@@ -35,10 +35,11 @@ fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
     pb.set_message(&format!("Downloading {}", url));
     pb
 }
-pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(), String> {
+
+pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
     let (mut file, mut downloaded) = get_file(path);
     
-    let res = client
+    let res = Client::new() 
         .get(url)
         .header("Range","bytes=".to_owned()+&downloaded.to_string()+"-")
         .send()
@@ -76,5 +77,5 @@ async fn main() {
     
     let url = args.value_of("URL").unwrap();
 
-    download_file(&Client::new(), url, "big_buck_bunny_480p_20mb.mp4").await.unwrap();
+    download_file(url, "big_buck_bunny_480p_20mb.mp4").await.unwrap();
 }
