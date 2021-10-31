@@ -25,6 +25,14 @@ fn get_file(path: &str) -> (std::fs::File, u64){
     (file, downloaded)
 }
 
+fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
+    let pb = ProgressBar::new(total_size);
+    pb.set_style(ProgressStyle::default_bar()
+        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+        .progress_chars("█  "));
+    pb.set_message(&format!("Downloading {}", url));
+    pb
+}
 pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(), String> {
     let (mut file, mut downloaded) = get_file(path);
     
@@ -38,11 +46,7 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
         .content_length()
         .ok_or(format!("Failed to get content length from '{}'", &url))?;
 
-    let pb = ProgressBar::new(total_size);
-    pb.set_style(ProgressStyle::default_bar()
-        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-        .progress_chars("█  "));
-    pb.set_message(&format!("Downloading {}", url));
+    let pb = get_progress_bar(total_size, url);
 
     let mut stream = res.bytes_stream();
     while let Some(item) = stream.next().await {
@@ -60,5 +64,5 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
 
 #[tokio::main]
 async fn main() {
-    download_file(&Client::new(), "https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_30mb.mp4", "big_buck_bunny_480p_30mb.mp4").await.unwrap();
+    download_file(&Client::new(), "https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_20mb.mp4", "big_buck_bunny_480p_20mb.mp4").await.unwrap();
 }
