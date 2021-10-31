@@ -9,7 +9,6 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
     let mut file;
     let mut downloaded: u64 = 0;
     
-    println!("Seeking in file.");
     if std::path::Path::new(path).exists() {
         println!("File exists. Resuming.");
         file = std::fs::OpenOptions::new()
@@ -22,7 +21,7 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
         downloaded = file_size;
 
     } else {
-        println!("Fresh file..");
+        println!("Writing to new file.");
         file = File::create(path).or(Err(format!("Failed to create file '{}'", path)))?;
     }
 
