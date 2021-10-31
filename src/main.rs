@@ -14,7 +14,7 @@ async fn main() {
         .get_matches_safe().unwrap_or_else(|e| e.exit());
     
     let url = args.value_of("URL").unwrap();
-    let output_file = args.value_of("FILE").unwrap();
+    let output_file = args.value_of("FILE").unwrap_or("");
 
-    lib::download_file(url, output_file).await.unwrap();
+    lib::get(url, output_file).await.unwrap();
 }

@@ -34,7 +34,7 @@ fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
     pb
 }
 
-pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
+pub async fn get(url: &str, path: &str) -> Result<(), String> {
     let (mut file, mut downloaded) = get_file(path);
     
     let res = Client::new() 
@@ -61,4 +61,13 @@ pub async fn download_file(url: &str, path: &str) -> Result<(), String> {
 
     pb.finish_with_message(&format!("Downloaded {} to {}", url, path));
     return Ok(());
+}
+
+
+#[tokio::test]
+async fn get_works() {
+    let out_file = "dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz";
+    get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file).await;
+    assert!(std::path::Path::new(out_file).exists());
+    std::fs::remove_file(out_file).unwrap();
 }
