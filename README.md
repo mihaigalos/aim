@@ -11,3 +11,7 @@ Alternatives:
 ### Why?
 
 To deepen Rust knowledge and have some fun.
+
+### Features
+
+* resumable file downloads via `GET` verb (default verb if none specified).
