@@ -5,10 +5,9 @@ use reqwest::Client;
 use indicatif::{ProgressBar, ProgressStyle};
 use futures_util::StreamExt;
 
-pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(), String> {
-    let mut file;
+fn get_file(path: &str) -> (std::fs::File, u64){
     let mut downloaded: u64 = 0;
-    
+    let mut file;
     if std::path::Path::new(path).exists() {
         println!("File exists. Resuming.");
         file = std::fs::OpenOptions::new()
@@ -19,12 +18,16 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
 
         let file_size = std::fs::metadata(path).unwrap().len();
         downloaded = file_size;
-
     } else {
         println!("Writing to new file.");
-        file = File::create(path).or(Err(format!("Failed to create file '{}'", path)))?;
+        file = File::create(path).or(Err(format!("Failed to create file '{}'", path))).unwrap();
     }
+    (file, downloaded)
+}
 
+pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(), String> {
+    let (mut file, mut downloaded) = get_file(path);
+    
     let res = client
         .get(url)
         .header("Range","bytes=".to_owned()+&downloaded.to_string()+"-")
