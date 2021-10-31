@@ -5,6 +5,8 @@ use reqwest::Client;
 use indicatif::{ProgressBar, ProgressStyle};
 use futures_util::StreamExt;
 
+use clap::{clap_app, crate_version};
+
 fn get_file(path: &str) -> (std::fs::File, u64){
     let mut downloaded: u64 = 0;
     let file;
@@ -64,5 +66,15 @@ pub async fn download_file(client: &Client, url: &str, path: &str) -> Result<(),
 
 #[tokio::main]
 async fn main() {
-    download_file(&Client::new(), "https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_20mb.mp4", "big_buck_bunny_480p_20mb.mp4").await.unwrap();
+    let args = clap_app!(rcurl =>
+        (version: crate_version!())
+        (author: "Mihai Galos <mihaigalos at gmail dot com>")
+        (about: "A simplified subset of curl written in Rust.")
+        (@arg URL: +required +takes_value "url to download")
+        )
+        .get_matches_safe().unwrap_or_else(|e| e.exit());
+    
+    let url = args.value_of("URL").unwrap();
+
+    download_file(&Client::new(), url, "big_buck_bunny_480p_20mb.mp4").await.unwrap();
 }
