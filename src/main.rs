@@ -1,13 +1,13 @@
 use std::cmp::min;
-use std::fs::{File, OpenOptions};
-use std::io::{Seek, Write};
+use std::fs::{File};
+use std::io::{Write};
 use reqwest::Client;
 use indicatif::{ProgressBar, ProgressStyle};
 use futures_util::StreamExt;
 
 fn get_file(path: &str) -> (std::fs::File, u64){
     let mut downloaded: u64 = 0;
-    let mut file;
+    let file;
     if std::path::Path::new(path).exists() {
         println!("File exists. Resuming.");
         file = std::fs::OpenOptions::new()
