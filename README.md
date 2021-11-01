@@ -1,7 +1,6 @@
-# rcurl
+# ship
 
-A simplified subset of curl written in Rust.
-Initially written for downloading with resume.
+Download/upload tool written in Rust.
 
 Alternatives:
 * [`duma`](https://github.com/mattgathu/duma).

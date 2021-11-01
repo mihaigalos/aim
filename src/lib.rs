@@ -66,11 +66,14 @@ pub async fn get(url: &str, path: &str) -> Result<(), String> {
 
 #[tokio::test]
 async fn get_works() {
-    let out_file = "dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz";
+    let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
+    let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
     
     get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file).await.unwrap();
 
-    assert!(std::path::Path::new(out_file).exists());
+    let bytes = std::fs::read(out_file).unwrap();
+    let computed_hash = sha256::digest_bytes(&bytes);
+    assert_eq!(computed_hash, expected_hash);
     std::fs::remove_file(out_file).unwrap();
 }
 
@@ -84,7 +87,6 @@ async fn get_resume_works() {
 
     let bytes = std::fs::read(out_file).unwrap();
     let computed_hash = sha256::digest_bytes(&bytes);
-    
     assert_eq!(computed_hash, expected_hash);
     std::fs::remove_file(out_file).unwrap();
 }
