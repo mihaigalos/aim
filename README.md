@@ -15,3 +15,7 @@ To deepen Rust knowledge and have some fun.
 
 * resumable file downloads via `GET` verb (default verb if none specified).
     ![resume example](screenshots/ship.gif)
+* use as curl alternative:
+  ```
+  ship https://raw.githubusercontent.com/mihaigalos/ship/main/README.md
+  ```
