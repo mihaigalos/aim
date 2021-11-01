@@ -5,24 +5,37 @@ use std::cmp::min;
 use std::fs::File;
 use std::io::Write;
 
-fn get_file(path: &str) -> (std::fs::File, u64){
+fn get_file(path: &str) -> (Option<std::fs::File>, u64) {
     let mut downloaded: u64 = 0;
-    let file;
-    if std::path::Path::new(path).exists() {
-        println!("File exists. Resuming.");
-        file = std::fs::OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(path)
-            .unwrap();
+    let mut file = None;
+    if path.len() > 0 {
+        if std::path::Path::new(path).exists() {
+            println!("File exists. Resuming.");
+            file = Some(std::fs::OpenOptions::new()
+                .write(true)
+                .append(true)
+                .open(path)
+                .unwrap());
 
-        let file_size = std::fs::metadata(path).unwrap().len();
-        downloaded = file_size;
-    } else {
-        println!("Writing to new file.");
-        file = File::create(path).or(Err(format!("Failed to create file '{}'", path))).unwrap();
+            let file_size = std::fs::metadata(path).unwrap().len();
+            downloaded = file_size;
+        } else {
+            println!("Writing to new file.");
+            file = Some(File::create(path).or(Err(format!("Failed to create file '{}'", path))).unwrap());
+        }
     }
     (file, downloaded)
+}
+
+fn get_output(path: &str) -> ( Box<dyn Write>, u64){
+    let (file, downloaded) = get_file(path);
+    
+    let output: Box<dyn Write> = Box::new(std::io::BufWriter::new(match path.len() {
+        0 => Box::new(std::io::stdout()) as Box<dyn Write>,
+        _ => Box::new(file.unwrap()) as Box<dyn Write>,
+    }));
+
+    (output, downloaded)
 }
 
 fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
@@ -35,7 +48,7 @@ fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
 }
 
 pub async fn get(url: &str, path: &str) -> Result<(), String> {
-    let (mut file, mut downloaded) = get_file(path);
+    let (mut output, mut downloaded) = get_output(path);
     
     let res = Client::new() 
         .get(url)
@@ -51,9 +64,9 @@ pub async fn get(url: &str, path: &str) -> Result<(), String> {
 
     let mut stream = res.bytes_stream();
     while let Some(item) = stream.next().await {
-        let chunk = item.or(Err(format!("Error while downloading file")))?;
-        file.write(&chunk)
-            .or(Err(format!("Error while writing to file")))?;
+        let chunk = item.or(Err(format!("Error while downloading.")))?;
+        output.write(&chunk)
+            .or(Err(format!("Error while writing to output.")))?;
         let new = min(downloaded + (chunk.len() as u64), total_size);
         downloaded = new;
         pb.set_position(new);
