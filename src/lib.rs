@@ -65,7 +65,7 @@ pub async fn get(url: &str, path: &str) -> Result<(), String> {
     let mut stream = res.bytes_stream();
     while let Some(item) = stream.next().await {
         let chunk = item.or(Err(format!("Error while downloading.")))?;
-        output.write(&chunk)
+        output.write_all(&chunk)
             .or(Err(format!("Error while writing to output.")))?;
         let new = min(downloaded + (chunk.len() as u64), total_size);
         downloaded = new;
