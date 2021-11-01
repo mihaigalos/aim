@@ -56,7 +56,7 @@ pub async fn get(url: &str, path: &str) -> Result<(), String> {
         .send()
         .await
         .or(Err(format!("Failed to GET from '{}'", &url)))?;
-    let total_size = res
+    let total_size = downloaded + res
         .content_length()
         .ok_or(format!("Failed to get content length from '{}'", &url))?;
 
