@@ -1,6 +1,7 @@
 use clap::{clap_app, crate_version};
 
 mod lib;
+mod ftp;
 
 #[tokio::main]
 async fn main() {
