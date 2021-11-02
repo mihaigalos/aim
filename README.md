@@ -1,6 +1,6 @@
 # ship
 
-Download/upload tool written in Rust.
+Download/upload tool written in Rust. ⛵
 
 Alternatives:
 * [`duma`](https://github.com/mattgathu/duma).

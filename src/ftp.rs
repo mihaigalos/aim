@@ -41,7 +41,7 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
 }
 pub async fn get() -> String {
 
-    let (ftp_server, ref username, ref password, path_segments, ref file) = parse_ftp_address("ftp://ftp.fau.de:21/archlinux/lastsync");
+    let (ftp_server, ref username, ref password, path_segments, ref file) = parse_ftp_address("ftp://ftp.fau.de:21/gnu/ProgramIndex");
 
     let mut ftp_stream = FtpStream::connect(ftp_server).await.unwrap();
     let _ = ftp_stream.login(username, password).await.unwrap();
@@ -60,5 +60,6 @@ pub async fn get() -> String {
 #[tokio::test]
 async fn get_ftp_works() {
     let contents = get().await;
-    assert_eq!("1635800822\r\n", contents);
+    let first_line = contents.split(' ').collect::<Vec<&str>>();
+    assert!(first_line[0].starts_with("Here"));
 }
