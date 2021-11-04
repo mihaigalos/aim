@@ -1,9 +1,10 @@
 use futures_util::StreamExt;
-use indicatif::{ProgressBar, ProgressStyle};
 use reqwest::Client;
 use std::cmp::min;
 use std::fs::File;
 use std::io::Write;
+
+use crate::bar::get_progress_bar;
 
 fn get_file(path: &str) -> (Option<std::fs::File>, u64) {
     let mut downloaded: u64 = 0;
@@ -36,15 +37,6 @@ fn get_output(path: &str) -> ( Box<dyn Write>, u64){
     }));
 
     (output, downloaded)
-}
-
-fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
-    let pb = ProgressBar::new(total_size);
-    pb.set_style(ProgressStyle::default_bar()
-        .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
-        .progress_chars("█  "));
-    pb.set_message(&format!("⛵ Downloading {}", url));
-    pb
 }
 
 pub async fn get(url: &str, path: &str) -> Result<(), String> {

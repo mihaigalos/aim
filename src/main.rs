@@ -1,8 +1,5 @@
 use clap::{clap_app, crate_version};
 
-mod lib;
-mod ftp;
-
 #[tokio::main]
 async fn main() {
     let args = clap_app!(rcurl =>
@@ -17,5 +14,5 @@ async fn main() {
     let url = args.value_of("URL").unwrap();
     let output_file = args.value_of("FILE").unwrap_or("");
 
-    lib::get(url, output_file).await.unwrap();
+    ship::core::get(url, output_file).await.unwrap();
 }

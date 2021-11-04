@@ -40,7 +40,7 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
     (ftp_server, username, password, path_segments, file.to_string())
 }
 pub async fn get() -> String {
-
+    let downloaded : u64 = 0;
     let (ftp_server, ref username, ref password, path_segments, ref file) = parse_ftp_address("ftp://ftp.fau.de:21/gnu/ProgramIndex");
 
     let mut ftp_stream = FtpStream::connect(ftp_server).await.unwrap();
@@ -48,6 +48,12 @@ pub async fn get() -> String {
     for path in &path_segments {
         ftp_stream.cwd(&path).await.unwrap();
     }
+
+    let total_size = downloaded + ftp_stream
+        .size(file)
+        .ok_or(format!("Failed to get content length from '{}'", &url))
+        .await
+        .unwrap();
 
     let remote_file = ftp_stream.simple_retr(file).await.unwrap();
     let contents = std::str::from_utf8(&remote_file.into_inner()).unwrap().to_string();
