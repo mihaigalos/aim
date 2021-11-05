@@ -6,7 +6,7 @@ async fn main() {
     (version: crate_version!())
     (author: "Mihai Galos <mihaigalos at gmail dot com>")
     (about: "Download/upload tool written in Rust. ⛵")
-    (@arg FILE: -O --output +takes_value "write documents to FILE")
+    (@arg FILE: -O --output +takes_value "write documents to FILE. If not specified, writes to stdout (cannot resume).")
     (@arg URL: +required +takes_value "url to download")
     )
     .get_matches_safe()
