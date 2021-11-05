@@ -37,9 +37,9 @@ dependencies = [
 
 [[package]]
 name = "async_ftp"
-version = "5.0.0"
+version = "6.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "187c622900c3b3072db7240b00a3e25baa266c94d9b412bce13dd956458155d5"
+checksum = "d101b45e744a5893bba920ed28f0b0f3d7a9c929e97f9cf2117bba5accadb76b"
 dependencies = [
  "chrono",
  "lazy_static",

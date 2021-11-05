@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async_ftp = "5.0.0"
+async_ftp = "6.0.0"
 clap = "2.33.2"
 failure = "0.1.8"
 futures-util = "0.3.14"

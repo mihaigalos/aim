@@ -52,7 +52,7 @@ pub async fn get(url: &str, path: &str) -> String {
         .await
         .unwrap()
         .unwrap() as u64;
-    // ftp_stream.restart_from(downloaded); Unsupported yet, see: https://github.com/mattnenterprise/rust-ftp/issues/67 
+    ftp_stream.restart_from(downloaded);
     let remote_file = ftp_stream.simple_retr(file).await.unwrap();
     let contents = std::str::from_utf8(&remote_file.into_inner()).unwrap().to_string();
     println!("Read file with contents\n{}\n", contents);
