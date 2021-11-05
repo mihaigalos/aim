@@ -2,10 +2,10 @@ use clap::{clap_app, crate_version};
 
 #[tokio::main]
 async fn main() {
-    let args = clap_app!(rcurl =>
+    let args = clap_app!(ship =>
     (version: crate_version!())
     (author: "Mihai Galos <mihaigalos at gmail dot com>")
-    (about: "A simplified subset of curl written in Rust.")
+    (about: "Download/upload tool written in Rust. ⛵")
     (@arg FILE: -O --output +takes_value "write documents to FILE")
     (@arg URL: +required +takes_value "url to download")
     )
