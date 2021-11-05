@@ -1,6 +1,5 @@
 use indicatif::{ProgressBar, ProgressStyle};
 
-
 pub fn get_progress_bar(total_size: u64, url: &str) -> indicatif::ProgressBar {
     let pb = ProgressBar::new(total_size);
     pb.set_style(ProgressStyle::default_bar()

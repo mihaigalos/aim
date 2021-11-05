@@ -1,5 +1,5 @@
-use async_ftp::{types::FileType, FtpStream};
 use crate::output::get_output;
+use async_ftp::{types::FileType, FtpStream};
 use failure::format_err;
 use url::Url;
 
@@ -7,10 +7,10 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
     let url = Url::parse(address).unwrap();
     let ftp_server = format!(
         "{}:{}",
-        url .host_str()
+        url.host_str()
             .ok_or_else(|| format_err!("failed to parse hostname from url: {}", url))
             .unwrap(),
-        url .port_or_known_default()
+        url.port_or_known_default()
             .ok_or_else(|| format_err!("failed to parse port from url: {}", url))
             .unwrap(),
     );
@@ -33,7 +33,13 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
         .ok_or_else(|| format_err!("got empty path segments from url: {}", url))
         .unwrap();
 
-    (ftp_server, username, password, path_segments, file.to_string())
+    (
+        ftp_server,
+        username,
+        password,
+        path_segments,
+        file.to_string(),
+    )
 }
 pub async fn get(url: &str, path: &str) -> String {
     let (mut output, mut downloaded) = get_output(path);
@@ -47,14 +53,12 @@ pub async fn get(url: &str, path: &str) -> String {
     }
 
     ftp_stream.transfer_type(FileType::Binary).await;
-    let total_size = downloaded + ftp_stream
-        .size(file)
-        .await
-        .unwrap()
-        .unwrap() as u64;
+    let total_size = downloaded + ftp_stream.size(file).await.unwrap().unwrap() as u64;
     ftp_stream.restart_from(downloaded);
     let remote_file = ftp_stream.simple_retr(file).await.unwrap();
-    let contents = std::str::from_utf8(&remote_file.into_inner()).unwrap().to_string();
+    let contents = std::str::from_utf8(&remote_file.into_inner())
+        .unwrap()
+        .to_string();
     println!("Read file with contents\n{}\n", contents);
 
     let _ = ftp_stream.quit();
