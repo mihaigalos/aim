@@ -1,9 +1,4 @@
-// ftp://ftp.fau.de/archlinux/pool/packages/ffmpeg-2:4.4-6-x86_64.pkg.tar.zst
-// https://ftp.fau.de/archlinux/pool/packages/ffmpeg-2:4.4-6-x86_64.pkg.tar.zst
-
-// https://ftp.fau.de/archlinux/lastsync
-
-use async_ftp::FtpStream;
+use async_ftp::{types::FileType, FtpStream};
 use crate::output::get_output;
 use failure::format_err;
 use url::Url;
@@ -46,18 +41,17 @@ pub async fn get(url: &str, path: &str) -> String {
 
     let mut ftp_stream = FtpStream::connect(ftp_server).await.unwrap();
     let _ = ftp_stream.login(username, password).await.unwrap();
-    ftp_stream.transfer_type(FileType::Binary);
 
     for path in &path_segments {
         ftp_stream.cwd(&path).await.unwrap();
     }
 
+    ftp_stream.transfer_type(FileType::Binary).await;
     let total_size = downloaded + ftp_stream
         .size(file)
-        .ok_or(format!("Failed to get content length from '{}'", &url))
         .await
-        .unwrap();
-
+        .unwrap()
+        .unwrap() as u64;
     // ftp_stream.restart_from(downloaded); Unsupported yet, see: https://github.com/mattnenterprise/rust-ftp/issues/67 
     let remote_file = ftp_stream.simple_retr(file).await.unwrap();
     let contents = std::str::from_utf8(&remote_file.into_inner()).unwrap().to_string();
@@ -73,10 +67,4 @@ async fn get_ftp_works() {
     let contents = get("ftp://ftp.fau.de:21/gnu/ProgramIndex", out_file).await;
     let first_line = contents.split(' ').collect::<Vec<&str>>();
     assert!(first_line[0].starts_with("Here"));
-
-
-    let bytes = std::fs::read(out_file).unwrap();
-    let computed_hash = sha256::digest_bytes(&bytes);
-    assert_eq!(computed_hash, expected_hash);
-    std::fs::remove_file(out_file).unwrap();
 }
