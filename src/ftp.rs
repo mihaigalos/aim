@@ -53,7 +53,7 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
 }
 
 impl FTPHandler {
-    pub async fn get(url: &str, path: &str) -> String {
+    pub async fn get(url: &str, path: &str) {
         let (mut output, mut downloaded) = get_output(path);
 
         let (ftp_server, ref username, ref password, path_segments, ref file) =
@@ -76,8 +76,8 @@ impl FTPHandler {
         loop {
             let mut buffer = vec![0; 1024usize];
             let byte_count = reader.read(&mut buffer[..]).await.unwrap();
+            buffer.truncate(byte_count);
             if !buffer.is_empty() {
-                buffer.truncate(byte_count);
                 output
                     .write_all(&buffer)
                     .or(Err(format!("Error while writing to output.")))
@@ -90,14 +90,22 @@ impl FTPHandler {
             }
         }
 
-        ftp_stream.quit().await.unwrap();
-        return "".to_string();
+        output.flush().unwrap();
     }
 }
+
 #[tokio::test]
 async fn get_ftp_works() {
-    let out_file = "";
-    let contents = FTPHandler::get("ftp://ftp.fau.de:21/gnu/ProgramIndex", out_file).await;
-    let first_line = contents.split(' ').collect::<Vec<&str>>();
-    assert!(first_line[0].starts_with("Here"));
+    let out_file = "out_file";
+    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
+
+    FTPHandler::get(
+        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
+        out_file,
+    )
+    .await;
+    let bytes = std::fs::read(out_file).unwrap();
+    let computed_hash = sha256::digest_bytes(&bytes);
+    assert_eq!(computed_hash, expected_hash);
+    std::fs::remove_file(out_file).unwrap();
 }
