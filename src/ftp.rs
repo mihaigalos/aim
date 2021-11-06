@@ -1,7 +1,17 @@
-use crate::output::get_output;
 use async_ftp::{types::FileType, FtpStream};
 use failure::format_err;
+use std::cmp::min;
+use std::io::Write;
+use tokio::io::AsyncReadExt;
 use url::Url;
+
+use crate::bar::get_progress_bar;
+use crate::output::get_output;
+
+pub struct FTPHandler {
+    pub output: Box<dyn Write>,
+    pub downloaded: u64,
+}
 
 fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, String) {
     let url = Url::parse(address).unwrap();
@@ -41,34 +51,53 @@ fn parse_ftp_address(address: &str) -> (String, String, String, Vec<String>, Str
         file.to_string(),
     )
 }
-pub async fn get(url: &str, path: &str) -> String {
-    let (mut output, mut downloaded) = get_output(path);
-    let (ftp_server, ref username, ref password, path_segments, ref file) = parse_ftp_address(url);
 
-    let mut ftp_stream = FtpStream::connect(ftp_server).await.unwrap();
-    let _ = ftp_stream.login(username, password).await.unwrap();
+impl FTPHandler {
+    pub async fn get(url: &str, path: &str) -> String {
+        let (mut output, mut downloaded) = get_output(path);
 
-    for path in &path_segments {
-        ftp_stream.cwd(&path).await.unwrap();
+        let (ftp_server, ref username, ref password, path_segments, ref file) =
+            parse_ftp_address(url);
+
+        let mut ftp_stream = FtpStream::connect(ftp_server).await.unwrap();
+        let _ = ftp_stream.login(username, password).await.unwrap();
+
+        for path in &path_segments {
+            ftp_stream.cwd(&path).await.unwrap();
+        }
+
+        ftp_stream.transfer_type(FileType::Binary).await.unwrap();
+        let total_size = downloaded + ftp_stream.size(file).await.unwrap().unwrap() as u64;
+        ftp_stream.restart_from(downloaded).await.unwrap();
+
+        let pb = get_progress_bar(total_size, url);
+
+        let mut reader = ftp_stream.get(file).await.unwrap();
+        loop {
+            let mut buffer = vec![0; 1024usize];
+            let byte_count = reader.read(&mut buffer[..]).await.unwrap();
+            if !buffer.is_empty() {
+                buffer.truncate(byte_count);
+                output
+                    .write_all(&buffer)
+                    .or(Err(format!("Error while writing to output.")))
+                    .unwrap();
+                let new = min(downloaded + (byte_count as u64), total_size);
+                downloaded = new;
+                pb.set_position(new);
+            } else {
+                break;
+            }
+        }
+
+        ftp_stream.quit().await.unwrap();
+        return "".to_string();
     }
-
-    ftp_stream.transfer_type(FileType::Binary).await;
-    let total_size = downloaded + ftp_stream.size(file).await.unwrap().unwrap() as u64;
-    ftp_stream.restart_from(downloaded);
-    let remote_file = ftp_stream.simple_retr(file).await.unwrap();
-    let contents = std::str::from_utf8(&remote_file.into_inner())
-        .unwrap()
-        .to_string();
-    println!("Read file with contents\n{}\n", contents);
-
-    let _ = ftp_stream.quit();
-    contents
 }
-
 #[tokio::test]
 async fn get_ftp_works() {
     let out_file = "";
-    let contents = get("ftp://ftp.fau.de:21/gnu/ProgramIndex", out_file).await;
+    let contents = FTPHandler::get("ftp://ftp.fau.de:21/gnu/ProgramIndex", out_file).await;
     let first_line = contents.split(' ').collect::<Vec<&str>>();
     assert!(first_line[0].starts_with("Here"));
 }
