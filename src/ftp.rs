@@ -74,7 +74,7 @@ impl FTPHandler {
 
         let mut reader = ftp_stream.get(file).await.unwrap();
         loop {
-            let mut buffer = vec![0; 1024usize];
+            let mut buffer = vec![0; 26214400usize];
             let byte_count = reader.read(&mut buffer[..]).await.unwrap();
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
