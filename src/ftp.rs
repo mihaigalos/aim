@@ -112,10 +112,14 @@ async fn get_ftp_works() {
 
 #[tokio::test]
 async fn get_ftp_resume_works() {
-    let expected_hash = "2f48212d6c9d3fc38d2b9c81805078108ed771dc811b4a8f8ec8ac2a56646994";
-    let out_file = "test/incomplete_wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
+    let expected_hash = "1f48212d6c9d3fc38d2b9c81805078108ed771dc811b4a8f8ec8ac2a56646994";
+    let out_file = "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
 
-    std::fs::copy(out_file, "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst").unwrap();
+    std::fs::copy(
+        "test/incomplete_wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
+        out_file,
+    )
+    .unwrap();
     FTPHandler::get(
         "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
         out_file,
