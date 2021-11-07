@@ -67,7 +67,7 @@ impl FTPHandler {
         }
 
         ftp_stream.transfer_type(FileType::Binary).await.unwrap();
-        let total_size = downloaded + ftp_stream.size(file).await.unwrap().unwrap() as u64;
+        let total_size = ftp_stream.size(file).await.unwrap().unwrap() as u64;
         ftp_stream.restart_from(downloaded).await.unwrap();
 
         let pb = get_progress_bar(total_size, url);
