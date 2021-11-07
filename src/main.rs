@@ -14,5 +14,6 @@ async fn main() {
     let url = args.value_of("URL").unwrap();
     let output_file = args.value_of("FILE").unwrap_or("");
 
-    ship::core::get(url, output_file).await.unwrap();
+    // ship::core::get(url, output_file).await.unwrap();
+    ship::ftp::FTPHandler::get(url, output_file).await;
 }
