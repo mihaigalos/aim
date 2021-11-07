@@ -9,7 +9,9 @@ Alternatives:
 
 ### Why?
 
-To deepen Rust knowledge and have some fun.
+Some of the alternatives I could not build from source.
+Others didn't have upload support or testing.
+Finally, I wanted to have some fun.
 
 ### Features
 
