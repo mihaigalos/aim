@@ -90,7 +90,7 @@ impl FTPHandler {
             }
         }
 
-        pb.finish_with_message(&format!("⛵ Downloaded {} to {}", url, path));
+        pb.finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
     }
 }
 

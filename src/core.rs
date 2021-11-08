@@ -32,7 +32,7 @@ pub async fn get(url: &str, path: &str) -> Result<(), String> {
         pb.set_position(new);
     }
 
-    pb.finish_with_message(&format!("⛵ Downloaded {} to {}", url, path));
+    pb.finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
     return Ok(());
 }
 
