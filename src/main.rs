@@ -14,6 +14,9 @@ async fn main() {
     let url = args.value_of("URL").unwrap();
     let output_file = args.value_of("FILE").unwrap_or("");
 
-    // ship::core::get(url, output_file).await.unwrap();
-    ship::ftp::FTPHandler::get(url, output_file).await;
+    match &url[0..4] {
+        "ftp:" | "ftp." => ship::ftp::FTPHandler::get(url, output_file).await,
+        "http" => ship::core::get(url, output_file).await.unwrap(),
+        _ => println!("Cannot exctract handler from URL: {} Exiting.", url),
+    }
 }
