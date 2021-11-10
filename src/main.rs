@@ -8,15 +8,12 @@ async fn main() {
     (about: "Download/upload tool written in Rust. ⛵")
     (@arg FILE: -O --output +takes_value "write documents to FILE. If not specified, writes to stdout (cannot resume).")
     (@arg URL: +required +takes_value "url to download")
+    (@arg SILENT: -s --silent "Silent or quiet mode. Don't show progress meter or error messages.")
     )
     .get_matches_safe()
     .unwrap_or_else(|e| e.exit());
     let url = args.value_of("URL").unwrap();
-    let output_file = args.value_of("FILE").unwrap_or("");
+    let output = args.value_of("FILE").unwrap_or("");
 
-    match &url[0..4] {
-        "ftp:" | "ftp." => ship::ftp::FTPHandler::get(url, output_file).await,
-        "http" => ship::https::get(url, output_file).await.unwrap(),
-        _ => println!("Cannot exctract handler from URL: {} Exiting.", url),
-    }
+    ship::driver::Driver::drive(url, output).await;
 }
