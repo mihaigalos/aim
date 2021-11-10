@@ -16,7 +16,7 @@ async fn main() {
 
     match &url[0..4] {
         "ftp:" | "ftp." => ship::ftp::FTPHandler::get(url, output_file).await,
-        "http" => ship::core::get(url, output_file).await.unwrap(),
+        "http" => ship::https::get(url, output_file).await.unwrap(),
         _ => println!("Cannot exctract handler from URL: {} Exiting.", url),
     }
 }
