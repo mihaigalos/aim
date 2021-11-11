@@ -1,0 +1,22 @@
+default:
+  @just --list
+
+tool := "nginx_webdav"
+docker_container_registry := "docker.pkg.github.com"
+docker_user_repo := "mihaigalos/docker"
+docker_image_version := "latest"
+docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
+
+build:
+    docker build -t {{docker_image}} .
+
+push:
+    docker push {{docker_image}}
+
+run:
+    docker run -it --rm -v $(pwd):/src -p 8081:80 {{docker_image}}
+
+test:
+  #!/bin/bash
+    curl -X PUT -d `cat test.file` http://localhost:8081/test.file
+    remote_contents=$(curl -s http://localhost:8081/test.file)
