@@ -23,14 +23,20 @@ test: && cleanup
     function err() {
         echo -e "\e[1;31m${@}\e[0m" >&2
     }
+
     function ok() {
         echo -e "\e[1;32m${@}\e[0m"
     }
+    function highlight() {
+        echo -en "\e[1;37m${@}\e[0m"
+    }
     EOF
     
+    source common.sh
     for test in $(grep ^_test_ Justfile | cut -d':' -f1);
     do
-        echo -n "Testing $test "
+        echo -n "Testing "
+        highlight "$test "
         just $test
     done
 
