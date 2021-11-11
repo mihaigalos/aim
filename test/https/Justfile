@@ -13,10 +13,33 @@ build:
 push:
     docker push {{docker_image}}
 
-run:
-    docker run -it --rm -v $(pwd):/src -p 8081:80 {{docker_image}}
+run args="": build
+    docker run {{args}} -it --rm -v $(pwd):/src -p 8081:80 {{docker_image}}
 
-test:
-  #!/bin/bash
+test: && cleanup
+    #!/bin/bash
+    cat <<'EOF' > common.sh
+    #!/bin/bash
+    function err() {
+        echo -e "\e[1;31m${@}\e[0m" >&2
+    }
+    function ok() {
+        echo -e "\e[1;32m${@}\e[0m"
+    }
+    EOF
+    
+    for test in $(grep ^_test_ Justfile | cut -d':' -f1);
+    do
+        echo -n "Testing $test "
+        just $test
+    done
+
+@cleanup:
+    rm common.sh
+
+_test_text_file:
+    #!/bin/bash
+    source common.sh
     curl -X PUT -d `cat test.file` http://localhost:8081/test.file
     remote_contents=$(curl -s http://localhost:8081/test.file)
+    [ $remote_contents != $(cat test.file) ] && err "ERROR: remote contents doesn't equal sent content." || ok "OK"
