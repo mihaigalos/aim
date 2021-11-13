@@ -79,8 +79,8 @@ fn parse_ftp_address(address: &str) -> FTPParsedAddress {
 }
 
 impl FTPHandler {
-    pub async fn get(url: &str, path: &str) {
-        let (mut output, mut downloaded) = get_output(path);
+    pub async fn get(url: &str, path: &str, silent: bool) {
+        let (mut output, mut downloaded) = get_output(path, silent);
 
         let parsed_ftp = parse_ftp_address(url);
 
@@ -98,7 +98,7 @@ impl FTPHandler {
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
         ftp_stream.restart_from(downloaded).await.unwrap();
 
-        let pb = get_progress_bar(total_size, url);
+        let pb = get_progress_bar(total_size, url, silent);
 
         let mut reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
         loop {
@@ -112,13 +112,18 @@ impl FTPHandler {
                     .unwrap();
                 let new = min(downloaded + (byte_count as u64), total_size);
                 downloaded = new;
-                pb.set_position(new);
+                if !silent {
+                    pb.as_ref().unwrap().set_position(new);
+                }
             } else {
                 break;
             }
         }
 
-        pb.finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
+        if !silent {
+            pb.unwrap()
+                .finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
+        }
     }
 }
 
@@ -182,6 +187,7 @@ async fn get_ftp_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
         out_file,
+        false,
     )
     .await;
     let bytes = std::fs::read(out_file).unwrap();
@@ -203,6 +209,7 @@ async fn get_ftp_resume_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
         out_file,
+        false,
     )
     .await;
 
