@@ -30,6 +30,7 @@ test: _start && _stop
     function highlight() {
         echo -en "\e[1;37m${@}\e[0m"
     }
+    export PATH=$PATH:$(realpath ../../target/debug/)
     EOF
     
     source common.sh
@@ -64,3 +65,11 @@ _test_curl_put_binary_file:
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm downloaded_test_binary.file
 
+_test_ship_get_binary_file:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    ship http://localhost:8081/test_binary.file  -O downloaded_test_binary.file
+    sha_output=$(sha256sum downloaded_test_binary.file | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm downloaded_test_binary.file
