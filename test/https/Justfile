@@ -45,8 +45,8 @@ _start +args="-d":
     @[ $(docker ps | grep ship_tests_https | wc -l) -eq 0 ] && docker run {{args}} -it --rm --name ship_tests_https -v $(pwd):/src -p {{server_port}}:80 {{docker_image}} > /dev/null || true
 
 _stop:
-    rm common.sh
-    docker stop ship_tests_https > /dev/null
+    @rm common.sh
+    @docker stop ship_tests_https > /dev/null
 
 _test_curl_put_text_file:
     #!/bin/bash
