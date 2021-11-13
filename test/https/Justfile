@@ -47,14 +47,14 @@ _stop:
     rm common.sh
     docker stop ship_tests_https > /dev/null
 
-_test_text_file:
+_test_curl_put_text_file:
     #!/bin/bash
     source common.sh
     curl -X PUT -d `cat test.file` http://localhost:{{server_port}}/test.file
     remote_contents=$(curl -s http://localhost:{{server_port}}/test.file)
     [ "$remote_contents" = "$(cat test.file)" ] && ok || err "ERROR: remote contents doesn't equal sent content."
 
-_test_binary_file:
+_test_curl_put_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
