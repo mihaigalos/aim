@@ -1,6 +1,6 @@
 # ship
 
-Ship: a download/upload tool. ⛵
+⛵ Ship: a download/upload tool.
 
 Alternatives:
 * [`duma`](https://github.com/mattgathu/duma).
