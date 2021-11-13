@@ -5,8 +5,8 @@ async fn main() {
     let args = clap_app!(ship =>
     (version: crate_version!())
     (author: "Mihai Galos <mihaigalos at gmail dot com>")
-    (about: "⛵ Download/upload tool written in Rust.")
-    (@arg OUTPUT: -O -o --output +takes_value "Output to ship to. If not specified, writes to stdout (cannot resume).")
+    (about: "⛵ Download/upload tool.")
+    (@arg OUTPUT: -o --output +takes_value "Output to ship to. If not specified, writes to stdout (cannot resume).")
     (@arg INPUT: +required +takes_value "Input to ship from.")
     (@arg silent: -s --silent "Silent or quiet mode. Don't show progress meter or error messages.")
     )
