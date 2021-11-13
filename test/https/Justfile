@@ -6,6 +6,7 @@ docker_container_registry := "docker.pkg.github.com"
 docker_user_repo := "mihaigalos/docker"
 docker_image_version := "latest"
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
+server_port := "8081"
 
 build:
     docker build -t {{docker_image}} .
@@ -14,7 +15,7 @@ push:
     docker push {{docker_image}}
 
 run args="": build
-    docker run {{args}} -it --rm -v $(pwd):/src -p 8081:80 {{docker_image}}
+    docker run {{args}} -it --rm -v $(pwd):/src -p {{server_port}}:80 {{docker_image}}
 
 test: && cleanup
     #!/bin/bash
@@ -25,8 +26,9 @@ test: && cleanup
     }
 
     function ok() {
-        echo -e "\e[1;32m${@}\e[0m"
+        echo -e "\e[1;32mOK\e[0m"
     }
+
     function highlight() {
         echo -en "\e[1;37m${@}\e[0m"
     }
@@ -35,7 +37,6 @@ test: && cleanup
     source common.sh
     for test in $(grep ^_test_ Justfile | cut -d':' -f1);
     do
-        echo -n "Testing "
         highlight "$test "
         just $test
     done
@@ -46,6 +47,17 @@ test: && cleanup
 _test_text_file:
     #!/bin/bash
     source common.sh
-    curl -X PUT -d `cat test.file` http://localhost:8081/test.file
-    remote_contents=$(curl -s http://localhost:8081/test.file)
-    [ $remote_contents != $(cat test.file) ] && err "ERROR: remote contents doesn't equal sent content." || ok "OK"
+    curl -X PUT -d `cat test.file` http://localhost:{{server_port}}/test.file
+    remote_contents=$(curl -s http://localhost:{{server_port}}/test.file)
+    [ "$remote_contents" = "$(cat test.file)" ] && ok || err "ERROR: remote contents doesn't equal sent content."
+
+_test_binary_file:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    curl -X PUT --data-binary @binary_file.tar.gz  http://localhost:{{server_port}}/test_binary.file
+    curl -s localhost:{{server_port}}/test_binary.file -o downloaded_test_binary.file
+    sha_output=$(sha256sum downloaded_test_binary.file | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm downloaded_test_binary.file
+
