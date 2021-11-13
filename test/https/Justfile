@@ -14,10 +14,8 @@ build:
 push:
     docker push {{docker_image}}
 
-run args="": build
-    docker run {{args}} -it --rm -v $(pwd):/src -p {{server_port}}:80 {{docker_image}}
 
-test: && cleanup
+test: _start && _stop
     #!/bin/bash
     cat <<'EOF' > common.sh
     #!/bin/bash
@@ -41,8 +39,12 @@ test: && cleanup
         just $test
     done
 
-@cleanup:
+_start +args="-d": build
+    [ $(docker ps | grep ship_tests_https | wc -l) -eq 0 ] && docker run {{args}} -it --rm --name ship_tests_https -v $(pwd):/src -p {{server_port}}:80 {{docker_image}} || true
+
+_stop:
     rm common.sh
+    docker stop ship_tests_https
 
 _test_text_file:
     #!/bin/bash
