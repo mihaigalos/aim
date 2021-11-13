@@ -1,0 +1,72 @@
+default:
+  @just --list
+
+tool := "vsftp_alpine"
+
+docker_container_registry := "docker.pkg.github.com"
+docker_user_repo := "mihaigalos/docker"
+docker_image_version := "latest"
+docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
+server_port := "21"
+
+build:
+    docker build -t {{docker_image}} .
+
+_start +args="-d":
+    #!/bin/bash
+    function wait_docker() {
+        while [ $(docker ps | grep ship_tests_ftp | wc -l) -eq 0 ]; do
+          sleep 0.1
+        done 
+    }
+    [ $(docker ps | grep ship_tests_ftp | wc -l) -eq 0 ] && \
+        docker run {{args}} \
+            -it \
+            --rm \
+            --name ship_tests_ftp \
+            -e PASV_ADDRESS=127.0.0.1 \
+            -e PASV_MIN_PORT=21100 \
+            -e PASV_MAX_PORT=21110 \
+            -v $(pwd):/src \
+            -p {{server_port}}:21 \
+            -p 20:20 \
+            -p 21100-21110:21100-21110 \
+            {{docker_image}} > /dev/null \
+        && wait_docker \
+        || true
+
+_stop:
+    @rm common.sh
+    @docker stop -t 1 ship_tests_ftp > /dev/null
+
+test: _start && _stop
+    #!/bin/bash
+    cat <<'EOF' > common.sh
+    #!/bin/bash
+    function err() {
+        echo -e "\e[1;31m${@}\e[0m" >&2
+    }
+
+    function ok() {
+        echo -e "\e[1;32mOK\e[0m"
+    }
+
+    function highlight() {
+        echo -en "\e[1;37m${@}\e[0m"
+    }
+    export PATH=$PATH:$(realpath ../../target/debug/)
+    EOF
+    
+    source common.sh
+    highlight "\nRunning tests in $PWD\n\n"
+    for test in $(grep ^_test_ Justfile | cut -d':' -f1);
+    do
+        highlight "$test "
+        just $test
+    done
+
+_test_curl_login:
+    #!/bin/bash
+    source common.sh
+    response=$(curl -s -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
+    [ $response = "226" ] && ok || "ERROR: Response code $response."
