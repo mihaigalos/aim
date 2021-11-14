@@ -20,6 +20,7 @@ fn construct_progress_bar(
     );
     pb
 }
+
 pub fn get_progress_bar(
     total_size: u64,
     url: &str,
@@ -27,18 +28,18 @@ pub fn get_progress_bar(
 ) -> Option<indicatif::ProgressBar> {
     dotenv().ok();
 
-    let template = env::var("SHIP_PROGRESSBAR_TEMPLATE")
+    let template = &env::var("SHIP_PROGRESSBAR_TEMPLATE")
         .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_TEMPLATE.to_string());
 
-    let progress_chars = env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
+    let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
         .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
 
     let result = match silent {
         false => Some(construct_progress_bar(
             total_size,
             url,
-            &template,
-            &progress_chars,
+            template,
+            progress_chars,
         )),
         true => None,
     };
