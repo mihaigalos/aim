@@ -23,3 +23,8 @@ Finally, I wanted to have some fun.
   ```bash
   ship https://raw.githubusercontent.com/mihaigalos/ship/main/README.md
   ```
+* configurable indicators via [`indicatif`](https://crates.io/crates/indicatif): you can change the display template and progress chars by creating a `.env` file in the folder you are calling from:
+  ```bash
+  SHIP_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
+  SHIP_PROGRESSBAR_PROGRESS_CHARS="=>-"
+  ```
