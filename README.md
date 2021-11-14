@@ -13,7 +13,7 @@ Finally, I wanted to have some fun.
 
 ### Features
 
-* resumable file downloads via `GET` verb (default verb if none specified).
+* resumable file transfers.
     ![resume example](screenshots/ship.gif)
 * defaults to stdout (pipe-able) to other commands:
   ```bash
