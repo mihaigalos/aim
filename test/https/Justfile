@@ -46,7 +46,8 @@ _start +args="-d":
 
 _stop:
     @rm common.sh
-    @docker stop ship_tests_https > /dev/null
+    @docker stop ship_tests_https > /dev/null 2>&1
+    @docker rm --force ship_tests_https > /dev/null 2>&1
 
 _test_curl_put_text_file:
     #!/bin/bash

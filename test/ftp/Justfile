@@ -37,7 +37,8 @@ _start +args="-d":
 
 _stop:
     @rm common.sh
-    @docker stop -t 1 ship_tests_ftp > /dev/null
+    @docker stop -t 1 ship_tests_ftp > /dev/null 2>&1
+    @docker rm --force ship_tests_ftp > /dev/null 2>&1
 
 test: _start && _stop
     #!/bin/bash
