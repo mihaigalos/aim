@@ -45,6 +45,7 @@ impl HTTPSHandler {
                 .finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
         }
     }
+    pub async fn put(_: &str, _: &str, _: bool) {}
 }
 #[tokio::test]
 async fn get_works() {
