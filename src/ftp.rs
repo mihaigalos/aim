@@ -78,26 +78,34 @@ fn parse_ftp_address(address: &str) -> FTPParsedAddress {
     }
 }
 
+async fn get_stream(
+    downloaded: u64,
+    parsed_ftp: &FTPParsedAddress,
+) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
+    let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
+        .await
+        .unwrap();
+    let _ = ftp_stream
+        .login(&parsed_ftp.username, &parsed_ftp.password)
+        .await
+        .unwrap();
+
+    for path in &parsed_ftp.path_segments {
+        ftp_stream.cwd(&path).await.unwrap();
+    }
+
+    ftp_stream.transfer_type(FileType::Binary).await.unwrap();
+    ftp_stream.restart_from(downloaded).await.unwrap();
+    Ok(ftp_stream)
+}
+
 impl FTPHandler {
     pub async fn get(url: &str, path: &str, silent: bool) {
         let (mut output, mut downloaded) = get_output(path, silent);
 
         let parsed_ftp = parse_ftp_address(url);
-
-        let mut ftp_stream = FtpStream::connect(parsed_ftp.server).await.unwrap();
-        let _ = ftp_stream
-            .login(&parsed_ftp.username, &parsed_ftp.password)
-            .await
-            .unwrap();
-
-        for path in &parsed_ftp.path_segments {
-            ftp_stream.cwd(&path).await.unwrap();
-        }
-
-        ftp_stream.transfer_type(FileType::Binary).await.unwrap();
+        let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
-        ftp_stream.restart_from(downloaded).await.unwrap();
-
         let pb = get_progress_bar(total_size, url, silent);
 
         let mut reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
