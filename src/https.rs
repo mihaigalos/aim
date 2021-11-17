@@ -7,29 +7,28 @@ use crate::output::get_output;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
-    pub async fn get(url: &str, path: &str, silent: bool) {
-        let (mut output, mut downloaded) = get_output(path, silent);
+    pub async fn get(input: &str, output: &str, silent: bool) {
+        let (mut out, mut downloaded) = get_output(output, silent);
 
         let res = Client::new()
-            .get(url)
+            .get(input)
             .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
             .send()
             .await
-            .or(Err(format!("Failed to GET from '{}'", &url)))
+            .or(Err(format!("Failed to GET from '{}'", &input)))
             .unwrap();
         let total_size = downloaded
             + res
                 .content_length()
-                .ok_or(format!("Failed to get content length from '{}'", &url))
+                .ok_or(format!("Failed to get content length from '{}'", &input))
                 .unwrap();
 
-        let pb = get_progress_bar(total_size, url, silent);
+        let pb = get_progress_bar(total_size, input, silent);
 
         let mut stream = res.bytes_stream();
         while let Some(item) = stream.next().await {
             let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
-            output
-                .write_all(&chunk)
+            out.write_all(&chunk)
                 .or(Err(format!("Error while writing to output.")))
                 .unwrap();
             let new = min(downloaded + (chunk.len() as u64), total_size);
@@ -42,7 +41,7 @@ impl HTTPSHandler {
         if !silent {
             pb.as_ref()
                 .unwrap()
-                .finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
+                .finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
         }
     }
     pub async fn put(_: &str, _: &str, _: bool) {}
