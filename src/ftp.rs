@@ -98,27 +98,32 @@ async fn get_stream(
     ftp_stream.restart_from(downloaded).await.unwrap();
     Ok(ftp_stream)
 }
+struct FTPProperties {
+    out: Box<dyn Write>,
+    downloaded: u64,
+    total_size: u64,
+    reader: tokio::io::BufReader<async_ftp::DataStream>,
+}
 
 impl FTPHandler {
     pub async fn get(input: &str, output: &str, bar: &WrappedBar) {
-        let (mut out, mut downloaded) = get_output(output, bar.silent);
-
-        let parsed_ftp = parse_ftp_address(input);
-        let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
-        let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
-
-        bar.set_length(total_size);
-        let mut reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
+        let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
             let mut buffer = vec![0; 26214400usize];
-            let byte_count = reader.read(&mut buffer[..]).await.unwrap();
+            let byte_count = properties.reader.read(&mut buffer[..]).await.unwrap();
+
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
-                out.write_all(&buffer)
+                properties
+                    .out
+                    .write_all(&buffer)
                     .or(Err(format!("Error while writing to output.")))
                     .unwrap();
-                let new = min(downloaded + (byte_count as u64), total_size);
-                downloaded = new;
+                let new = min(
+                    properties.downloaded + (byte_count as u64),
+                    properties.total_size,
+                );
+                properties.downloaded = new;
                 bar.set_position(new);
             } else {
                 break;
@@ -128,6 +133,27 @@ impl FTPHandler {
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
     pub async fn put(_: &str, _: &str, _: &WrappedBar) {}
+
+    async fn setup(
+        input: &str,
+        output: &str,
+        bar: &WrappedBar,
+    ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
+        let (out, downloaded) = get_output(output, bar.silent);
+
+        let parsed_ftp = parse_ftp_address(input);
+        let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
+        let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
+
+        bar.set_length(total_size);
+        let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
+        Ok(FTPProperties {
+            out,
+            downloaded,
+            total_size,
+            reader,
+        })
+    }
 }
 
 #[tokio::test]
