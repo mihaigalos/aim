@@ -100,13 +100,13 @@ async fn get_stream(
 }
 
 impl FTPHandler {
-    pub async fn get(url: &str, path: &str, silent: bool) {
-        let (mut output, mut downloaded) = get_output(path, silent);
+    pub async fn get(input: &str, output: &str, silent: bool) {
+        let (mut out, mut downloaded) = get_output(output, silent);
 
-        let parsed_ftp = parse_ftp_address(url);
+        let parsed_ftp = parse_ftp_address(input);
         let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
-        let pb = get_progress_bar(total_size, url, silent);
+        let pb = get_progress_bar(total_size, input, silent);
 
         let mut reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
         loop {
@@ -114,8 +114,7 @@ impl FTPHandler {
             let byte_count = reader.read(&mut buffer[..]).await.unwrap();
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
-                output
-                    .write_all(&buffer)
+                out.write_all(&buffer)
                     .or(Err(format!("Error while writing to output.")))
                     .unwrap();
                 let new = min(downloaded + (byte_count as u64), total_size);
@@ -130,7 +129,7 @@ impl FTPHandler {
 
         if !silent {
             pb.unwrap()
-                .finish_with_message(format!("⛵ Downloaded {} to {}", url, path));
+                .finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
         }
     }
     pub async fn put(_: &str, _: &str, _: bool) {}
