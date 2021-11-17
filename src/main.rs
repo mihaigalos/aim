@@ -5,9 +5,9 @@ async fn main() {
     let args = clap_app!(ship =>
     (version: crate_version!())
     (author: "Mihai Galos <mihaigalos at gmail dot com>")
-    (about: "⛵ Download/upload tool.")
+    (about: "⛵ A download/upload tool.")
     (@arg INPUT: +required +takes_value "Input to ship from.")
-    (@arg OUTPUT: -o --output +takes_value "Output to ship to. If not specified, writes to stdout (cannot resume).")
+    (@arg OUTPUT: -o --output +takes_value "Explicit output to ship to. \n-o can be ommitted: if filename supplied, writes to file, otherwise stdout (cannot resume).")
     (@arg OUTPUT_ALT: -O +takes_value "Alternative to -o.")
     (@arg silent: -s --silent "Silent or quiet mode. Don't show progress meter or error messages.")
     )
