@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
 use std::env;
 
 const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
@@ -12,6 +12,7 @@ fn construct_progress_bar(
     progress_chars: &str,
 ) -> indicatif::ProgressBar {
     let pb = ProgressBar::new(total_size);
+    pb.set_draw_target(ProgressDrawTarget::hidden());
     pb.set_message(format!("⛵ Downloading {}", url.clone()));
     pb.set_style(
         ProgressStyle::default_bar()
@@ -21,27 +22,58 @@ fn construct_progress_bar(
     pb
 }
 
-pub fn get_progress_bar(
-    total_size: u64,
-    url: &str,
-    silent: bool,
-) -> Option<indicatif::ProgressBar> {
-    dotenv().ok();
+pub struct WrappedBar {
+    pub silent: bool,
+    output: Option<indicatif::ProgressBar>,
+}
 
-    let template = &env::var("SHIP_PROGRESSBAR_TEMPLATE")
-        .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_TEMPLATE.to_string());
+impl WrappedBar {
+    pub fn new_empty() -> WrappedBar {
+        WrappedBar {
+            silent: true,
+            output: None,
+        }
+    }
+    pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
+        dotenv().ok();
 
-    let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
-        .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
+        let template = &env::var("SHIP_PROGRESSBAR_TEMPLATE")
+            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_TEMPLATE.to_string());
 
-    let result = match silent {
-        false => Some(construct_progress_bar(
-            total_size,
-            url,
-            template,
-            progress_chars,
-        )),
-        true => None,
-    };
-    result
+        let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
+            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
+        let output = match silent {
+            false => Some(construct_progress_bar(
+                total_size,
+                url,
+                template,
+                progress_chars,
+            )),
+            true => None,
+        };
+
+        WrappedBar {
+            silent: silent,
+            output: output,
+        }
+    }
+    pub fn set_length(&self, len: u64) {
+        if !self.silent {
+            self.output
+                .as_ref()
+                .unwrap()
+                .set_draw_target(ProgressDrawTarget::stderr());
+            self.output.as_ref().unwrap().set_length(len);
+        }
+    }
+    pub fn set_position(&self, pos: u64) {
+        if !self.silent {
+            self.output.as_ref().unwrap().set_position(pos);
+        }
+    }
+    pub fn finish_with_message(&self, msg: String) {
+        if !self.silent {
+            self.output.as_ref().unwrap().finish_with_message(msg);
+        }
+    }
 }

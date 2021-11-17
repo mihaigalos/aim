@@ -5,7 +5,7 @@ use std::io::Write;
 use tokio::io::AsyncReadExt;
 use url::Url;
 
-use crate::bar::get_progress_bar;
+use crate::bar::WrappedBar;
 use crate::output::get_output;
 
 pub struct FTPHandler {
@@ -100,14 +100,14 @@ async fn get_stream(
 }
 
 impl FTPHandler {
-    pub async fn get(input: &str, output: &str, silent: bool) {
-        let (mut out, mut downloaded) = get_output(output, silent);
+    pub async fn get(input: &str, output: &str, bar: &WrappedBar) {
+        let (mut out, mut downloaded) = get_output(output, bar.silent);
 
         let parsed_ftp = parse_ftp_address(input);
         let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
-        let pb = get_progress_bar(total_size, input, silent);
 
+        bar.set_length(total_size);
         let mut reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
         loop {
             let mut buffer = vec![0; 26214400usize];
@@ -119,20 +119,15 @@ impl FTPHandler {
                     .unwrap();
                 let new = min(downloaded + (byte_count as u64), total_size);
                 downloaded = new;
-                if !silent {
-                    pb.as_ref().unwrap().set_position(new);
-                }
+                bar.set_position(new);
             } else {
                 break;
             }
         }
 
-        if !silent {
-            pb.unwrap()
-                .finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
-        }
+        bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
-    pub async fn put(_: &str, _: &str, _: bool) {}
+    pub async fn put(_: &str, _: &str, _: &WrappedBar) {}
 }
 
 #[tokio::test]
@@ -195,7 +190,7 @@ async fn get_ftp_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
         out_file,
-        false,
+        &WrappedBar::new_empty(),
     )
     .await;
     let bytes = std::fs::read(out_file).unwrap();
@@ -217,7 +212,7 @@ async fn get_ftp_resume_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
         out_file,
-        false,
+        &WrappedBar::new_empty(),
     )
     .await;
 
