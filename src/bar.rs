@@ -1,19 +1,29 @@
 use dotenv::dotenv;
 use indicatif::{ProgressBar, ProgressDrawTarget, ProgressStyle};
+use std::collections::HashMap;
 use std::env;
+use strfmt::strfmt;
 
-const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
+const DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT: &str = "⛵ Downloading {url}";
 const DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
+const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 
 fn construct_progress_bar(
     total_size: u64,
     url: &str,
-    template: &str,
+    message_format: &str,
     progress_chars: &str,
+    template: &str,
 ) -> indicatif::ProgressBar {
     let pb = ProgressBar::new(total_size);
     pb.set_draw_target(ProgressDrawTarget::hidden());
-    pb.set_message(format!("⛵ Downloading {}", url.clone()));
+    let mut vars: HashMap<String, String> = HashMap::new();
+
+    if message_format.contains("{url}") {
+        vars.insert("url".to_string(), url.to_string());
+    }
+
+    pb.set_message(strfmt(message_format, &vars).unwrap());
     pb.set_style(
         ProgressStyle::default_bar()
             .template(template)
@@ -37,17 +47,20 @@ impl WrappedBar {
     pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
         dotenv().ok();
 
+        let message_format = &env::var("SHIP_PROGRESSBAR_MESSAGE_FORMAT")
+            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT.to_string());
+        let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
+            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
         let template = &env::var("SHIP_PROGRESSBAR_TEMPLATE")
             .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_TEMPLATE.to_string());
 
-        let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
-            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
         let output = match silent {
             false => Some(construct_progress_bar(
                 total_size,
                 url,
-                template,
+                message_format,
                 progress_chars,
+                template,
             )),
             true => None,
         };

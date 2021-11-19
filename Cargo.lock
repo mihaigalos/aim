@@ -1075,6 +1075,7 @@ dependencies = [
  "indicatif",
  "reqwest",
  "sha256",
+ "strfmt",
  "tokio",
  "url 1.7.2",
 ]
@@ -1109,6 +1110,12 @@ dependencies = [
  "libc",
  "winapi",
 ]
+
+[[package]]
+name = "strfmt"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b278b244ef7aa5852b277f52dd0c6cac3a109919e1f6d699adde63251227a30f"
 
 [[package]]
 name = "strsim"
