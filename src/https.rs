@@ -1,6 +1,9 @@
 use futures_util::StreamExt;
 use reqwest::Client;
 use std::cmp::min;
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
+use tokio_util::codec::{BytesCodec, FramedRead};
 
 use crate::bar::WrappedBar;
 use crate::output::get_output;
@@ -38,38 +41,43 @@ impl HTTPSHandler {
 
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
+    pub async fn put(input: &str, output: &str, _: &WrappedBar) {
+        println!("{} -> {}", input, output);
+        let mut file = File::open(input).await.unwrap();
+        let mut vec = Vec::new();
+        let _ = file.read_to_end(&mut vec);
 
-    pub async fn put(input: &str, output: &str, bar: &WrappedBar) {
-        let (mut out, mut uploaded) = get_output(output, bar.silent);
+        let stream = FramedRead::new(file, BytesCodec::new());
+        let body = reqwest::Body::wrap_stream(stream);
 
-        let res = Client::new()
-            .put(input)
-            .header("Range", "bytes=".to_owned() + &uploaded.to_string() + "-")
+        let _ = Client::new()
+            .put(output)
+            .header("content-type", "application/octet-stream")
+            .body(body)
             .send()
             .await
-            .or(Err(format!("Failed to PUT from {} to {}", &input, &output)))
             .unwrap();
-        let total_size = uploaded
-            + res
-                .content_length()
-                .ok_or(format!("Failed to get content length from '{}'", &input))
-                .unwrap();
 
-        bar.set_length(total_size);
-
-        let mut stream = res.bytes_stream();
-        while let Some(item) = stream.next().await {
-            let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
-            out.write_all(&chunk)
-                .or(Err(format!("Error while writing to output.")))
-                .unwrap();
-            let new = min(uploaded + (chunk.len() as u64), total_size);
-            uploaded = new;
-            bar.set_position(new);
-        }
-
-        bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
+        //bar.set_length(total_size);
+        // bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
     }
+
+    //pub async fn put(input: &str, output: &str, _: &WrappedBar) {
+    //    println!("{} -> {}", input, output);
+    //    let mut file = File::open(input).await.unwrap();
+    //    let mut vec = Vec::new();
+    //    let _ = file.read_to_end(&mut vec);
+    //    let res = Client::new()
+    //        .put(output)
+    //        .header("content-type", "application/octet-stream")
+    //        .body(vec)
+    //        .send()
+    //        .await
+    //        .unwrap();
+    //
+    //    //bar.set_length(total_size);
+    //    // bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
+    //}
 }
 #[tokio::test]
 async fn get_works() {
