@@ -15,7 +15,7 @@ impl HTTPSHandler {
             .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
             .send()
             .await
-            .or(Err(format!("Failed to GET from '{}'", &input)))
+            .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
             .unwrap();
         let total_size = downloaded
             + res
@@ -38,7 +38,38 @@ impl HTTPSHandler {
 
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
-    pub async fn put(_: &str, _: &str, _: &WrappedBar) {}
+
+    pub async fn put(input: &str, output: &str, bar: &WrappedBar) {
+        let (mut out, mut uploaded) = get_output(output, bar.silent);
+
+        let res = Client::new()
+            .put(input)
+            .header("Range", "bytes=".to_owned() + &uploaded.to_string() + "-")
+            .send()
+            .await
+            .or(Err(format!("Failed to PUT from {} to {}", &input, &output)))
+            .unwrap();
+        let total_size = uploaded
+            + res
+                .content_length()
+                .ok_or(format!("Failed to get content length from '{}'", &input))
+                .unwrap();
+
+        bar.set_length(total_size);
+
+        let mut stream = res.bytes_stream();
+        while let Some(item) = stream.next().await {
+            let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
+            out.write_all(&chunk)
+                .or(Err(format!("Error while writing to output.")))
+                .unwrap();
+            let new = min(uploaded + (chunk.len() as u64), total_size);
+            uploaded = new;
+            bar.set_position(new);
+        }
+
+        bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
+    }
 }
 #[tokio::test]
 async fn get_works() {
