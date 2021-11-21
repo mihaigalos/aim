@@ -42,7 +42,6 @@ impl HTTPSHandler {
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
     pub async fn put(input: &str, output: &str, _: &WrappedBar) {
-        println!("{} -> {}", input, output);
         let mut file = File::open(input).await.unwrap();
         let mut vec = Vec::new();
         let _ = file.read_to_end(&mut vec);

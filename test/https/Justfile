@@ -80,7 +80,7 @@ _test_ship_put_binary_file:
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     ship binary_file.tar.gz -o http://localhost:8081/uploaded_binary.file
-    #ship http://localhost:8081/test_binary.file -s -o downloaded_test_binary.file
+    ship http://localhost:8081/uploaded_binary.file -s -o downloaded_test_binary.file
     sha_output=$(sha256sum downloaded_test_binary.file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm downloaded_test_binary.file
