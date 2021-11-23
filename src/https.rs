@@ -41,14 +41,19 @@ impl HTTPSHandler {
     }
 
     pub async fn put(input: &str, output: &str, _: &WrappedBar) {
-        let f = tokio::fs::File::open(&input).await.unwrap();
-        let mut reader_stream = ReaderStream::new(f);
+        let file = tokio::fs::File::open(&input).await.unwrap();
+        let mut reader_stream = ReaderStream::new(file);
 
+        let mut total = 0;
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
+                if let Ok(chunk) = &chunk {
+                    total += chunk.len();
+                }
                 yield chunk;
             }
         };
+
         let _ = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
