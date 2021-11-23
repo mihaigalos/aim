@@ -1,9 +1,7 @@
 use futures_util::StreamExt;
 use reqwest::Client;
 use std::cmp::min;
-use tokio::fs::File;
-use tokio::io::AsyncReadExt;
-use tokio_util::codec::{BytesCodec, FramedRead};
+use tokio_util::io::ReaderStream;
 
 use crate::bar::WrappedBar;
 use crate::output::get_output;
@@ -41,43 +39,26 @@ impl HTTPSHandler {
 
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
+
     pub async fn put(input: &str, output: &str, _: &WrappedBar) {
-        let mut file = File::open(input).await.unwrap();
-        let mut vec = Vec::new();
-        let _ = file.read_to_end(&mut vec);
+        let f = tokio::fs::File::open(&input).await.unwrap();
+        let mut reader_stream = ReaderStream::new(f);
 
-        let stream = FramedRead::new(file, BytesCodec::new());
-        let body = reqwest::Body::wrap_stream(stream);
-
-        let _ = Client::new()
+        let async_stream = async_stream::stream! {
+            while let Some(chunk) = reader_stream.next().await {
+                yield chunk;
+            }
+        };
+        let _ = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
-            .body(body)
+            .body(reqwest::Body::wrap_stream(async_stream))
             .send()
             .await
             .unwrap();
-
-        //bar.set_length(total_size);
-        // bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
     }
-
-    //pub async fn put(input: &str, output: &str, _: &WrappedBar) {
-    //    println!("{} -> {}", input, output);
-    //    let mut file = File::open(input).await.unwrap();
-    //    let mut vec = Vec::new();
-    //    let _ = file.read_to_end(&mut vec);
-    //    let res = Client::new()
-    //        .put(output)
-    //        .header("content-type", "application/octet-stream")
-    //        .body(vec)
-    //        .send()
-    //        .await
-    //        .unwrap();
-    //
-    //    //bar.set_length(total_size);
-    //    // bar.finish_with_message(format!("⛵ Uploaded {} to {}", input, output));
-    //}
 }
+
 #[tokio::test]
 async fn get_works() {
     let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";

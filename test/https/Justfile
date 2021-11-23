@@ -15,7 +15,7 @@ push:
     docker push {{docker_image}}
 
 
-test: _start #&& _stop
+test: _start && _stop
     #!/bin/bash
     cat <<'EOF' > common.sh
     #!/bin/bash
