@@ -1,5 +1,5 @@
 default:
-  @just --list
+    @just --list
 
 tool := "vsftp_alpine"
 

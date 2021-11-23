@@ -1,5 +1,5 @@
 default:
-  @just --list
+    @just --list
 
 tool := "nginx_webdav"
 docker_container_registry := "docker.pkg.github.com"

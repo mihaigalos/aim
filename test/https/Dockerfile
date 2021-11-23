@@ -1,7 +1,7 @@
 FROM nginx:stable-alpine
 
 RUN apk -U upgrade \
- && apk add --no-cache apache2-utils
+    && apk add --no-cache apache2-utils
 
 RUN mkdir -p /srv \
     && chmod a+w /srv
