@@ -13,7 +13,7 @@ impl Driver {
             "http" => crate::https::HTTPSHandler::get(input, output, &bar).await,
             _ => match &output[0..4] {
                 "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, &bar).await,
-                "http" => crate::https::HTTPSHandler::put(input, output, &bar).await,
+                "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
                 _ => println!(
                     "Cannot extract handler from args: {} {} Exiting.",
                     input, output

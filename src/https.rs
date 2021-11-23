@@ -40,15 +40,23 @@ impl HTTPSHandler {
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
 
-    pub async fn put(input: &str, output: &str, _: &WrappedBar) {
+    pub async fn put(input: &str, output: &str, bar: WrappedBar) {
         let file = tokio::fs::File::open(&input).await.unwrap();
-        let mut reader_stream = ReaderStream::new(file);
 
-        let mut total = 0;
+        let mut uploaded: u64 = 0;
+        let total_size = file.metadata().await.unwrap().len();
+
+        let mut reader_stream = ReaderStream::new(file);
+        bar.set_length(total_size);
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
                 if let Ok(chunk) = &chunk {
-                    total += chunk.len();
+                    let new = min(uploaded + (chunk.len() as u64), total_size);
+                    uploaded = new;
+                    bar.set_position(new);
+                    if(uploaded >= total_size){
+                        bar.finish_with_message(format!("⛵ Uploaded."));
+                    }
                 }
                 yield chunk;
             }

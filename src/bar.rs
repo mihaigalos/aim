@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::env;
 use strfmt::strfmt;
 
-const DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT: &str = "⛵ Downloading {url}";
+const DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT: &str = "⛵ Transfering {url}";
 const DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
 const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 
