@@ -43,6 +43,8 @@ impl HTTPSHandler {
     pub async fn put(input: &str, output: &str, bar: WrappedBar) {
         let file = tokio::fs::File::open(&input).await.unwrap();
 
+        let input_ = input.to_string();
+        let output_ = output.to_string();
         let mut uploaded: u64 = 0;
         let total_size = file.metadata().await.unwrap().len();
 
@@ -55,7 +57,7 @@ impl HTTPSHandler {
                     uploaded = new;
                     bar.set_position(new);
                     if(uploaded >= total_size){
-                        bar.finish_with_message(format!("⛵ Uploaded."));
+                        bar.finish_with_message(format!("⛵ Uploaded {} to {}", input_, output_));
                     }
                 }
                 yield chunk;
