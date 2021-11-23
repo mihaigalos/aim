@@ -44,10 +44,11 @@ impl HTTPSHandler {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
         let mut uploaded: u64 = 0;
+
         let input_ = input.to_string();
         let output_ = output.to_string();
-
         let mut reader_stream = ReaderStream::new(file);
+
         bar.set_length(total_size);
 
         let async_stream = async_stream::stream! {
