@@ -13,10 +13,10 @@ Others didn't have upload support or (self-contained) testing.
 Finally, I wanted to have some fun.
 
 ### Features
-* default action implied from parameter order.
-  * `ship https://domain.com/"` -> display contents
-  * `ship https://domain.com/source.file source.file"` -> Download
-  * `ship source.file https://domain.com/source.file"` -> Upload
+* default shipping action implied from parameter order.
+  * `ship https://domain.com/"` -> display contents.
+  * `ship https://domain.com/source.file source.file"` -> Download.
+  * `ship source.file https://domain.com/source.file"` -> Upload.
 
 * resumable file transfers.
 
