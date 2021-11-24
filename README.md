@@ -31,6 +31,7 @@ Finally, I wanted to have some fun.
   ```
 * configurable indicators via [`indicatif`](https://crates.io/crates/indicatif): you can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
   ```bash
+  SHIP_PROGRESSBAR_MESSAGE_FORMAT="⛵ Transfering {url}"
   SHIP_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
   SHIP_PROGRESSBAR_PROGRESS_CHARS="=>-"
   ```
