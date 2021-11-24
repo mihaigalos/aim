@@ -106,7 +106,7 @@ struct FTPProperties {
 }
 
 impl FTPHandler {
-    pub async fn get(input: &str, output: &str, bar: &WrappedBar) {
+    pub async fn get(input: &str, output: &str, bar: &mut WrappedBar) {
         let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
             let mut buffer = vec![0; 26214400usize];
@@ -137,7 +137,7 @@ impl FTPHandler {
     async fn setup(
         input: &str,
         output: &str,
-        bar: &WrappedBar,
+        bar: &mut WrappedBar,
     ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
         let (out, downloaded) = get_output(output, bar.silent);
 
@@ -216,7 +216,7 @@ async fn get_ftp_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
         out_file,
-        &WrappedBar::new_empty(),
+        &mut WrappedBar::new_empty(),
     )
     .await;
     let bytes = std::fs::read(out_file).unwrap();
@@ -238,7 +238,7 @@ async fn get_ftp_resume_works() {
     FTPHandler::get(
         "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
         out_file,
-        &WrappedBar::new_empty(),
+        &mut WrappedBar::new_empty(),
     )
     .await;
 

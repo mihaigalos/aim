@@ -8,7 +8,7 @@ use crate::output::get_output;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
-    pub async fn get(input: &str, output: &str, bar: &WrappedBar) {
+    pub async fn get(input: &str, output: &str, bar: &mut WrappedBar) {
         let (mut out, mut downloaded) = get_output(output, bar.silent);
 
         let res = Client::new()
@@ -18,11 +18,7 @@ impl HTTPSHandler {
             .await
             .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
             .unwrap();
-        let total_size = downloaded
-            + res
-                .content_length()
-                .ok_or(format!("Failed to get content length from '{}'", &input))
-                .unwrap();
+        let total_size = downloaded + res.content_length().or(Some(0)).unwrap();
 
         bar.set_length(total_size);
 
@@ -40,7 +36,7 @@ impl HTTPSHandler {
         bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
     }
 
-    pub async fn put(input: &str, output: &str, bar: WrappedBar) {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
         let mut uploaded: u64 = 0;
@@ -79,7 +75,7 @@ impl HTTPSHandler {
 async fn get_works() {
     let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
     let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
-    HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &WrappedBar::new_empty()).await;
+    HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty()).await;
 
     let bytes = std::fs::read(out_file).unwrap();
     let computed_hash = sha256::digest_bytes(&bytes);
@@ -97,7 +93,7 @@ async fn get_resume_works() {
         "test/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz",
     )
     .unwrap();
-    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &WrappedBar::new_empty()).await;
+    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty()).await;
 
     let bytes = std::fs::read(out_file).unwrap();
     let computed_hash = sha256::digest_bytes(&bytes);

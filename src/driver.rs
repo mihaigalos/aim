@@ -7,10 +7,10 @@ trait RESTVerbs {
 
 impl Driver {
     pub async fn drive(input: &str, output: &str, silent: bool) {
-        let bar = WrappedBar::new(0, input, silent);
+        let mut bar = WrappedBar::new(0, input, silent);
         match &input[0..4] {
-            "ftp:" | "ftp." => crate::ftp::FTPHandler::get(input, output, &bar).await,
-            "http" => crate::https::HTTPSHandler::get(input, output, &bar).await,
+            "ftp:" | "ftp." => crate::ftp::FTPHandler::get(input, output, &mut bar).await,
+            "http" => crate::https::HTTPSHandler::get(input, output, &mut bar).await,
             _ => match &output[0..4] {
                 "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, &bar).await,
                 "http" => crate::https::HTTPSHandler::put(input, output, bar).await,

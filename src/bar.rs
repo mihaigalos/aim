@@ -8,6 +8,8 @@ const DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT: &str = "⛵ Transfering {url}";
 const DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
 const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 
+const THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE: u64 = 1 * 1024 * 1024;
+
 fn construct_progress_bar(
     total_size: u64,
     url: &str,
@@ -70,7 +72,10 @@ impl WrappedBar {
             output: output,
         }
     }
-    pub fn set_length(&self, len: u64) {
+    pub fn set_length(&mut self, len: u64) {
+        if len < THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE {
+            self.silent = true;
+        }
         if !self.silent {
             self.output
                 .as_ref()
