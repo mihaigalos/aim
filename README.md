@@ -30,3 +30,12 @@ Finally, I wanted to have some fun.
   SHIP_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
   SHIP_PROGRESSBAR_PROGRESS_CHARS="=>-"
   ```
+
+### Resume
+
+* Download resume:
+  * [x] http
+  * [x] ftp
+* Upload resume:
+  * [x] http implemented but experimental. You need a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`). `_test_ship_put_resume_binary_file` should cover this case.
+  * [ ] ftp

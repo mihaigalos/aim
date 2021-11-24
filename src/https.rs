@@ -4,6 +4,7 @@ use std::cmp::min;
 use tokio_util::io::ReaderStream;
 
 use crate::bar::WrappedBar;
+use crate::consts::*;
 use crate::output::get_output;
 
 pub struct HTTPSHandler;
@@ -14,6 +15,10 @@ impl HTTPSHandler {
         let res = Client::new()
             .get(input)
             .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
+            .header(
+                reqwest::header::USER_AGENT,
+                reqwest::header::HeaderValue::from_static(CLIENT_ID),
+            )
             .send()
             .await
             .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
@@ -39,12 +44,11 @@ impl HTTPSHandler {
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
-        let mut uploaded: u64 = 0;
-
         let input_ = input.to_string();
         let output_ = output.to_string();
         let mut reader_stream = ReaderStream::new(file);
 
+        let mut uploaded = HTTPSHandler::get_already_uploaded(output).await;
         bar.set_length(total_size);
 
         let async_stream = async_stream::stream! {
@@ -64,10 +68,33 @@ impl HTTPSHandler {
         let _ = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
+            .header("Range", "bytes=".to_owned() + &uploaded.to_string() + "-")
+            .header(
+                reqwest::header::USER_AGENT,
+                reqwest::header::HeaderValue::from_static(CLIENT_ID),
+            )
             .body(reqwest::Body::wrap_stream(async_stream))
             .send()
             .await
             .unwrap();
+    }
+
+    async fn get_already_uploaded(output: &str) -> u64 {
+        let res = Client::new()
+            .get(output)
+            .header(
+                reqwest::header::USER_AGENT,
+                reqwest::header::HeaderValue::from_static(CLIENT_ID),
+            )
+            .send()
+            .await
+            .or(Err(format!(
+                "Failed to GET already uploaded size from {}",
+                &output
+            )))
+            .unwrap();
+        let uploaded = res.content_length().or(Some(0)).unwrap();
+        uploaded
     }
 }
 
