@@ -19,6 +19,7 @@ Finally, I wanted to have some fun.
   * `ship source.file https://domain.com/source.file"` -> Upload.
 
 * resumable file transfers.
+* automatic no display of progressbar if content length <1MB (easy display contents of remote).
 
   ![resume example](screenshots/ship.gif)
 * defaults to stdout (pipe-able) to other commands:
