@@ -6,13 +6,17 @@ Alternatives:
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
 
 ### Why?
-Simplicity: a modern, single tool for downloading/uploading with default settings.
+Simplicity: a modern, simple tool for downloading/uploading with default settings.
 
 Some of the alternatives I could not build from source.
-Others didn't have upload support or testing.
+Others didn't have upload support or (self-contained) testing.
 Finally, I wanted to have some fun.
 
 ### Features
+* default action implied from parameter order.
+  * `ship https://domain.com/"` -> display contents
+  * `ship https://domain.com/source.file source.file"` -> Download
+  * `ship source.file https://domain.com/source.file"` -> Upload
 
 * resumable file transfers.
 
