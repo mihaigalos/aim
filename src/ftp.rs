@@ -234,7 +234,7 @@ async fn get_ftp_resume_works() {
     let out_file = "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
 
     std::fs::copy(
-        "test/incomplete_wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
+        "test/incomplete_wpa_supplicant-2XX2.9-8-x86_64.pkg.tar.zst",
         out_file,
     )
     .unwrap();
