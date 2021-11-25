@@ -8,7 +8,11 @@ async fn main() {
         (about: "⛵ A download/upload tool with resume.")
         (@arg silent: -s --silent "Silent or quiet mode. Don't show progress meter or error messages.")
         (@arg INPUT: +required +takes_value "Input to ship from.")
-        (@arg OUTPUT: +takes_value "Explicit output to ship to. \nCan be ommitted during:\n  Downloading: if filename supplied, writes to file, otherwise stdout (cannot resume).\n  Uploading: directly uploads file to URL.")
+        (@arg OUTPUT: +takes_value "Explicit output to ship to. \n\
+            Can be ommitted during:\n\
+            * Downloading: if filename supplied, writes to file, otherwise stdout (cannot resume).\n\
+            * Uploading: directly uploads file to URL.\n\
+            * if none present, writes to stdout.")
     )
     .get_matches_safe()
     .unwrap_or_else(|e| e.exit());
