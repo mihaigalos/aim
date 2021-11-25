@@ -15,15 +15,15 @@ build:
 _start +args="-d":
     #!/bin/bash
     function wait_docker() {
-        while [ $(docker ps | grep ship_tests_ftp | wc -l) -eq 0 ]; do
+        while [ $(docker ps | grep aim_tests_ftp | wc -l) -eq 0 ]; do
           sleep 0.1
         done 
     }
-    [ $(docker ps | grep ship_tests_ftp | wc -l) -eq 0 ] && \
+    [ $(docker ps | grep aim_tests_ftp | wc -l) -eq 0 ] && \
         docker run {{args}} \
             -it \
             --rm \
-            --name ship_tests_ftp \
+            --name aim_tests_ftp \
             -e PASV_ADDRESS=127.0.0.1 \
             -e PASV_MIN_PORT=21100 \
             -e PASV_MAX_PORT=21110 \
@@ -37,8 +37,8 @@ _start +args="-d":
 
 _stop:
     @rm common.sh
-    @docker stop -t 1 ship_tests_ftp > /dev/null 2>&1
-    @docker rm --force ship_tests_ftp > /dev/null 2>&1
+    @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
+    @docker rm --force aim_tests_ftp > /dev/null 2>&1
 
 test: _start && _stop
     #!/bin/bash

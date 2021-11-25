@@ -38,7 +38,7 @@ impl HTTPSHandler {
             bar.set_position(new);
         }
 
-        bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
+        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) {
@@ -58,7 +58,7 @@ impl HTTPSHandler {
                     uploaded = new;
                     bar.set_position(new);
                     if(uploaded >= total_size){
-                        bar.finish_with_message(format!("⛵ Uploaded {} to {}", input_, output_));
+                        bar.finish_with_message(format!("🎯 Uploaded {} to {}", input_, output_));
                     }
                 }
                 yield chunk;

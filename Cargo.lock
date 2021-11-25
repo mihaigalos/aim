@@ -27,6 +27,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "aim"
+version = "0.0.1"
+dependencies = [
+ "async-stream",
+ "async_ftp",
+ "clap",
+ "dotenv",
+ "failure",
+ "futures-util",
+ "indicatif",
+ "reqwest",
+ "sha256",
+ "strfmt",
+ "tokio",
+ "tokio-util",
+ "url 1.7.2",
+]
+
+[[package]]
 name = "ansi_term"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1088,25 +1107,6 @@ checksum = "4e84a7f596c081d359de5e06a83877138bc3c4483591e1af1916e1472e6e146e"
 dependencies = [
  "hex",
  "sha2",
-]
-
-[[package]]
-name = "ship"
-version = "0.0.1"
-dependencies = [
- "async-stream",
- "async_ftp",
- "clap",
- "dotenv",
- "failure",
- "futures-util",
- "indicatif",
- "reqwest",
- "sha256",
- "strfmt",
- "tokio",
- "tokio-util",
- "url 1.7.2",
 ]
 
 [[package]]

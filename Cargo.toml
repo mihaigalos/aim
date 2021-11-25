@@ -1,8 +1,8 @@
 [package]
-name = "ship"
+name = "aim"
 version = "0.0.1"
 edition = "2021"
-description = "github.com/mihaigalos/ship"
+description = "github.com/mihaigalos/aim"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

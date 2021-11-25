@@ -2,13 +2,13 @@ use clap::{clap_app, crate_version};
 
 #[tokio::main]
 async fn main() {
-    let args = clap_app!(ship =>
+    let args = clap_app!(aim =>
         (version: crate_version!())
         (author: "Mihai Galos <mihaigalos at gmail dot com>")
-        (about: "⛵ A download/upload tool with resume.")
+        (about: "🎯 A download/upload tool with resume.")
         (@arg silent: -s --silent "Silent or quiet mode. Don't show progress meter or error messages.")
-        (@arg INPUT: +required +takes_value "Input to ship from.")
-        (@arg OUTPUT: +takes_value "Explicit output to ship to. \n\
+        (@arg INPUT: +required +takes_value "Input to aim from.")
+        (@arg OUTPUT: +takes_value "Explicit output to aim to. \n\
             Can be ommitted during:\n\
             * Downloading: if filename supplied, writes to file, otherwise stdout (cannot resume).\n\
             * Uploading: directly uploads file to URL.\n\
@@ -21,5 +21,5 @@ async fn main() {
     let output = args.value_of("OUTPUT").unwrap_or("stdout");
     let silent = args.is_present("silent");
 
-    ship::driver::Driver::drive(input, output, silent).await;
+    aim::driver::Driver::drive(input, output, silent).await;
 }

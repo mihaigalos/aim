@@ -130,7 +130,7 @@ impl FTPHandler {
             }
         }
 
-        bar.finish_with_message(format!("⛵ Downloaded {} to {}", input, output));
+        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
     }
     pub async fn put(_: &str, _: &str, _: &WrappedBar) {}
 

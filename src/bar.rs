@@ -4,9 +4,9 @@ use std::collections::HashMap;
 use std::env;
 use strfmt::strfmt;
 
-const DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT: &str = "⛵ Transfering {url}";
-const DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
-const DEFAULT_SHIP_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
+const DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT: &str = "🎯 Transfering {url}";
+const DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
+const DEFAULT_AIM_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 
 const THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE: u64 = 1 * 1024 * 1024;
 
@@ -50,12 +50,12 @@ impl WrappedBar {
     pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
         dotenv().ok();
 
-        let message_format = &env::var("SHIP_PROGRESSBAR_MESSAGE_FORMAT")
-            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_MESSAGE_FORMAT.to_string());
-        let progress_chars = &env::var("SHIP_PROGRESSBAR_PROGRESS_CHARS")
-            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_PROGRESS_CHARS.to_string());
-        let template = &env::var("SHIP_PROGRESSBAR_TEMPLATE")
-            .unwrap_or(DEFAULT_SHIP_PROGRESSBAR_TEMPLATE.to_string());
+        let message_format = &env::var("AIM_PROGRESSBAR_MESSAGE_FORMAT")
+            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT.to_string());
+        let progress_chars = &env::var("AIM_PROGRESSBAR_PROGRESS_CHARS")
+            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS.to_string());
+        let template = &env::var("AIM_PROGRESSBAR_TEMPLATE")
+            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_TEMPLATE.to_string());
 
         let output = match silent {
             false => Some(construct_progress_bar(
