@@ -16,6 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: extractions/setup-just@v1
+      with:
+        just-version: 0.8  # optional semver specification, otherwise latest
     - name: Cargo Cache
       uses: actions/cache@v1
       with:
@@ -33,6 +36,6 @@ jobs:
           ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
           ${{ runner.os }}-cargo-target
     - name: Build
-      run: cargo build --verbose --all --features "strict"
+      run: cargo build --verbose --all
     - name: Run tests
-      run: cargo test --verbose --all --features "strict"
+      run: just test
