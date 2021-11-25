@@ -3,7 +3,7 @@ default:
 
 build:
     #!/bin/bash
-    cargo build
+    cargo build || exit 1
     for d in $(find test -type d); do
         pushd $d > /dev/null
             [ -f Justfile ] && just build
