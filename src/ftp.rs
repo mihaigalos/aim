@@ -175,6 +175,7 @@ async fn ftpparseaddress_operator_equals_works_when_typical() {
 
     assert!(left == right);
 }
+
 #[tokio::test]
 async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
     let left = FTPParsedAddress {
@@ -194,6 +195,7 @@ async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
 
     assert!(left != right);
 }
+
 #[tokio::test]
 async fn parse_ftp_works() {
     let expected = FTPParsedAddress {
@@ -208,6 +210,7 @@ async fn parse_ftp_works() {
 
     assert_eq!(actual, expected);
 }
+
 #[tokio::test]
 async fn get_ftp_works() {
     let out_file = "demo_README";

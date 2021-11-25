@@ -46,6 +46,7 @@ impl WrappedBar {
             output: None,
         }
     }
+
     pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
         dotenv().ok();
 
@@ -72,6 +73,7 @@ impl WrappedBar {
             output: output,
         }
     }
+
     pub fn set_length(&mut self, len: u64) {
         if len < THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE {
             self.silent = true;
@@ -84,11 +86,13 @@ impl WrappedBar {
             self.output.as_ref().unwrap().set_length(len);
         }
     }
+
     pub fn set_position(&self, pos: u64) {
         if !self.silent {
             self.output.as_ref().unwrap().set_position(pos);
         }
     }
+
     pub fn finish_with_message(&self, msg: String) {
         if !self.silent {
             self.output.as_ref().unwrap().finish_with_message(msg);
