@@ -1,6 +1,6 @@
 # aim
 
-🎯 aim: a download/upload tool with resume.
+🎯 aim: A command line download/upload tool with resume.
 
 Alternatives:
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
