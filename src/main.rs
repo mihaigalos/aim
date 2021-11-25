@@ -13,11 +13,7 @@ async fn main() {
     .get_matches_safe()
     .unwrap_or_else(|e| e.exit());
     let input = args.value_of("INPUT").unwrap();
-    let mut output = args.value_of("OUTPUT").unwrap_or("");
-    if output == "" {
-        output = args.value_of("OUTPUT_ALT").unwrap_or("");
-    }
-
+    let output = args.value_of("OUTPUT").unwrap_or("stdout");
     let silent = args.is_present("silent");
 
     ship::driver::Driver::drive(input, output, silent).await;

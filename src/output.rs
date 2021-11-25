@@ -4,7 +4,7 @@ use std::io::Write;
 fn get_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
     let mut downloaded: u64 = 0;
     let mut file = None;
-    if path.len() > 0 {
+    if path != "stdout" {
         if std::path::Path::new(path).exists() {
             if !silent {
                 println!("File exists. Resuming.");
@@ -35,8 +35,8 @@ fn get_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
 
 pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {
     let (file, downloaded) = get_file(path, silent);
-    let output: Box<dyn Write> = Box::new(std::io::BufWriter::new(match path.len() {
-        0 => Box::new(std::io::stdout()) as Box<dyn Write>,
+    let output: Box<dyn Write> = Box::new(std::io::BufWriter::new(match path {
+        "stdout" => Box::new(std::io::stdout()) as Box<dyn Write>,
         _ => Box::new(file.unwrap()) as Box<dyn Write>,
     }));
 
