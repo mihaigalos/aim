@@ -38,4 +38,6 @@ jobs:
     - name: Build
       run: cargo build --verbose --all
     - name: Run tests
-      run: just test
+      run: |
+        set -x
+        just test
