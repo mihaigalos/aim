@@ -8,13 +8,9 @@ Alternatives:
 ### Why?
 Simplicity: a modern, simple tool for downloading/uploading with default settings.
 
-Some of the alternatives I could not build from source.
-Others didn't have upload support or (self-contained) testing.
-Finally, I wanted to have some fun.
-
 ### Features
 * default shipping action implied from parameter order.
-  * `ship https://domain.com/"` -> display contents.
+  * `ship https://domain.com/"` -> Display contents.
   * `ship https://domain.com/source.file source.file"` -> Download.
   * `ship source.file https://domain.com/source.file"` -> Upload.
 
@@ -36,6 +32,7 @@ Finally, I wanted to have some fun.
   SHIP_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
   SHIP_PROGRESSBAR_PROGRESS_CHARS="=>-"
   ```
+* pipe-able output: `ship https://www.rust-lang.org/ | htmlq --attribute href a`
 
 ### Resume
 
