@@ -12,7 +12,7 @@ build:
 
 test: build
     #!/bin/bash
-    cargo test
+    cargo test || exit 1
 
     for d in $(find test -type d); do
         pushd $d > /dev/null
