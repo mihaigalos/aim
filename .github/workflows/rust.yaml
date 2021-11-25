@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: extractions/setup-just@v1
       with:
-        just-version: 0.8  # optional semver specification, otherwise latest
+        just-version: 0.10.2  # optional semver specification, otherwise latest
     - name: Cargo Cache
       uses: actions/cache@v1
       with:
