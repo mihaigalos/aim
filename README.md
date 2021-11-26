@@ -1,3 +1,5 @@
+[![CI](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
+
 # aim
 
 🎯 aim: A command line download/upload tool with resume.
