@@ -16,6 +16,6 @@ test:
 
     for d in $(find test -type d); do
         pushd $d > /dev/null
-            [ -f Justfile ] && just test || exit 1
+            [ -f Justfile ] && just test 
         popd > /dev/null
     done
