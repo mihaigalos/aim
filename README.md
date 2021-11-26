@@ -46,3 +46,12 @@ Simplicity: a simple tool for downloading/uploading with default settings.
 * Upload resume:
   * [x] http implemented but experimental. You need a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`). `_test_aim_put_resume_binary_file` should cover this case.
   * [ ] ftp: pending.
+
+### Docker
+
+For convenience, an alpine-based docker image is available, so you can pass arguments directly to it:
+
+```bash
+docker pull mihaigalos/aim:0.0.2
+docker run --rm -it mihaigalos/aim:0.0.2 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+```
