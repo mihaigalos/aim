@@ -2,8 +2,6 @@
 # aim
 [![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
-[![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/mihaigalos/aim)
-
 
 🎯 aim: A command line download/upload tool with resume.
 
@@ -13,7 +11,7 @@
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
 
 ### Why?
-Simplicity: a modern, simple tool for downloading/uploading with default settings.
+Simplicity: a simple tool for downloading/uploading with default settings.
 
 ### Features
 * default action implied from parameter order.
