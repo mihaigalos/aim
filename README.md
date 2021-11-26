@@ -1,6 +1,6 @@
-[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
 
 # aim
+[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
 
 🎯 aim: A command line download/upload tool with resume.
 
