@@ -213,6 +213,7 @@ async fn parse_ftp_works() {
 
 #[tokio::test]
 async fn get_ftp_works() {
+    use crate::hash::sha256sum;
     let out_file = "demo_README";
     let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
 
@@ -222,15 +223,14 @@ async fn get_ftp_works() {
         &mut WrappedBar::new_empty(),
     )
     .await;
-    let bytes = std::fs::read(out_file).unwrap();
-    let computed_hash = sha256::digest_bytes(&bytes);
+    let computed_hash = sha256sum(out_file);
     assert_eq!(computed_hash, expected_hash);
     std::fs::remove_file(out_file).unwrap();
 }
 
 #[tokio::test]
 async fn get_ftp_resume_works() {
-    let expected_hash = "1f48212d6c9d3fc38d2b9c81805078108ed771dc811b4a8f8ec8ac2a56646994";
+    let expected_size = 1370827;
     let out_file = "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
 
     std::fs::copy(
@@ -245,8 +245,7 @@ async fn get_ftp_resume_works() {
     )
     .await;
 
-    let bytes = std::fs::read(out_file).unwrap();
-    let computed_hash = sha256::digest_bytes(&bytes);
-    assert_eq!(computed_hash, expected_hash);
+    let actual_size = std::fs::metadata(out_file).unwrap().len();
+    assert_eq!(actual_size, expected_size);
     std::fs::remove_file(out_file).unwrap();
 }

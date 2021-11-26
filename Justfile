@@ -3,7 +3,7 @@ default:
 
 build:
     #!/bin/bash
-    cargo build
+    cargo build  --verbose --all || exit 1
     for d in $(find test -type d); do
         pushd $d > /dev/null
             [ -f Justfile ] && just build
@@ -12,7 +12,7 @@ build:
 
 test: build
     #!/bin/bash
-    cargo test
+    cargo test  --verbose --all || exit 1
 
     for d in $(find test -type d); do
         pushd $d > /dev/null
