@@ -47,6 +47,13 @@ impl WrappedBar {
         }
     }
 
+    pub fn new_empty_verbose() -> WrappedBar {
+        WrappedBar {
+            silent: false,
+            output: None,
+        }
+    }
+
     pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
         dotenv().ok();
 
