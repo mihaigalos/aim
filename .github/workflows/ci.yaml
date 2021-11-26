@@ -16,9 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - uses: extractions/setup-just@v1
       with:
         just-version: 0.10.2  # optional semver specification, otherwise latest
+
     - name: Cargo Cache
       uses: actions/cache@v1
       with:
@@ -27,6 +29,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
           ${{ runner.os }}-cargo
+
     - name: Cargo Target Cache
       uses: actions/cache@v1
       with:
@@ -35,6 +38,21 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
           ${{ runner.os }}-cargo-target
+
     - name: Run tests
       run: |
         just test
+
+  dockerize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: extractions/setup-just@v1
+      with:
+        just-version: 0.10.2  # optional semver specification, otherwise latest
+
+    - name: Build docker
+      run: |
+        just build_docker
