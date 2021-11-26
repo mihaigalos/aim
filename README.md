@@ -49,17 +49,17 @@ Simplicity: a simple tool for downloading/uploading with default settings.
 
 ### Docker
 
-For convenience, an alpine-based docker image is available, so you can pass arguments directly to it.
-Future versions will support single naming for all archs via manifests. For the moment:
+For convenience, an alpine-based docker image is available, so arguments can be passed directly to it.
+Future versions will support single naming for all archs via manifests.
 
 `x64`:
 ```bash
-docker pull mihaigalos/aim:0.0.2
-docker run --rm -it mihaigalos/aim:0.0.2 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker pull mihaigalos/aim
+docker run --rm -it mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
 
 `arm64/aarch64`:
 ```bash
-docker pull mihaigalos/aim-arm64:0.0.2
-docker run --rm -it mihaigalos/aim-arm64:0.0.2 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker pull mihaigalos/aim-arm64
+docker run --rm -it mihaigalos/aim-arm64 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
