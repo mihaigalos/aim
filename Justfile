@@ -7,14 +7,6 @@ docker_user_repo := "mihaigalos"
 docker_image_version := `cat Cargo.toml | grep ^version | cut -d'=' -f 2 | sed -e 's/"//g' -e 's/ //g'`
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool+ ":" + docker_image_version
 
-# assumes just _setup has run at least once
-dockerize_amd64:
-    just _build_docker_with_buildkit "linux/amd64"
-
-# assumes just _setup has run at least once
-dockerize_arm64:
-    just _build_docker_with_buildkit "linux/arm64"
-
 build:
     #!/bin/bash
     cargo build  --verbose --all || exit 1
@@ -49,6 +41,15 @@ setup:
 
     docker buildx create --use --name mbuilder
     docker buildx inspect --bootstrap
+
+# assumes just _setup has run at least once
+dockerize_amd64:
+    just _build_docker_with_buildkit "linux/amd64"
+
+# assumes just _setup has run at least once
+dockerize_arm64:
+    just _build_docker_with_buildkit "linux/arm64"
+
 
 _build_docker +args="":
     docker build -t {{docker_image}} {{args}} .
