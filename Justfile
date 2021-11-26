@@ -26,7 +26,7 @@ test: build
         popd > /dev/null
     done
 
-setup:
+setup_dockerize:
     #! /bin/bash
     sudo apt update
     sudo apt-get install -y binfmt-support qemu-user-static
@@ -42,11 +42,11 @@ setup:
     docker buildx create --use --name mbuilder
     docker buildx inspect --bootstrap
 
-# assumes just _setup has run at least once
+# assumes just setup_dockerize has run at least once
 dockerize_amd64:
     just _build_docker_with_buildkit "linux/amd64"
 
-# assumes just _setup has run at least once
+# assumes just setup_dockerize has run at least once
 dockerize_arm64:
     just _build_docker_with_buildkit "linux/arm64"
 
