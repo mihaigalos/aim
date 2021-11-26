@@ -40,4 +40,6 @@ jobs:
     - name: Run tests
       run: |
         set -x
+        ./target/debug/aim https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz
+        sha256sum dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz
         just test
