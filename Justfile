@@ -32,10 +32,12 @@ _build_docker_with_buildkit platform="linux/amd64":
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
     docker buildx build --platform {{platform}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . && gzip {{tool}}_${platform_short}.tar
 
-dockerize_amd64: # assumes just _setup has run at least 1
+# assumes just _setup has run at least once
+dockerize_amd64:
     just _build_docker_with_buildkit "linux/amd64"
 
-dockerize_arm64: # assumes just _setup has run at least 1
+# assumes just _setup has run at least once
+dockerize_arm64:
     just _build_docker_with_buildkit "linux/arm64"
 
 build:
