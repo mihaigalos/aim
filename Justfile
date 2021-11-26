@@ -10,22 +10,6 @@ docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool+
 _build_docker +args="":
     docker build -t {{docker_image}} {{args}} .
 
-_setup:
-    #! /bin/bash
-    sudo apt update
-    sudo apt-get install -y binfmt-support qemu-user-static
-    sudo apt-get install -y docker.io
-    sudo usermod -aG docker $USER
-
-    sudo apt-get install -y jq
-    mkdir -p ~/.docker/cli-plugins
-    BUILDX_URL=$(curl https://api.github.com/repos/docker/buildx/releases/latest |  jq  '.assets[].browser_download_url' | grep linux-arm64)
-    wget $BUILDX_URL -O ~/.docker/cli-plugins/docker-build
-    chmod +x ~/.docker/cli-plugins/docker-buildx
-
-    docker buildx create --use --name mbuilder
-    docker buildx inspect --bootstrap
-
 _build_docker_with_buildkit platform="linux/amd64":
     #! /bin/bash
     set -x
@@ -58,3 +42,19 @@ test: build
             [ -f Justfile ] && just test
         popd > /dev/null
     done
+
+setup:
+    #! /bin/bash
+    sudo apt update
+    sudo apt-get install -y binfmt-support qemu-user-static
+    sudo apt-get install -y docker.io
+    sudo usermod -aG docker $USER
+
+    sudo apt-get install -y jq
+    mkdir -p ~/.docker/cli-plugins
+    BUILDX_URL=$(curl https://api.github.com/repos/docker/buildx/releases/latest |  jq  '.assets[].browser_download_url' | grep linux-arm64)
+    wget $BUILDX_URL -O ~/.docker/cli-plugins/docker-build
+    chmod +x ~/.docker/cli-plugins/docker-buildx
+
+    docker buildx create --use --name mbuilder
+    docker buildx inspect --bootstrap
