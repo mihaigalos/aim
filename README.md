@@ -7,7 +7,9 @@
 
 🎯 aim: A command line download/upload tool with resume.
 
-Alternatives:
+![resume example](screenshots/aim.gif)
+
+### Alternatives:
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
 
 ### Why?
@@ -22,7 +24,6 @@ Simplicity: a modern, simple tool for downloading/uploading with default setting
 * resumable file transfers.
 * automatic no display of progressbar if content length <1MB (easy display contents of remote).
 
-  ![resume example](screenshots/aim.gif)
 * defaults to stdout (pipe-able) to other commands:
   ```bash
   aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xvz
