@@ -1,4 +1,4 @@
-[![CI](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
+[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
 
 # aim
 
