@@ -1,6 +1,6 @@
 
 # aim
-[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/rust.yaml)
+[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
 [![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/Aaronepower/tokei)
 
