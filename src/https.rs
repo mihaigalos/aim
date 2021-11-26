@@ -122,6 +122,7 @@ async fn get_resume_works() {
     .unwrap();
     HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose()).await;
 
+    println!("file size after downloading: {}",std::fs::metadata(out_file).unwrap().len());
     let bytes = std::fs::read(out_file).unwrap();
     let computed_hash = sha256::digest_bytes(&bytes);
     assert_eq!(computed_hash, expected_hash);
