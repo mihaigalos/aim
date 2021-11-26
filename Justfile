@@ -1,6 +1,15 @@
 default:
   @just --list
 
+tool := "aim"
+docker_container_registry := "ghcr.io"
+docker_user_repo := "mihaigalos"
+docker_image_version := `cat Cargo.toml | grep ^version | cut -d'=' -f 2 | sed -e 's/"//g' -e 's/ //g'`
+docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool+ ":" + docker_image_version
+
+build_docker +args="":
+    docker build -t {{docker_image}} {{args}} .
+
 build:
     #!/bin/bash
     cargo build  --verbose --all || exit 1
