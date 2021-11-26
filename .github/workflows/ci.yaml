@@ -44,6 +44,15 @@ jobs:
         just test
 
   dockerize:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: extractions/setup-just@v1
+      with:
+        just-version: 0.10.2  # optional semver specification, otherwise latest
+
     - name: Build docker
       run: |
         just build_docker
