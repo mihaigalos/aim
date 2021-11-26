@@ -46,4 +46,4 @@ Simplicity: a modern, simple tool for downloading/uploading with default setting
   * [x] ftp
 * Upload resume:
   * [x] http implemented but experimental. You need a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`). `_test_aim_put_resume_binary_file` should cover this case.
-  * [ ] ftp
+  * [ ] ftp: pending.
