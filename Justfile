@@ -10,7 +10,7 @@ build:
         popd > /dev/null
     done
 
-test: build
+test:
     #!/bin/bash
     cargo test  --verbose --all || exit 1
 
