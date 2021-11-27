@@ -27,7 +27,7 @@ test: build
     done
 
 setup_dockerize:
-    #! /bin/bash
+    #!/bin/bash
     sudo apt update
     sudo apt-get install -y binfmt-support qemu-user-static
     sudo apt-get install -y docker.io
@@ -50,12 +50,21 @@ dockerize_amd64 +args="":
 dockerize_arm64 +args="":
     just _build_docker_with_buildkit "linux/arm64" {{args}}
 
-
 _build_docker +args="":
     docker build -t {{docker_image}} {{args}} .
 
 _build_docker_with_buildkit platform="linux/amd64" +args="":
-    #! /bin/bash
+    #!/bin/bash
     set -x
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
-    docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . && gzip {{tool}}_${platform_short}.tar
+    docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . | tee /tmp/docker_build_${platform_short}_{{tool}}.log 2>&1 && gzip {{tool}}_${platform_short}.tar
+    just _load_docker platform
+
+_load_docker platform:
+    #!/bin/bash
+    platform_short=$(echo {{platform}} | cut -d '/' -f2)
+    #sha256=$(cat /tmp/docker_build_${platform_short}_{{tool}}.log | grep exporting\ config | grep sha256: | cut -d':' -f2 | cut -c 1-12)
+    #echo $sha256
+    output={{tool}}_${platform_short}
+    docker load < ${output}.tar.gz
+    docker tag $sha256 {{docker_image}}
