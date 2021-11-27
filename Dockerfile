@@ -20,5 +20,7 @@ RUN apk update && apk add libgcc
 
 COPY --from=base /src/aim/target/release/aim /usr/local/bin
 
+WORKDIR /src
+
 ENTRYPOINT [ "aim" ]
 CMD [ "--help" ]
