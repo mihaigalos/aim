@@ -59,14 +59,15 @@ _build_docker_with_buildkit platform="linux/amd64" +args="":
     #!/bin/bash
     set -x
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
-    docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . | tee /tmp/docker_build_${platform_short}_{{tool}}.log 2>&1 && gzip {{tool}}_${platform_short}.tar
+    stdout=$(2>&1 docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . | tee /tmp/docker_build_${platform_short}_{{tool}}.log 2>&1 && gzip {{tool}}_${platform_short}.tar)
     just _load_docker {{platform}}
 
 _load_docker platform:
     #!/bin/bash
+    set -x
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
-    #sha256=$(cat /tmp/docker_build_${platform_short}_{{tool}}.log | grep exporting\ config | grep sha256: | cut -d':' -f2 | cut -c 1-12)
-    #echo $sha256
+    sha256=$(cat /tmp/docker_build_${platform_short}_{{tool}}.log | grep exporting\ config | grep sha256: | head -1 | cut -d':' -f2 | cut -d ' ' -f1)
+    echo $sha256
     output={{tool}}_${platform_short}
     docker load < ${output}.tar.gz
     docker tag $sha256 {{docker_image}}
