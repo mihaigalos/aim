@@ -25,6 +25,7 @@ Simplicity: a simple tool for downloading/uploading with default settings.
 * defaults to stdout (pipe-able) to other commands:
   ```bash
   aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xvz
+  aim https://www.rust-lang.org/ | htmlq --attribute href a
   ```
 * use as curl alternative:
   ```bash
@@ -36,7 +37,6 @@ Simplicity: a simple tool for downloading/uploading with default settings.
   AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
   AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
   ```
-* pipe-able output: `aim https://www.rust-lang.org/ | htmlq --attribute href a`
 
 ### Resume
 
