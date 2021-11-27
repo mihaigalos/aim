@@ -5,43 +5,22 @@ use tokio_util::io::ReaderStream;
 
 use crate::bar::WrappedBar;
 use crate::consts::*;
+use crate::hash::HashChecker;
 use crate::output::get_output;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
-    pub async fn get(input: &str, output: &str, bar: &mut WrappedBar) {
-        let (mut out, mut downloaded) = get_output(output, bar.silent);
-
-        let res = Client::new()
-            .get(input)
-            .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
-            .header(
-                reqwest::header::USER_AGENT,
-                reqwest::header::HeaderValue::from_static(CLIENT_ID),
-            )
-            .send()
-            .await
-            .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
-            .unwrap();
-        let total_size = downloaded + res.content_length().or(Some(0)).unwrap();
-
-        bar.set_length(total_size);
-
-        let mut stream = res.bytes_stream();
-        while let Some(item) = stream.next().await {
-            let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
-            out.write_all(&chunk)
-                .or(Err(format!("Error while writing to output.")))
-                .unwrap();
-            let new = min(downloaded + (chunk.len() as u64), total_size);
-            downloaded = new;
-            bar.set_position(new);
-        }
-
-        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
+    pub async fn get(
+        input: &str,
+        output: &str,
+        bar: &mut WrappedBar,
+        expected_sha256: &str,
+    ) -> bool {
+        HTTPSHandler::_get(input, output, bar).await;
+        HashChecker::check(output, expected_sha256, bar.silent)
     }
 
-    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
         let input_ = input.to_string();
@@ -77,6 +56,39 @@ impl HTTPSHandler {
             .send()
             .await
             .unwrap();
+        return true;
+    }
+
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+        let (mut out, mut downloaded) = get_output(output, bar.silent);
+
+        let res = Client::new()
+            .get(input)
+            .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
+            .header(
+                reqwest::header::USER_AGENT,
+                reqwest::header::HeaderValue::from_static(CLIENT_ID),
+            )
+            .send()
+            .await
+            .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
+            .unwrap();
+        let total_size = downloaded + res.content_length().or(Some(0)).unwrap();
+
+        bar.set_length(total_size);
+
+        let mut stream = res.bytes_stream();
+        while let Some(item) = stream.next().await {
+            let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
+            out.write_all(&chunk)
+                .or(Err(format!("Error while writing to output.")))
+                .unwrap();
+            let new = min(downloaded + (chunk.len() as u64), total_size);
+            downloaded = new;
+            bar.set_position(new);
+        }
+
+        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
     }
 
     async fn get_already_uploaded(output: &str) -> u64 {
@@ -100,13 +112,12 @@ impl HTTPSHandler {
 
 #[tokio::test]
 async fn get_works() {
-    use crate::hash::HashChecker;
     let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
     let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
 
-    HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty()).await;
+    let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(HashChecker::check(out_file, expected_hash, true));
+    assert!(result);
     std::fs::remove_file(out_file).unwrap();
 }
 
@@ -120,7 +131,7 @@ async fn get_resume_works() {
     )
     .unwrap();
 
-    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose()).await;
+    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
 
     let actual_size = std::fs::metadata(out_file).unwrap().len();
     assert_eq!(actual_size, expected_size);
