@@ -58,12 +58,12 @@ Future versions will support single naming for all archs via manifests.
 
 `x64`:
 ```bash
-docker pull mihaigalos/aim
-docker run --rm -it mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker pull mihaigalos/aim:0.0.3
+docker run --rm -it mihaigalos/aim:0.0.3 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
 
 `arm64/aarch64`:
 ```bash
-docker pull mihaigalos/aim-arm64
-docker run --rm -it mihaigalos/aim-arm64 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker pull mihaigalos/aim-arm64:0.0.3
+docker run --rm -it mihaigalos/aim-arm64:0.0.3 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
