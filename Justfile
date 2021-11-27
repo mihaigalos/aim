@@ -6,6 +6,7 @@ docker_container_registry := "ghcr.io"
 docker_user_repo := "mihaigalos"
 docker_image_version := `cat Cargo.toml | grep ^version | cut -d'=' -f 2 | sed -e 's/"//g' -e 's/ //g'`
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool+ ":" + docker_image_version
+docker_image_dockerhub := docker_user_repo + "/" + tool+ ":" + docker_image_version
 
 build:
     #!/bin/bash
@@ -50,8 +51,9 @@ dockerize_amd64 +args="":
 dockerize_arm64 +args="":
     just _build_docker_with_buildkit "linux/arm64" {{args}}
 
-dockerize_simple +args="":
-    docker build -t {{docker_image}} {{args}} .
+dockerize_push_hub_simple +args="":
+    docker build -t {{docker_image_dockerhub}} {{args}} .
+    docker push {{docker_image_dockerhub}}
 
 _build_docker_with_buildkit platform="linux/amd64" +args="":
     #!/bin/bash
