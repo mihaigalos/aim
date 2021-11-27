@@ -50,7 +50,7 @@ dockerize_amd64 +args="":
 dockerize_arm64 +args="":
     just _build_docker_with_buildkit "linux/arm64" {{args}}
 
-_build_docker +args="":
+dockerize_simple +args="":
     docker build -t {{docker_image}} {{args}} .
 
 _build_docker_with_buildkit platform="linux/amd64" +args="":
