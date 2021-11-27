@@ -43,19 +43,19 @@ setup_dockerize:
     docker buildx inspect --bootstrap
 
 # assumes just setup_dockerize has run at least once
-dockerize_amd64:
-    just _build_docker_with_buildkit "linux/amd64"
+dockerize_amd64 +args="":
+    just _build_docker_with_buildkit "linux/amd64" {{args}}
 
 # assumes just setup_dockerize has run at least once
-dockerize_arm64:
-    just _build_docker_with_buildkit "linux/arm64"
+dockerize_arm64 +args="":
+    just _build_docker_with_buildkit "linux/arm64" {{args}}
 
 
 _build_docker +args="":
     docker build -t {{docker_image}} {{args}} .
 
-_build_docker_with_buildkit platform="linux/amd64":
+_build_docker_with_buildkit platform="linux/amd64" +args="":
     #! /bin/bash
     set -x
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
-    docker buildx build --platform {{platform}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . && gzip {{tool}}_${platform_short}.tar
+    docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . && gzip {{tool}}_${platform_short}.tar
