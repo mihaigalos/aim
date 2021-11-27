@@ -60,7 +60,7 @@ _build_docker_with_buildkit platform="linux/amd64" +args="":
     set -x
     platform_short=$(echo {{platform}} | cut -d '/' -f2)
     docker buildx build --platform {{platform}} {{args}} -t {{docker_image}}  --output "type=oci,dest={{tool}}_${platform_short}.tar" . | tee /tmp/docker_build_${platform_short}_{{tool}}.log 2>&1 && gzip {{tool}}_${platform_short}.tar
-    just _load_docker platform
+    just _load_docker {{platform}}
 
 _load_docker platform:
     #!/bin/bash
