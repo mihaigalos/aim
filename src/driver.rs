@@ -6,9 +6,9 @@ trait RESTVerbs {
 }
 
 impl Driver {
-    pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) {
+    pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) -> bool {
         let mut bar = WrappedBar::new(0, input, silent);
-        let _ = match &input[0..4] {
+        let result = match &input[0..4] {
             "ftp:" | "ftp." => {
                 crate::ftp::FTPHandler::get(input, output, &mut bar, expected_sha256).await
             }
@@ -24,5 +24,6 @@ impl Driver {
                 ),
             },
         };
+        result
     }
 }

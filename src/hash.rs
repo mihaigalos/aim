@@ -3,10 +3,15 @@ use std::str;
 
 pub struct HashChecker;
 impl HashChecker {
-    pub fn check(filename: &str, expected_hash: &str, verbose: bool) -> bool {
+    pub fn check(filename: &str, expected_hash: &str, silent: bool) -> bool {
         let actual_hash = HashChecker::sha256sum(filename);
-        let result = actual_hash == expected_hash;
-        if filename != "stdout" && verbose && (expected_hash != "") {
+        let mut result = true;
+        if filename != "stdout" && (expected_hash != "") {
+            if actual_hash != expected_hash {
+                result = false;
+            }
+        }
+        if !silent {
             if result {
                 println!("✅ Checksum OK.");
             } else {

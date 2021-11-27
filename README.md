@@ -20,6 +20,10 @@ Simplicity: a simple tool for downloading/uploading with default settings.
   * `aim source.file https://domain.com/source.file"` -> Upload.
 
 * resumable file transfers.
+* optional check of sha256 checksum:
+  ```rust
+  aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz tokei-x86_64-unknown-linux-gnu.tar.gz 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
+  ```
 * automatic no display of progressbar if content length <1MB (easy display contents of remote).
 
 * defaults to stdout (pipe-able) to other commands:

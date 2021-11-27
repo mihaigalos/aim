@@ -96,3 +96,19 @@ _test_aim_put_resume_binary_file:
     sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
     rm _test_aim_put_resume_binary_file
+
+_test_aim_checksum_works:
+    #!/bin/bash
+    source common.sh
+    sha_expected="0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
+    aim -s https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz _test_aim_checksum_works $sha_expected
+    [ $? -eq 0 ] && ok || err "ERROR: expected and actual SHA256s don't match."
+    rm _test_aim_checksum_works
+
+_test_aim_checksum_fails_when_checksum_mismatch:
+    #!/bin/bash
+    source common.sh
+    sha_expected="AAAA0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
+    aim -s https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz _test_aim_checksum_fails_when_checksum_mismatch $sha_expected
+    [ $? -ne 0 ] && ok || err "ERROR: expected checksum mismatch, got equal."
+    rm _test_aim_checksum_fails_when_checksum_mismatch
