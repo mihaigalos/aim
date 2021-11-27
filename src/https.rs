@@ -100,14 +100,13 @@ impl HTTPSHandler {
 
 #[tokio::test]
 async fn get_works() {
-    use crate::hash::sha256sum;
+    use crate::hash::HashChecker;
     let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
     let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
 
     HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty()).await;
 
-    let computed_hash = sha256sum(out_file);
-    assert_eq!(computed_hash, expected_hash);
+    assert!(HashChecker::check(out_file, expected_hash, true));
     std::fs::remove_file(out_file).unwrap();
 }
 

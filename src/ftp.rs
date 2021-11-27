@@ -213,7 +213,7 @@ async fn parse_ftp_works() {
 
 #[tokio::test]
 async fn get_ftp_works() {
-    use crate::hash::sha256sum;
+    use crate::hash::HashChecker;
     let out_file = "demo_README";
     let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
 
@@ -223,8 +223,7 @@ async fn get_ftp_works() {
         &mut WrappedBar::new_empty(),
     )
     .await;
-    let computed_hash = sha256sum(out_file);
-    assert_eq!(computed_hash, expected_hash);
+    assert!(HashChecker::check(out_file, expected_hash, true));
     std::fs::remove_file(out_file).unwrap();
 }
 
