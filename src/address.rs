@@ -30,7 +30,7 @@ impl PartialEq for ParsedAddress {
 impl ParsedAddress {
     pub fn parse_address(address: &str) -> ParsedAddress {
         let url = Url::parse(address).unwrap();
-        let ftp_server = format!(
+        let server = format!(
             "{}:{}",
             url.host_str()
                 .ok_or_else(|| format_err!("failed to parse hostname from url: {}", url))
@@ -59,7 +59,7 @@ impl ParsedAddress {
             .unwrap();
 
         ParsedAddress {
-            server: ftp_server,
+            server: server,
             username: username,
             password: password,
             path_segments: path_segments,
@@ -69,7 +69,7 @@ impl ParsedAddress {
 }
 
 #[tokio::test]
-async fn ftpparseaddress_operator_equals_works_when_typical() {
+async fn parseaddress_operator_equals_works_when_typical() {
     let left = ParsedAddress {
         server: "do.main".to_string(),
         username: "user".to_string(),
@@ -89,7 +89,7 @@ async fn ftpparseaddress_operator_equals_works_when_typical() {
 }
 
 #[tokio::test]
-async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
+async fn parseaddress_operator_equals_fails_when_not_equal() {
     let left = ParsedAddress {
         server: "do.main".to_string(),
         username: "user".to_string(),
@@ -109,7 +109,7 @@ async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
 }
 
 #[tokio::test]
-async fn parse_ftp_works() {
+async fn parse_works() {
     let expected = ParsedAddress {
         server: "do.main:21".to_string(),
         username: "user".to_string(),
