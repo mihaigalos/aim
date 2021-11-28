@@ -2,7 +2,7 @@ use failure::format_err;
 use url::Url;
 
 #[derive(Debug)]
-pub struct FTPParsedAddress {
+pub struct ParsedAddress {
     pub server: String,
     pub username: String,
     pub password: String,
@@ -10,7 +10,7 @@ pub struct FTPParsedAddress {
     pub file: String,
 }
 
-impl PartialEq for FTPParsedAddress {
+impl PartialEq for ParsedAddress {
     fn eq(&self, other: &Self) -> bool {
         let result = self.server == other.server
             && self.username == other.username
@@ -27,8 +27,8 @@ impl PartialEq for FTPParsedAddress {
     }
 }
 
-impl FTPParsedAddress {
-    pub fn parse_ftp_address(address: &str) -> FTPParsedAddress {
+impl ParsedAddress {
+    pub fn parse_ftp_address(address: &str) -> ParsedAddress {
         let url = Url::parse(address).unwrap();
         let ftp_server = format!(
             "{}:{}",
@@ -58,7 +58,7 @@ impl FTPParsedAddress {
             .ok_or_else(|| format_err!("got empty path segments from url: {}", url))
             .unwrap();
 
-        FTPParsedAddress {
+        ParsedAddress {
             server: ftp_server,
             username: username,
             password: password,
@@ -70,14 +70,14 @@ impl FTPParsedAddress {
 
 #[tokio::test]
 async fn ftpparseaddress_operator_equals_works_when_typical() {
-    let left = FTPParsedAddress {
+    let left = ParsedAddress {
         server: "do.main".to_string(),
         username: "user".to_string(),
         password: "pass".to_string(),
         path_segments: vec!["my".to_string(), "path".to_string()],
         file: "pass".to_string(),
     };
-    let right = FTPParsedAddress {
+    let right = ParsedAddress {
         server: "do.main".to_string(),
         username: "user".to_string(),
         password: "pass".to_string(),
@@ -90,14 +90,14 @@ async fn ftpparseaddress_operator_equals_works_when_typical() {
 
 #[tokio::test]
 async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
-    let left = FTPParsedAddress {
+    let left = ParsedAddress {
         server: "do.main".to_string(),
         username: "user".to_string(),
         password: "pass".to_string(),
         path_segments: vec!["my".to_string(), "path".to_string()],
         file: "pass".to_string(),
     };
-    let right = FTPParsedAddress {
+    let right = ParsedAddress {
         server: "do".to_string(),
         username: "user".to_string(),
         password: "pass".to_string(),
@@ -110,7 +110,7 @@ async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
 
 #[tokio::test]
 async fn parse_ftp_works() {
-    let expected = FTPParsedAddress {
+    let expected = ParsedAddress {
         server: "do.main:21".to_string(),
         username: "user".to_string(),
         password: "pass".to_string(),
@@ -118,7 +118,7 @@ async fn parse_ftp_works() {
         file: "file".to_string(),
     };
 
-    let actual = FTPParsedAddress::parse_ftp_address("ftp://user:pass@do.main:21/index/file");
+    let actual = ParsedAddress::parse_ftp_address("ftp://user:pass@do.main:21/index/file");
 
     assert_eq!(actual, expected);
 }

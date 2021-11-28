@@ -3,7 +3,7 @@ use std::cmp::min;
 use std::io::Write;
 use tokio::io::AsyncReadExt;
 
-use crate::address::FTPParsedAddress;
+use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::hash::HashChecker;
 use crate::output::get_output;
@@ -15,7 +15,7 @@ pub struct FTPHandler {
 
 async fn get_stream(
     downloaded: u64,
-    parsed_ftp: &FTPParsedAddress,
+    parsed_ftp: &ParsedAddress,
 ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
     let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
         .await
@@ -62,7 +62,7 @@ impl FTPHandler {
     ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
         let (out, downloaded) = get_output(output, bar.silent);
 
-        let parsed_ftp = FTPParsedAddress::parse_ftp_address(input);
+        let parsed_ftp = ParsedAddress::parse_ftp_address(input);
         let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
