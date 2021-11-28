@@ -62,7 +62,7 @@ impl FTPHandler {
     ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
         let (out, downloaded) = get_output(output, bar.silent);
 
-        let parsed_ftp = ParsedAddress::parse_ftp_address(input);
+        let parsed_ftp = ParsedAddress::parse_address(input);
         let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 

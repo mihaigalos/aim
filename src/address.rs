@@ -28,7 +28,7 @@ impl PartialEq for ParsedAddress {
 }
 
 impl ParsedAddress {
-    pub fn parse_ftp_address(address: &str) -> ParsedAddress {
+    pub fn parse_address(address: &str) -> ParsedAddress {
         let url = Url::parse(address).unwrap();
         let ftp_server = format!(
             "{}:{}",
@@ -118,7 +118,7 @@ async fn parse_ftp_works() {
         file: "file".to_string(),
     };
 
-    let actual = ParsedAddress::parse_ftp_address("ftp://user:pass@do.main:21/index/file");
+    let actual = ParsedAddress::parse_address("ftp://user:pass@do.main:21/index/file");
 
     assert_eq!(actual, expected);
 }
