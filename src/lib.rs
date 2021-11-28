@@ -1,3 +1,4 @@
+pub mod address;
 pub mod bar;
 pub mod consts;
 pub mod driver;

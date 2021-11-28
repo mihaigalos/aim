@@ -1,10 +1,9 @@
 use async_ftp::{types::FileType, FtpStream};
-use failure::format_err;
 use std::cmp::min;
 use std::io::Write;
 use tokio::io::AsyncReadExt;
-use url::Url;
 
+use crate::address::FTPParsedAddress;
 use crate::bar::WrappedBar;
 use crate::hash::HashChecker;
 use crate::output::get_output;
@@ -12,71 +11,6 @@ use crate::output::get_output;
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
     pub downloaded: u64,
-}
-
-#[derive(Debug)]
-struct FTPParsedAddress {
-    server: String,
-    username: String,
-    password: String,
-    path_segments: Vec<String>,
-    file: String,
-}
-
-impl PartialEq for FTPParsedAddress {
-    fn eq(&self, other: &Self) -> bool {
-        let result = self.server == other.server
-            && self.username == other.username
-            && self.password == other.password
-            && self.file == other.file;
-
-        let mut paths_equal = true;
-        for it in self.path_segments.iter().zip(self.path_segments.iter()) {
-            let (left, right) = it;
-            paths_equal = paths_equal && (left == right);
-        }
-
-        result && paths_equal
-    }
-}
-
-fn parse_ftp_address(address: &str) -> FTPParsedAddress {
-    let url = Url::parse(address).unwrap();
-    let ftp_server = format!(
-        "{}:{}",
-        url.host_str()
-            .ok_or_else(|| format_err!("failed to parse hostname from url: {}", url))
-            .unwrap(),
-        url.port_or_known_default()
-            .ok_or_else(|| format_err!("failed to parse port from url: {}", url))
-            .unwrap(),
-    );
-    let username = if url.username().is_empty() {
-        "anonymous".to_string()
-    } else {
-        url.username().to_string()
-    };
-    let password = url.password().unwrap_or("anonymous").to_string();
-
-    let mut path_segments: Vec<String> = url
-        .path_segments()
-        .ok_or_else(|| format_err!("failed to get url path segments: {}", url))
-        .unwrap()
-        .map(|s| s.to_string())
-        .collect();
-
-    let file = path_segments
-        .pop()
-        .ok_or_else(|| format_err!("got empty path segments from url: {}", url))
-        .unwrap();
-
-    FTPParsedAddress {
-        server: ftp_server,
-        username: username,
-        password: password,
-        path_segments: path_segments,
-        file: file.to_string(),
-    }
 }
 
 async fn get_stream(
@@ -128,7 +62,7 @@ impl FTPHandler {
     ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
         let (out, downloaded) = get_output(output, bar.silent);
 
-        let parsed_ftp = parse_ftp_address(input);
+        let parsed_ftp = FTPParsedAddress::parse_ftp_address(input);
         let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
@@ -168,61 +102,6 @@ impl FTPHandler {
 
         bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
     }
-}
-
-#[tokio::test]
-async fn ftpparseaddress_operator_equals_works_when_typical() {
-    let left = FTPParsedAddress {
-        server: "do.main".to_string(),
-        username: "user".to_string(),
-        password: "pass".to_string(),
-        path_segments: vec!["my".to_string(), "path".to_string()],
-        file: "pass".to_string(),
-    };
-    let right = FTPParsedAddress {
-        server: "do.main".to_string(),
-        username: "user".to_string(),
-        password: "pass".to_string(),
-        path_segments: vec!["my".to_string(), "path".to_string()],
-        file: "pass".to_string(),
-    };
-
-    assert!(left == right);
-}
-
-#[tokio::test]
-async fn ftpparseaddress_operator_equals_fails_when_not_equal() {
-    let left = FTPParsedAddress {
-        server: "do.main".to_string(),
-        username: "user".to_string(),
-        password: "pass".to_string(),
-        path_segments: vec!["my".to_string(), "path".to_string()],
-        file: "pass".to_string(),
-    };
-    let right = FTPParsedAddress {
-        server: "do".to_string(),
-        username: "user".to_string(),
-        password: "pass".to_string(),
-        path_segments: vec!["my".to_string(), "path".to_string()],
-        file: "pass".to_string(),
-    };
-
-    assert!(left != right);
-}
-
-#[tokio::test]
-async fn parse_ftp_works() {
-    let expected = FTPParsedAddress {
-        server: "do.main:21".to_string(),
-        username: "user".to_string(),
-        password: "pass".to_string(),
-        path_segments: vec!["index".to_string()],
-        file: "file".to_string(),
-    };
-
-    let actual = parse_ftp_address("ftp://user:pass@do.main:21/index/file");
-
-    assert_eq!(actual, expected);
 }
 
 #[tokio::test]
