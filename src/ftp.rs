@@ -10,11 +10,11 @@ use crate::output::get_output;
 
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
-    pub downloaded: u64,
+    pub transfered: u64,
 }
 
 async fn get_stream(
-    downloaded: u64,
+    transfered: u64,
     parsed_ftp: &ParsedAddress,
 ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
     let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
@@ -30,12 +30,12 @@ async fn get_stream(
     }
 
     ftp_stream.transfer_type(FileType::Binary).await.unwrap();
-    ftp_stream.restart_from(downloaded).await.unwrap();
+    ftp_stream.restart_from(transfered).await.unwrap();
     Ok(ftp_stream)
 }
 struct FTPProperties {
     out: Box<dyn Write>,
-    downloaded: u64,
+    transfered: u64,
     total_size: u64,
     reader: tokio::io::BufReader<async_ftp::DataStream>,
 }
@@ -60,17 +60,17 @@ impl FTPHandler {
         output: &str,
         bar: &mut WrappedBar,
     ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
-        let (out, downloaded) = get_output(output, bar.silent);
+        let (out, transfered) = get_output(output, bar.silent);
 
         let parsed_ftp = ParsedAddress::parse_address(input);
-        let mut ftp_stream = get_stream(downloaded, &parsed_ftp).await.unwrap();
+        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
         bar.set_length(total_size);
         let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
         Ok(FTPProperties {
             out,
-            downloaded,
+            transfered,
             total_size,
             reader,
         })
@@ -90,10 +90,10 @@ impl FTPHandler {
                     .or(Err(format!("Error while writing to output.")))
                     .unwrap();
                 let new = min(
-                    properties.downloaded + (byte_count as u64),
+                    properties.transfered + (byte_count as u64),
                     properties.total_size,
                 );
-                properties.downloaded = new;
+                properties.transfered = new;
                 bar.set_position(new);
             } else {
                 break;
