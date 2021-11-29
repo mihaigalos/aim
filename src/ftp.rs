@@ -76,6 +76,27 @@ impl FTPHandler {
         })
     }
 
+    async fn setup_put(
+        input: &str,
+        output: &str,
+        bar: &mut WrappedBar,
+    ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
+        let (out, transfered) = get_output(output, bar.silent);
+
+        let parsed_ftp = ParsedAddress::parse_address(input);
+        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
+        let total_size = std::fs::metadata(input).unwrap().len();
+
+        bar.set_length(total_size);
+        let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
+        Ok(FTPProperties {
+            out,
+            transfered,
+            total_size,
+            reader,
+        })
+    }
+
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
