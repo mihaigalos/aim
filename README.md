@@ -11,7 +11,7 @@
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
 
 ### Why?
-Simplicity: a simple tool for downloading/uploading with default settings.
+Simplicity: download or upload files depending on parameter order with default settings.
 
 ### Features
 * default action implied from parameter order.
