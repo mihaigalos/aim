@@ -22,27 +22,6 @@ struct FTPGetProperties {
     reader: tokio::io::BufReader<async_ftp::DataStream>,
 }
 
-async fn get_stream(
-    transfered: u64,
-    parsed_ftp: &ParsedAddress,
-) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
-    let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
-        .await
-        .unwrap();
-    let _ = ftp_stream
-        .login(&parsed_ftp.username, &parsed_ftp.password)
-        .await
-        .unwrap();
-
-    for path in &parsed_ftp.path_segments {
-        ftp_stream.cwd(&path).await.unwrap();
-    }
-
-    ftp_stream.transfer_type(FileType::Binary).await.unwrap();
-    ftp_stream.restart_from(transfered).await.unwrap();
-    Ok(ftp_stream)
-}
-
 impl FTPHandler {
     pub async fn get(
         input: &str,
@@ -62,7 +41,9 @@ impl FTPHandler {
         let (out, transfered) = get_output(output, bar.silent);
 
         let parsed_ftp = ParsedAddress::parse_address(input);
-        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
+        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
+            .await
+            .unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
         bar.set_length(total_size);
@@ -110,7 +91,9 @@ impl FTPHandler {
 
         let parsed_ftp = ParsedAddress::parse_address(output);
         let transfered = 0;
-        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
+        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
+            .await
+            .unwrap();
         let mut reader_stream = ReaderStream::new(file);
 
         bar.set_length(total_size);
@@ -138,6 +121,27 @@ impl FTPHandler {
             .unwrap();
 
         true
+    }
+
+    async fn get_stream(
+        transfered: u64,
+        parsed_ftp: &ParsedAddress,
+    ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
+        let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
+            .await
+            .unwrap();
+        let _ = ftp_stream
+            .login(&parsed_ftp.username, &parsed_ftp.password)
+            .await
+            .unwrap();
+
+        for path in &parsed_ftp.path_segments {
+            ftp_stream.cwd(&path).await.unwrap();
+        }
+
+        ftp_stream.transfer_type(FileType::Binary).await.unwrap();
+        ftp_stream.restart_from(transfered).await.unwrap();
+        Ok(ftp_stream)
     }
 }
 
