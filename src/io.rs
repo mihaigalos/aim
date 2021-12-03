@@ -34,14 +34,13 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
 }
 
 fn get_input_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
-    let mut transfered: u64 = 0;
+    let mut file_size: u64 = 0;
     let mut file = None;
     if path != "stdin" {
         if std::path::Path::new(path).exists() {
             file = Some(std::fs::OpenOptions::new().read(true).open(path).unwrap());
 
-            let file_size = std::fs::metadata(path).unwrap().len();
-            transfered = file_size;
+            file_size = std::fs::metadata(path).unwrap().len();
         } else {
             if !silent {
                 println!("Writing to new file.");
@@ -53,7 +52,7 @@ fn get_input_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             );
         }
     }
-    (file, transfered)
+    (file, file_size)
 }
 
 pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {

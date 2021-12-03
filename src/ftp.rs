@@ -1,16 +1,25 @@
 use async_ftp::{types::FileType, FtpStream};
+use futures_util::StreamExt;
 use std::cmp::min;
 use std::io::Write;
 use tokio::io::AsyncReadExt;
+use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::hash::HashChecker;
-use crate::output::get_output;
+use crate::io::get_output;
 
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
     pub transfered: u64,
+}
+
+struct FTPGetProperties {
+    out: Box<dyn Write>,
+    transfered: u64,
+    total_size: u64,
+    reader: tokio::io::BufReader<async_ftp::DataStream>,
 }
 
 async fn get_stream(
@@ -33,12 +42,6 @@ async fn get_stream(
     ftp_stream.restart_from(transfered).await.unwrap();
     Ok(ftp_stream)
 }
-struct FTPProperties {
-    out: Box<dyn Write>,
-    transfered: u64,
-    total_size: u64,
-    reader: tokio::io::BufReader<async_ftp::DataStream>,
-}
 
 impl FTPHandler {
     pub async fn get(
@@ -51,15 +54,11 @@ impl FTPHandler {
         HashChecker::check(output, expected_sha256, bar.silent)
     }
 
-    pub async fn put(_: &str, _: &str, _: &WrappedBar) -> bool {
-        return true;
-    }
-
     async fn setup(
         input: &str,
         output: &str,
         bar: &mut WrappedBar,
-    ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
+    ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
         let (out, transfered) = get_output(output, bar.silent);
 
         let parsed_ftp = ParsedAddress::parse_address(input);
@@ -68,28 +67,7 @@ impl FTPHandler {
 
         bar.set_length(total_size);
         let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
-        Ok(FTPProperties {
-            out,
-            transfered,
-            total_size,
-            reader,
-        })
-    }
-
-    async fn setup_put(
-        input: &str,
-        output: &str,
-        bar: &mut WrappedBar,
-    ) -> Result<FTPProperties, Box<dyn std::error::Error>> {
-        let (out, transfered) = get_output(output, bar.silent);
-
-        let parsed_ftp = ParsedAddress::parse_address(input);
-        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
-        let total_size = std::fs::metadata(input).unwrap().len();
-
-        bar.set_length(total_size);
-        let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
-        Ok(FTPProperties {
+        Ok(FTPGetProperties {
             out,
             transfered,
             total_size,
@@ -122,6 +100,44 @@ impl FTPHandler {
         }
 
         bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
+    }
+
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
+        let file = tokio::fs::File::open(&input).await.unwrap();
+        let total_size = file.metadata().await.unwrap().len();
+        let input_ = input.to_string();
+        let output_ = output.to_string();
+
+        let parsed_ftp = ParsedAddress::parse_address(output);
+        let transfered = 0;
+        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
+        let mut reader_stream = ReaderStream::new(file);
+
+        bar.set_length(total_size);
+        let mut uploaded = 0;
+
+        let async_stream = async_stream::stream! {
+            while let Some(chunk) = reader_stream.next().await {
+                if let Ok(chunk) = &chunk {
+                    let new = min(uploaded + (chunk.len() as u64), total_size);
+                    uploaded = new;
+                    bar.set_position(new);
+                    if(uploaded >= total_size){
+                        bar.finish_with_message(format!("🎯 Uploaded {} to {}", input_, output_));
+                    }
+                }
+                yield chunk;
+            }
+        };
+
+        let stream_reader = tokio_util::io::StreamReader::new(async_stream);
+        tokio::pin!(stream_reader);
+        ftp_stream
+            .put(&parsed_ftp.file, &mut stream_reader)
+            .await
+            .unwrap();
+
+        true
     }
 }
 

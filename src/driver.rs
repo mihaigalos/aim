@@ -16,7 +16,7 @@ impl Driver {
                 crate::https::HTTPSHandler::get(input, output, &mut bar, expected_sha256).await
             }
             _ => match &output[0..4] {
-                "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, &bar).await,
+                "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
                 "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
                 _ => panic!(
                     "Cannot extract handler from args: {} {} Exiting.",
