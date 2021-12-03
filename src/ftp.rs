@@ -29,12 +29,13 @@ impl FTPHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
+        netrc: Option<netrc::Netrc>,
     ) -> bool {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        FTPHandler::_get(input, _output, bar).await;
+        FTPHandler::_get(input, _output, bar, netrc).await;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
@@ -42,13 +43,12 @@ impl FTPHandler {
         input: &str,
         output: &str,
         bar: &mut WrappedBar,
+        netrc: Option<netrc::Netrc>,
     ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
         let (out, transfered) = get_output(output, bar.silent);
 
-        let parsed_ftp = ParsedAddress::parse_address(input);
-        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
-            .await
-            .unwrap();
+        let parsed_ftp = ParsedAddress::parse_address(input, netrc);
+        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
         bar.set_length(total_size);
@@ -61,8 +61,8 @@ impl FTPHandler {
         })
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
-        let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar, netrc: Option<netrc::Netrc>) {
+        let mut properties = FTPHandler::setup(input, output, bar, netrc).await.unwrap();
         loop {
             let mut buffer = vec![0; 26214400usize];
             let byte_count = properties.reader.read(&mut buffer[..]).await.unwrap();
