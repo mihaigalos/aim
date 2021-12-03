@@ -87,3 +87,24 @@ _test_aim_checksum_fails_when_checksum_mismatch:
     aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README _test_aim_checksum_fails_when_checksum_mismatch $sha_expected
     [ $? -ne 0 ] && ok || err "ERROR: expected checksum mismatch, got equal."
     rm _test_aim_checksum_fails_when_checksum_mismatch
+
+_test_aim_put_binary_file:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    aim -s binary_file.tar.gz ftp://user:pass@127.0.0.1:21/_test_aim_put_binary_file
+    aim -s ftp://user:pass@127.0.0.1:21/_test_aim_put_binary_file _test_aim_put_binary_file
+    sha_output=$(sha256sum _test_aim_put_binary_file | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm _test_aim_put_binary_file
+
+_test_aim_put_resume_binary_file:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    aim -s binary_file.tar.gz.part1 ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz
+    aim -s binary_file.tar.gz.part2 ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz
+    aim -s ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz _test_aim_put_resume_binary_file
+    sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
+    rm _test_aim_put_resume_binary_file

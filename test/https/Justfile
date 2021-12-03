@@ -43,7 +43,21 @@ test: _start && _stop
     done
 
 _start +args="-d":
-    @[ $(docker ps | grep aim_tests_https | wc -l) -eq 0 ] && docker run {{args}} -it --rm --name aim_tests_https -v $(pwd):/src -p {{server_port}}:80 {{docker_image}} > /dev/null || true
+    #!/bin/bash
+    function wait_docker() {
+        while [ $(docker ps | grep aim_tests_https | wc -l) - 0 ]; do
+          sleep 0.1
+        done 
+    }
+    docker run {{args}} \
+        -it \
+        --rm \
+        --name aim_tests_https \
+        -v $(pwd):/src \
+        -p {{server_port}}:80 \
+        {{docker_image}} > /dev/null \
+    && wait_docker \
+    || true
 
 _stop:
     @rm common.sh

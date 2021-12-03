@@ -6,7 +6,7 @@ use tokio_util::io::ReaderStream;
 use crate::bar::WrappedBar;
 use crate::consts::*;
 use crate::hash::HashChecker;
-use crate::output::get_output;
+use crate::io::get_output;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
