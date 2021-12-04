@@ -80,14 +80,12 @@ impl FTPHandler {
             }
         }
 
-        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
+        bar.finish_download(&input, &output);
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
-        let input_ = input.to_string();
-        let output_ = output.to_string();
 
         let parsed_ftp = ParsedAddress::parse_address(output);
         let transfered = 0;
@@ -106,7 +104,7 @@ impl FTPHandler {
                     uploaded = new;
                     bar.set_position(new);
                     if(uploaded >= total_size){
-                        bar.finish_with_message(format!("🎯 Uploaded {} to {}", input_, output_));
+                        bar.finish_upload(&input, &output);
                     }
                 }
                 yield chunk;

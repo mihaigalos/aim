@@ -37,7 +37,7 @@ impl HTTPSHandler {
                     uploaded = new;
                     bar.set_position(new);
                     if(uploaded >= total_size){
-                        bar.finish_with_message(format!("🎯 Uploaded {} to {}", input_, output_));
+                        bar.finish_upload(&input_, &output_);
                     }
                 }
                 yield chunk;
@@ -88,7 +88,7 @@ impl HTTPSHandler {
             bar.set_position(new);
         }
 
-        bar.finish_with_message(format!("🎯 Downloaded {} to {}", input, output));
+        bar.finish_download(&input, &output);
     }
 
     async fn get_already_uploaded(output: &str) -> u64 {

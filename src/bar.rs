@@ -4,9 +4,11 @@ use std::collections::HashMap;
 use std::env;
 use strfmt::strfmt;
 
+const DEFAULT_AIM_PROGRESSBAR_DOWNLOADED_MESSAGE: &str = "🎯 Downloaded {input} to {output}";
 const DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT: &str = "🎯 Transfering {url}";
 const DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
 const DEFAULT_AIM_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
+const DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE: &str = "🎯 Uploaded {input} to {output}";
 
 const THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE: u64 = 1 * 1024 * 1024;
 
@@ -37,6 +39,8 @@ fn construct_progress_bar(
 pub struct WrappedBar {
     pub silent: bool,
     output: Option<indicatif::ProgressBar>,
+    downloaded_message: String,
+    uploaded_message: String,
 }
 
 impl WrappedBar {
@@ -44,26 +48,30 @@ impl WrappedBar {
         WrappedBar {
             silent: true,
             output: None,
+            downloaded_message: "".to_string(),
+            uploaded_message: "".to_string(),
         }
     }
-
     pub fn new_empty_verbose() -> WrappedBar {
         WrappedBar {
             silent: false,
             output: None,
+            downloaded_message: "".to_string(),
+            uploaded_message: "".to_string(),
         }
     }
-
     pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
         dotenv().ok();
-
         let message_format = &env::var("AIM_PROGRESSBAR_MESSAGE_FORMAT")
             .unwrap_or(DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT.to_string());
         let progress_chars = &env::var("AIM_PROGRESSBAR_PROGRESS_CHARS")
             .unwrap_or(DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS.to_string());
         let template = &env::var("AIM_PROGRESSBAR_TEMPLATE")
             .unwrap_or(DEFAULT_AIM_PROGRESSBAR_TEMPLATE.to_string());
-
+        let downloaded_message = &env::var("AIM_PROGRESSBAR_DOWNLOADED_MESSAGE")
+            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_DOWNLOADED_MESSAGE.to_string());
+        let uploaded_message = &env::var("AIM_PROGRESSBAR_UPLOADED_MESSAGE")
+            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE.to_string());
         let output = match silent {
             false => Some(construct_progress_bar(
                 total_size,
@@ -74,10 +82,11 @@ impl WrappedBar {
             )),
             true => None,
         };
-
         WrappedBar {
             silent: silent,
             output: output,
+            downloaded_message: downloaded_message.to_string(),
+            uploaded_message: uploaded_message.to_string(),
         }
     }
 
@@ -100,9 +109,38 @@ impl WrappedBar {
         }
     }
 
-    pub fn finish_with_message(&self, msg: String) {
+    pub fn finish_download(&self, input: &str, output: &str) {
         if !self.silent {
-            self.output.as_ref().unwrap().finish_with_message(msg);
+            let mut vars: HashMap<String, String> = HashMap::new();
+
+            if self.downloaded_message.contains("{input}") {
+                vars.insert("input".to_string(), input.to_string());
+            }
+
+            if self.downloaded_message.contains("{output}") {
+                vars.insert("output".to_string(), output.to_string());
+            }
+            self.output
+                .as_ref()
+                .unwrap()
+                .finish_with_message(strfmt(&self.downloaded_message, &vars).unwrap());
+        }
+    }
+    pub fn finish_upload(&self, input: &str, output: &str) {
+        if !self.silent {
+            let mut vars: HashMap<String, String> = HashMap::new();
+
+            if self.uploaded_message.contains("{input}") {
+                vars.insert("input".to_string(), input.to_string());
+            }
+
+            if self.uploaded_message.contains("{output}") {
+                vars.insert("output".to_string(), output.to_string());
+            }
+            self.output
+                .as_ref()
+                .unwrap()
+                .finish_with_message(strfmt(&self.uploaded_message, &vars).unwrap());
         }
     }
 }
