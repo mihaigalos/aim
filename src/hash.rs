@@ -11,7 +11,7 @@ impl HashChecker {
                 result = false;
             }
         }
-        if !silent {
+        if !silent && expected_hash != "" {
             if result {
                 println!("✅ Checksum OK.");
             } else {
