@@ -15,14 +15,14 @@ Simplicity: download or upload files depending on parameter order with default s
 
 ### Features
 * default action implied from parameter order.
-  * `aim https://domain.com/"` -> Display contents.
+  * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
-  * `aim source.file https://domain.com/source.file"` -> Upload.
+  * `aim source.file https://domain.com/source.file` -> Upload.
 
 * resumable file transfers.
 * optional check of sha256 checksum:
   ```rust
-  aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz tokei-x86_64-unknown-linux-gnu.tar.gz 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
+  aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz . 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
   ```
 * automatic no display of progressbar if content length <1MB (easy display contents of remote).
 
@@ -37,7 +37,7 @@ Simplicity: download or upload files depending on parameter order with default s
   ```
 * configurable indicators via [`indicatif`](https://crates.io/crates/indicatif): you can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
   ```bash
-  AIM_PROGRESSBAR_DOWNLOADED_MESSAGE"🎯 Downloaded {input} to {output}"
+  AIM_PROGRESSBAR_DOWNLOADED_MESSAGE="🎯 Downloaded {input} to {output}"
   AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transfering {url}"
   AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
   AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
