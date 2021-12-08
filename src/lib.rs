@@ -6,3 +6,4 @@ pub mod ftp;
 pub mod hash;
 pub mod https;
 pub mod io;
+pub mod slicer;

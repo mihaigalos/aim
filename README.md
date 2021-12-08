@@ -16,7 +16,7 @@ Simplicity: download or upload files depending on parameter order with default s
 ### Features
 * default action implied from parameter order.
   * `aim https://domain.com/"` -> Display contents.
-  * `aim https://domain.com/source.file source.file"` -> Download.
+  * `aim https://domain.com/source.file .` -> Download.
   * `aim source.file https://domain.com/source.file"` -> Upload.
 
 * resumable file transfers.
