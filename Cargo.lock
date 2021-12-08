@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "0.0.4"
+version = "0.0.5"
 dependencies = [
  "async-stream",
  "async_ftp",

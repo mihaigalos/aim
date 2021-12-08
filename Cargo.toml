@@ -1,6 +1,6 @@
 [package]
 name = "aim"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 description = "github.com/mihaigalos/aim"
 categories = ["command-line-utilities"]
