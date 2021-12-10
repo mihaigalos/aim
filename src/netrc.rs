@@ -1,6 +1,5 @@
 use netrc::Netrc;
 use std::env;
-use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
@@ -16,10 +15,9 @@ fn get_possible_netrc_path() -> String {
 }
 
 pub fn netrc() -> Option<netrc::Netrc> {
-    let result = None;
+    let mut result = None;
     let path = get_possible_netrc_path();
     if path != "" {
-        let file = File::open(path).unwrap();
         let in_ = BufReader::new(path.as_bytes());
         result = Some(Netrc::parse(in_).unwrap());
     }

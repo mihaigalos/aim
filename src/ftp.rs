@@ -48,7 +48,9 @@ impl FTPHandler {
         let (out, transfered) = get_output(output, bar.silent);
 
         let parsed_ftp = ParsedAddress::parse_address(input, netrc);
-        let mut ftp_stream = get_stream(transfered, &parsed_ftp).await.unwrap();
+        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
+            .await
+            .unwrap();
         let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
 
         bar.set_length(total_size);
@@ -92,7 +94,7 @@ impl FTPHandler {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
 
-        let parsed_ftp = ParsedAddress::parse_address(output);
+        let parsed_ftp = ParsedAddress::parse_address(output, None);
         let transfered = 0;
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
             .await
@@ -158,6 +160,7 @@ async fn get_ftp_works() {
         out_file,
         &mut WrappedBar::new_empty(),
         expected_hash,
+        None,
     )
     .await;
     std::fs::remove_file(out_file).unwrap();
@@ -175,6 +178,7 @@ async fn get_ftp_works_same_filename() {
         out_file,
         &mut WrappedBar::new_empty(),
         expected_hash,
+        None,
     )
     .await;
     std::fs::remove_file("README").unwrap();
@@ -197,6 +201,7 @@ async fn get_ftp_resume_works() {
         out_file,
         &mut WrappedBar::new_empty(),
         "",
+        None,
     )
     .await;
 
