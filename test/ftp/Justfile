@@ -107,3 +107,15 @@ _test_aim_put_resume_binary_file:
     sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
     rm _test_aim_put_resume_binary_file
+
+_test_aim_put_with_netrc:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    echo "machine 127.0.0.1 login user password pass port 21" > .netrc.test
+    aim -s binary_file.tar.gz ftp://127.0.0.1:21/_test_aim_put_with_netrc
+    aim -s ftp://127.0.0.1:21/_test_aim_put_with_netrc _test_aim_put_with_netrc
+    sha_output=$(sha256sum _test_aim_put_with_netrc | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm _test_aim_put_with_netrc
+    rm .netrc.test
