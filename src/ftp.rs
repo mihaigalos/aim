@@ -29,13 +29,12 @@ impl FTPHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
-        netrc: Option<netrc::Netrc>,
     ) -> bool {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        FTPHandler::_get(input, _output, bar, netrc).await;
+        FTPHandler::_get(input, _output, bar).await;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
@@ -43,11 +42,10 @@ impl FTPHandler {
         input: &str,
         output: &str,
         bar: &mut WrappedBar,
-        netrc: Option<netrc::Netrc>,
     ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
         let (out, transfered) = get_output(output, bar.silent);
 
-        let parsed_ftp = ParsedAddress::parse_address(input, netrc);
+        let parsed_ftp = ParsedAddress::parse_address(input);
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
             .await
             .unwrap();
@@ -63,8 +61,8 @@ impl FTPHandler {
         })
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar, netrc: Option<netrc::Netrc>) {
-        let mut properties = FTPHandler::setup(input, output, bar, netrc).await.unwrap();
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+        let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
             let mut buffer = vec![0; 26214400usize];
             let byte_count = properties.reader.read(&mut buffer[..]).await.unwrap();
@@ -94,7 +92,7 @@ impl FTPHandler {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
 
-        let parsed_ftp = ParsedAddress::parse_address(output, None);
+        let parsed_ftp = ParsedAddress::parse_address(output);
         let transfered = 0;
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
             .await
@@ -160,7 +158,6 @@ async fn get_ftp_works() {
         out_file,
         &mut WrappedBar::new_empty(),
         expected_hash,
-        None,
     )
     .await;
     std::fs::remove_file(out_file).unwrap();
@@ -178,7 +175,6 @@ async fn get_ftp_works_same_filename() {
         out_file,
         &mut WrappedBar::new_empty(),
         expected_hash,
-        None,
     )
     .await;
     std::fs::remove_file("README").unwrap();
@@ -201,7 +197,6 @@ async fn get_ftp_resume_works() {
         out_file,
         &mut WrappedBar::new_empty(),
         "",
-        None,
     )
     .await;
 

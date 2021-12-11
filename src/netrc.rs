@@ -18,8 +18,9 @@ pub fn netrc() -> Option<netrc::Netrc> {
     let mut result = None;
     let path = get_possible_netrc_path();
     if path != "" {
-        let in_ = BufReader::new(path.as_bytes());
-        result = Some(Netrc::parse(in_).unwrap());
+        let file = std::fs::File::open(path).unwrap();
+        let parsed = Netrc::parse(BufReader::new(file));
+        result = Some(parsed.unwrap());
     }
     result
 }
