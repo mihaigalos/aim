@@ -45,7 +45,7 @@ test: _start && _stop
 _start +args="-d":
     #!/bin/bash
     function wait_docker() {
-        while [ $(docker ps | grep aim_tests_https | wc -l) - 0 ]; do
+        while [ $(docker ps | grep aim_tests_https | wc -l) -eq 0 ]; do
           sleep 0.1
         done 
     }
