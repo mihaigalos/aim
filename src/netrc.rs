@@ -5,7 +5,11 @@ use std::path::Path;
 
 fn get_possible_netrc_path() -> String {
     let current_directory = env::var("PWD").unwrap_or("".to_string());
-    let candidates = vec![current_directory + "/.netrc", "~/.netrc".to_string()];
+    let candidates = vec![
+        current_directory.clone() + "/.netrc",
+        current_directory + "/.netrc.test",
+        "~/.netrc".to_string(),
+    ];
     for cantidate in candidates {
         if Path::new(&cantidate).exists() {
             return cantidate;

@@ -195,6 +195,7 @@ async fn mixin_works_with_port() {
     assert_eq!(actual_username, expected_username);
     assert_eq!(actual_password, expected_password);
 }
+
 #[tokio::test]
 async fn parse_works_with_netrc_mixin() {
     let expected = ParsedAddress {
@@ -206,9 +207,9 @@ async fn parse_works_with_netrc_mixin() {
     };
     let data = "machine do.main login test password p@ssw0rd port 21";
 
-    std::fs::write(".netrc", data).expect("Unable to write file");
+    std::fs::write(".netrc.test", data).expect("Unable to write file");
     let actual = ParsedAddress::parse_address("ftp://do.main/index/file");
 
     assert_eq!(actual, expected);
-    std::fs::remove_file(".netrc").unwrap();
+    std::fs::remove_file(".netrc.test").unwrap();
 }
