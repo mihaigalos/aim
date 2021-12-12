@@ -2,8 +2,14 @@ name: CI
 
 on:
   push:
+    paths-ignore:
+      - '*.md'
+      - 'screenshots/**'
     branches: [ main ]
   pull_request:
+    paths-ignore:
+      - '*.md'
+      - 'screenshots/**'
     branches: [ main ]
 
 env:
