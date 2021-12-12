@@ -3,6 +3,7 @@ use reqwest::Client;
 use std::cmp::min;
 use tokio_util::io::ReaderStream;
 
+use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
 use crate::hash::HashChecker;
@@ -26,6 +27,7 @@ impl HTTPSHandler {
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
+        let parsed_address = ParsedAddress::parse_address(output);
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
         let input_ = input.to_string();
@@ -57,6 +59,7 @@ impl HTTPSHandler {
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
             )
+            .basic_auth(parsed_address.username, Some(parsed_address.password))
             .body(reqwest::Body::wrap_stream(async_stream))
             .send()
             .await
@@ -65,6 +68,7 @@ impl HTTPSHandler {
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+        let parsed_address = ParsedAddress::parse_address(input);
         let (mut out, mut downloaded) = get_output(output, bar.silent);
 
         let res = Client::new()
@@ -74,6 +78,7 @@ impl HTTPSHandler {
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
             )
+            .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
             .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
@@ -97,12 +102,14 @@ impl HTTPSHandler {
     }
 
     async fn get_already_uploaded(output: &str) -> u64 {
+        let parsed_address = ParsedAddress::parse_address(output);
         let res = Client::new()
             .get(output)
             .header(
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
             )
+            .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
             .or(Err(format!(

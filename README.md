@@ -2,6 +2,7 @@
 # aim
 [![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
+[![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/mihaigalos/aim)
 
 🎯 aim: A command line download/upload tool with resume.
 
@@ -53,6 +54,12 @@ Simplicity: download or upload files depending on parameter order with default s
   * [x] http implemented but experimental. You need a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`). `_test_aim_put_resume_binary_file` should cover this case.
   * [x] ftp
 
+### Authentication
+
+`.netrc` support is implemented. Create a file named `.netrc` with read permissions in `~` or the current folder you're running `aim` from to automate login to the endpoint:
+```bash
+machine mydomain.com login myuser password mypass port server_port
+```
 ### Docker
 
 For convenience, an alpine-based docker image is available, so arguments can be passed directly to it.

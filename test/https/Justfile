@@ -45,10 +45,11 @@ test: _start && _stop
 _start +args="-d":
     #!/bin/bash
     function wait_docker() {
-        while [ $(docker ps | grep aim_tests_https | wc -l) - 0 ]; do
+        while [ $(docker ps | grep aim_tests_https | wc -l) -eq 0 ]; do
           sleep 0.1
         done 
     }
+    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > .netrc.test
     docker run {{args}} \
         -it \
         --rm \
@@ -60,23 +61,23 @@ _start +args="-d":
     || true
 
 _stop:
-    @rm common.sh
+    @rm common.sh .netrc.test
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
 
 _test_curl_put_text_file:
     #!/bin/bash
     source common.sh
-    curl -s -X PUT -d `cat test.file` http://localhost:{{server_port}}/_test_curl_put_text_file
-    remote_contents=$(curl -s -s http://localhost:{{server_port}}/_test_curl_put_text_file)
+    curl -s -X PUT --netrc-file .netrc.test -d `cat test.file` http://127.0.0.1:{{server_port}}/_test_curl_put_text_file
+    remote_contents=$(curl -s --netrc-file .netrc.test http://127.0.0.1:{{server_port}}/_test_curl_put_text_file)
     [ "$remote_contents" = "$(cat test.file)" ] && ok || err "ERROR: remote contents doesn't equal sent content."
 
 _test_curl_put_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    curl -s -X PUT --data-binary @binary_file.tar.gz  http://localhost:{{server_port}}/_test_curl_put_binary_file
-    curl -s -s localhost:{{server_port}}/_test_curl_put_binary_file -o _test_curl_put_binary_file
+    curl -s --netrc-file .netrc.test -X PUT --data-binary @binary_file.tar.gz  http://127.0.0.1:{{server_port}}/_test_curl_put_binary_file
+    curl -s --netrc-file .netrc.test 127.0.0.1:{{server_port}}/_test_curl_put_binary_file -o _test_curl_put_binary_file
     sha_output=$(sha256sum _test_curl_put_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm _test_curl_put_binary_file
@@ -85,7 +86,7 @@ _test_aim_get_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    aim -s http://localhost:8081/_test_curl_put_binary_file _test_aim_get_binary_file
+    aim -s http://127.0.0.1:8081/_test_curl_put_binary_file _test_aim_get_binary_file
     sha_output=$(sha256sum _test_aim_get_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm _test_aim_get_binary_file
@@ -94,8 +95,8 @@ _test_aim_put_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    aim -s binary_file.tar.gz http://localhost:8081/_test_aim_put_binary_file
-    aim -s http://localhost:8081/_test_aim_put_binary_file _test_aim_put_binary_file
+    aim -s binary_file.tar.gz http://127.0.0.1:8081/_test_aim_put_binary_file
+    aim -s http://127.0.0.1:8081/_test_aim_put_binary_file _test_aim_put_binary_file
     sha_output=$(sha256sum _test_aim_put_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm _test_aim_put_binary_file
@@ -104,9 +105,9 @@ _test_aim_put_resume_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    curl -s -X PUT --data-binary @binary_file.tar.gz.part1  http://localhost:{{server_port}}/_test_aim_put_resume_binary_file.tar.gz
-    aim -s binary_file.tar.gz.part2 http://localhost:8081/_test_aim_put_resume_binary_file.tar.gz
-    aim -s http://localhost:8081/_test_aim_put_resume_binary_file.tar.gz _test_aim_put_resume_binary_file
+    curl -s -X PUT --netrc-file .netrc.test --data-binary @binary_file.tar.gz.part1  http://127.0.0.1:{{server_port}}/_test_aim_put_resume_binary_file.tar.gz
+    aim -s binary_file.tar.gz.part2 http://127.0.0.1:8081/_test_aim_put_resume_binary_file.tar.gz
+    aim -s http://127.0.0.1:8081/_test_aim_put_resume_binary_file.tar.gz _test_aim_put_resume_binary_file
     sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
     rm _test_aim_put_resume_binary_file

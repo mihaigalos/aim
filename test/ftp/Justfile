@@ -19,24 +19,24 @@ _start +args="-d":
           sleep 0.1
         done 
     }
-    [ $(docker ps | grep aim_tests_ftp | wc -l) -eq 0 ] && \
-        docker run {{args}} \
-            -it \
-            --rm \
-            --name aim_tests_ftp \
-            -e PASV_ADDRESS=127.0.0.1 \
-            -e PASV_MIN_PORT=21100 \
-            -e PASV_MAX_PORT=21110 \
-            -v $(pwd):/src \
-            -p {{server_port}}:21 \
-            -p 20:20 \
-            -p 21100-21110:21100-21110 \
-            {{docker_image}} > /dev/null \
-        && wait_docker \
-        || true
+    echo "machine 127.0.0.1 login user password pass port 21" > .netrc.test
+    docker run {{args}} \
+        -it \
+        --rm \
+        --name aim_tests_ftp \
+        -e PASV_ADDRESS=127.0.0.1 \
+        -e PASV_MIN_PORT=21100 \
+        -e PASV_MAX_PORT=21110 \
+        -v $(pwd):/src \
+        -p {{server_port}}:21 \
+        -p 20:20 \
+        -p 21100-21110:21100-21110 \
+        {{docker_image}} > /dev/null \
+    && wait_docker \
+    || true
 
 _stop:
-    @rm common.sh
+    @rm common.sh .netrc.test
     @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
     @docker rm --force aim_tests_ftp > /dev/null 2>&1
 
@@ -108,3 +108,13 @@ _test_aim_put_resume_binary_file:
     sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
     rm _test_aim_put_resume_binary_file
+
+_test_aim_put_with_netrc:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    aim -s binary_file.tar.gz ftp://127.0.0.1:21/_test_aim_put_with_netrc
+    aim -s ftp://127.0.0.1:21/_test_aim_put_with_netrc _test_aim_put_with_netrc
+    sha_output=$(sha256sum _test_aim_put_with_netrc | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm _test_aim_put_with_netrc

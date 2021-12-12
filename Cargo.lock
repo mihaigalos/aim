@@ -37,6 +37,7 @@ dependencies = [
  "failure",
  "futures-util",
  "indicatif",
+ "netrc",
  "reqwest",
  "strfmt",
  "tokio",
@@ -642,6 +643,12 @@ dependencies = [
  "security-framework-sys",
  "tempfile",
 ]
+
+[[package]]
+name = "netrc"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9a91b326434fca226707ed8ec1fd22d4e1c96801abdf10c412afdc7d97116e0"
 
 [[package]]
 name = "ntapi"

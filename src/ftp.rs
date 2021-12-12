@@ -45,14 +45,18 @@ impl FTPHandler {
     ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
         let (out, transfered) = get_output(output, bar.silent);
 
-        let parsed_ftp = ParsedAddress::parse_address(input);
-        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
+        let parsed_address = ParsedAddress::parse_address(input);
+        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .unwrap();
-        let total_size = ftp_stream.size(&parsed_ftp.file).await.unwrap().unwrap() as u64;
+        let total_size = ftp_stream
+            .size(&parsed_address.file)
+            .await
+            .unwrap()
+            .unwrap() as u64;
 
         bar.set_length(total_size);
-        let reader = ftp_stream.get(&parsed_ftp.file).await.unwrap();
+        let reader = ftp_stream.get(&parsed_address.file).await.unwrap();
         Ok(FTPGetProperties {
             out,
             transfered,
@@ -92,9 +96,9 @@ impl FTPHandler {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
 
-        let parsed_ftp = ParsedAddress::parse_address(output);
+        let parsed_address = ParsedAddress::parse_address(output);
         let transfered = 0;
-        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_ftp)
+        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .unwrap();
         let mut reader_stream = ReaderStream::new(file);
@@ -119,7 +123,7 @@ impl FTPHandler {
         let stream_reader = tokio_util::io::StreamReader::new(async_stream);
         tokio::pin!(stream_reader);
         ftp_stream
-            .put(&parsed_ftp.file, &mut stream_reader)
+            .put(&parsed_address.file, &mut stream_reader)
             .await
             .unwrap();
 
@@ -128,17 +132,17 @@ impl FTPHandler {
 
     async fn get_stream(
         transfered: u64,
-        parsed_ftp: &ParsedAddress,
+        parsed_address: &ParsedAddress,
     ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
-        let mut ftp_stream = FtpStream::connect((*parsed_ftp).server.clone())
+        let mut ftp_stream = FtpStream::connect((*parsed_address).server.clone())
             .await
             .unwrap();
         let _ = ftp_stream
-            .login(&parsed_ftp.username, &parsed_ftp.password)
+            .login(&parsed_address.username, &parsed_address.password)
             .await
             .unwrap();
 
-        for path in &parsed_ftp.path_segments {
+        for path in &parsed_address.path_segments {
             ftp_stream.cwd(&path).await.unwrap();
         }
 
