@@ -56,7 +56,7 @@ Simplicity: download or upload files depending on parameter order with default s
 
 ### Authentication
 
-`.netrc` support is implemented. Create a file named `.netrc` with read permissions in `~` or the current folder you're running `aim` from to automate login to the endpoint:
+Create a file named `.netrc` with read permissions in `~` or the current folder you're running `aim` from to automate login to that endpoint:
 ```bash
 machine mydomain.com login myuser password mypass port server_port
 ```
