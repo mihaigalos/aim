@@ -1,6 +1,6 @@
 [package]
 name = "aim"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2021"
 description = "A command line download/upload tool with resume."
 categories = ["command-line-utilities"]
