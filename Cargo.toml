@@ -1,13 +1,13 @@
 [package]
 name = "aim"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 description = "A command line download/upload tool with resume."
 categories = ["command-line-utilities"]
 keywords = ["download", "upload", "resume"]
 repository = "https://github.com/mihaigalos/aim"
 documentation = "https://github.com/mihaigalos/aim/blob/master/README.md"
-license-file = "MIT"
+license = "MIT"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
