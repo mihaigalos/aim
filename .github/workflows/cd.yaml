@@ -68,7 +68,7 @@ jobs:
             aim-*-${{ matrix.job.target }}.*
             git-aim*.deb
         env:
-          GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-cargo:
     name: Publishing to Cargo
