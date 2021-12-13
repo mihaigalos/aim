@@ -71,6 +71,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-to-cargo:
+    if: ${{ false }}  # disable for now
     name: Publishing to Cargo
     runs-on: ubuntu-latest
     steps:
