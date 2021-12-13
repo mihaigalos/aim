@@ -21,6 +21,7 @@ failure = "0.1.8"
 futures-util = "0.3.14"
 indicatif = "0.16.2"
 netrc = "0.4.1"
+openssl = { version = "0.10", features = ["vendored"] }
 reqwest = { version = "0.11.3", features = ["stream"] }
 strfmt = "0.1.6"
 tokio = { version = "1.14.0", features = ["full"] }
