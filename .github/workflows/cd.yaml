@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publishing for ${{ matrix.job.os }}
+    name: Publishing ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
     strategy:
       matrix:
