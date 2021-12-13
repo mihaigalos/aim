@@ -7,7 +7,7 @@ categories = ["command-line-utilities"]
 keywords = ["download", "upload", "resume"]
 repository = "https://github.com/mihaigalos/aim"
 documentation = "https://github.com/mihaigalos/aim/blob/master/README.md"
-license-file = "MIT"
+license = "MIT"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
