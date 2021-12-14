@@ -37,12 +37,6 @@ jobs:
           RUSTFLAGS: "-C target-feature=-crt-static" 
         shell: bash
         run: |
-          sudo apt update
-          sudo apt-get install -y \
-              openssl \
-              pkg-config \
-              libssl-dev
-
           if [[ ${{ matrix.job.target }} == arm-unknown-linux-gnueabihf ]]; then
               sudo apt update
               sudo apt-get install -y binutils-arm-linux-gnueabihf
