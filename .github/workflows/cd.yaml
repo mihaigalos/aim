@@ -6,8 +6,8 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  publish:
-    name: Publishing ${{ matrix.job.target }}
+  publish-to-github:
+    name: Publishing aim-${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
     strategy:
       matrix:
@@ -74,9 +74,11 @@ jobs:
             git-aim*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+ 
   publish-to-cargo:
     name: Publishing to Cargo
+    needs:
+      - publish-to-github
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
