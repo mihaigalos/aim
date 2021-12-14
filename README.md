@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
 [![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/mihaigalos/aim)
 
-🎯 aim: A command line download/upload tool with resume.
+A command line download/upload tool with resume.
 
 ![resume example](screenshots/aim.gif)
 
