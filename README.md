@@ -8,9 +8,6 @@
 
 ![resume example](screenshots/aim.gif)
 
-### Alternatives:
-[`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
-
 ### Why?
 Simplicity: download or upload files depending on parameter order with default settings.
 
@@ -76,3 +73,6 @@ docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim:0.0.3 https:/
 docker pull mihaigalos/aim-arm64:0.0.3
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim-arm64:0.0.3 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
+
+### Similar work
+[`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
