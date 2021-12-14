@@ -10,8 +10,9 @@ pack() {
     tempdir=$(mktemp -d 2>/dev/null || mktemp -d -t tmp)
     out_dir=$(pwd)
 
-    GITHUB_REF=$(git describe --abbrev=0 --tags) # set to last known tag. Needed if CD triggered manually.
-    package_name="$PROJECT_NAME-${GITHUB_REF/refs\/tags\//}-$TARGET"
+    [[ $GITHUB_REF == *"refs/tags"* ]] && TAG=$GITHUB_REF || TAG="manual-continous-deployment"
+
+    package_name="$PROJECT_NAME-${TAG/refs\/tags\//}-$TARGET"
 
     if [[ $TARGET == "arm-unknown-linux-gnueabihf" ]]; then
         gcc_prefix="arm-linux-gnueabihf-"
