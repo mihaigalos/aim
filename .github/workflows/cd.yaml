@@ -12,7 +12,7 @@ on:
 
 jobs:
   publish-to-github:
-    name: Publishing aim-${{ matrix.job.target }}
+    name: Building ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.os }}
     strategy:
       matrix:
