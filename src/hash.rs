@@ -40,10 +40,9 @@ impl HashChecker {
 
 #[test]
 fn test_sha256sum_api() {
-    let expected = "0352bbf93e78e3f11f25e6f0271a002f13c64761b8b17985cde0e33651b951df";
+    let expected = "800dbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
 
-    let actual =
-        HashChecker::sha256sum("test/incomplete_wpa_supplicant-2XX2.9-8-x86_64.pkg.tar.zst");
+    let actual = HashChecker::sha256sum("LICENSE.md");
 
     assert_eq!(actual, expected);
 }
@@ -51,13 +50,9 @@ fn test_sha256sum_api() {
 #[test]
 fn test_check_api() {
     let silent = false;
-    let expected = "0352bbf93e78e3f11f25e6f0271a002f13c64761b8b17985cde0e33651b951df";
+    let expected = "800dbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
 
-    let is_match = HashChecker::check(
-        "test/incomplete_wpa_supplicant-2XX2.9-8-x86_64.pkg.tar.zst",
-        expected,
-        silent,
-    );
+    let is_match = HashChecker::check("LICENSE.md", expected, silent);
 
     assert!(is_match);
 }
