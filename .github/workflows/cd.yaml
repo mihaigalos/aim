@@ -79,6 +79,7 @@ jobs:
  
   publish-to-cargo:
     name: Publishing to Cargo
+    if: github.event_name == 'push'
     needs:
       - publish-to-github
     runs-on: ubuntu-latest
@@ -90,7 +91,6 @@ jobs:
           profile: minimal
           override: true
       - uses: actions-rs/cargo@v1
-        if: github.event_name == 'push'
         with:
           command: publish
           args: --token ${{ secrets.CARGO_API_KEY }} --allow-dirty
