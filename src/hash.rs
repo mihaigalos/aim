@@ -49,7 +49,7 @@ fn test_sha256sum_api() {
 
 #[test]
 fn test_check_api() {
-    let silent = true;
+    let silent = false;
     let expected = "0352bbf93e78e3f11f25e6f0271a002f13c64761b8b17985cde0e33651b951df";
 
     let is_match = HashChecker::check(
