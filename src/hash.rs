@@ -32,6 +32,7 @@ impl HashChecker {
 
         io::copy(&mut file, &mut hasher).unwrap();
         let computed_hash = hasher.finalize();
+        drop(file);
 
         format!("{:x}", computed_hash)
     }
