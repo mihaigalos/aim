@@ -63,7 +63,7 @@ jobs:
         env:
           TARGET: ${{ matrix.job.target }}
           PROJECT_NAME: aim
-          PACKAGE_NAME: git-aim
+          PACKAGE_NAME: aim
           OS_NAME: ${{ matrix.job.os }}
         run: ./.github/workflows/pack.sh
 
@@ -73,7 +73,7 @@ jobs:
         with:
           files: |
             aim-*-${{ matrix.job.target }}.*
-            git-aim*.deb
+            aim*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  
