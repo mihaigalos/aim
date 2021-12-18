@@ -59,20 +59,10 @@ machine mydomain.com login myuser password mypass port server_port
 ```
 ### Docker
 
-For convenience, an alpine-based docker image is available, so arguments can be passed directly to it.
-Future versions will support single naming for all archs via manifests.
+For convenience, an alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
 
-`x64`:
 ```bash
-docker pull mihaigalos/aim:0.0.3
-docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim:0.0.3 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
-
-`arm64/aarch64`:
-```bash
-docker pull mihaigalos/aim-arm64:0.0.3
-docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim-arm64:0.0.3 https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
-```
-
 ### Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
