@@ -1,6 +1,5 @@
 use crate::netrc::netrc;
 
-use failure::format_err;
 use url::Url;
 
 #[derive(Debug)]
@@ -36,10 +35,10 @@ impl ParsedAddress {
         let server = format!(
             "{}:{}",
             url.host_str()
-                .ok_or_else(|| format_err!("failed to parse hostname from url: {}", url))
+                .ok_or_else(|| panic!("failed to parse hostname from url: {}", url))
                 .unwrap(),
             url.port_or_known_default()
-                .ok_or_else(|| format_err!("failed to parse port from url: {}", url))
+                .ok_or_else(|| panic!("failed to parse port from url: {}", url))
                 .unwrap(),
         );
         let username = if url.username().is_empty() {
@@ -53,14 +52,14 @@ impl ParsedAddress {
 
         let mut path_segments: Vec<String> = url
             .path_segments()
-            .ok_or_else(|| format_err!("failed to get url path segments: {}", url))
+            .ok_or_else(|| panic!("failed to get url path segments: {}", url))
             .unwrap()
             .map(|s| s.to_string())
             .collect();
 
         let file = path_segments
             .pop()
-            .ok_or_else(|| format_err!("got empty path segments from url: {}", url))
+            .ok_or_else(|| panic!("got empty path segments from url: {}", url))
             .unwrap();
 
         ParsedAddress {
