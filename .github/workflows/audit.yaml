@@ -11,7 +11,6 @@ on:
 
 jobs:
   audit:
-    if: ${{ false }}  # disable for now
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
