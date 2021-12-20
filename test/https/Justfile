@@ -61,7 +61,7 @@ _start +args="-d":
     || true
 
 _stop:
-    @rm common.sh .netrc.test
+    @rm common.sh .netrc.test || true
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
 
