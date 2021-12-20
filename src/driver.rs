@@ -64,3 +64,27 @@ async fn test_get_panics_when_invalid_input() {
 async fn test_put_panics_when_invalid_input() {
     Driver::put("", "", WrappedBar::new(0, "", true)).await;
 }
+
+#[tokio::test]
+async fn test_https_get_works_when_typical_input() {
+    Driver::get(
+        "https://github.com/mihaigalos/aim/blob/main/LICENSE.md",
+        "downloaded_https_LICENSE.md",
+        "",
+        &mut WrappedBar::new(0, "", true),
+    )
+    .await;
+    std::fs::remove_file("downloaded_https_LICENSE.md").unwrap();
+}
+
+#[tokio::test]
+async fn test_ftp_get_works_when_typical_input() {
+    Driver::get(
+        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
+        "downloaded_ftp_README.md",
+        "",
+        &mut WrappedBar::new(0, "", true),
+    )
+    .await;
+    std::fs::remove_file("downloaded_ftp_README.md").unwrap();
+}
