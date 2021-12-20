@@ -28,3 +28,23 @@ pub fn netrc() -> Option<netrc::Netrc> {
     }
     result
 }
+
+#[test]
+fn test_netrc_with_file_works_when_typical() {
+    use std::io::Write;
+    let mut file = std::fs::File::create(".netrc.test").unwrap();
+    file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
+        .unwrap();
+
+    let netrc = netrc();
+
+    assert!(netrc.is_some());
+    std::fs::remove_file(".netrc.test").unwrap();
+}
+
+#[test]
+fn test_netrc_with_no_file_works_when_typical() {
+    let netrc = netrc();
+
+    assert!(netrc.is_none());
+}
