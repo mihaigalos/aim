@@ -66,7 +66,7 @@ async fn test_put_panics_when_invalid_input() {
 }
 
 #[tokio::test]
-async fn test_https_get_works_when_typical_input() {
+async fn test_https_get_works_when_typical() {
     Driver::get(
         "https://github.com/mihaigalos/aim/blob/main/LICENSE.md",
         "downloaded_https_LICENSE.md",
@@ -78,7 +78,7 @@ async fn test_https_get_works_when_typical_input() {
 }
 
 #[tokio::test]
-async fn test_ftp_get_works_when_typical_input() {
+async fn test_ftp_get_works_when_typical() {
     Driver::get(
         "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
         "downloaded_ftp_README.md",
