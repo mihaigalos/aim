@@ -40,3 +40,27 @@ impl Driver {
         result
     }
 }
+
+#[tokio::test]
+#[should_panic]
+async fn test_panics_when_invalid_input() {
+    Driver::drive("", "https://foo.bar", true, "").await;
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_panics_when_invalid_output() {
+    Driver::drive("https://foo.bar", "", true, "").await;
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_get_panics_when_invalid_input() {
+    Driver::get("", "", "", &mut WrappedBar::new(0, "", true)).await;
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_put_panics_when_invalid_input() {
+    Driver::put("", "", WrappedBar::new(0, "", true)).await;
+}
