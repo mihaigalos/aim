@@ -42,14 +42,14 @@ test: _start && _stop
         just $test
     done
 
-_start +args="-d":
+_start dirname="." +args="-d":
     #!/bin/bash
     function wait_docker() {
         while [ $(docker ps | grep aim_tests_https | wc -l) -eq 0 ]; do
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > .netrc.test
+    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > {{dirname}}/.netrc.test.https
     docker run {{args}} \
         -it \
         --rm \
@@ -60,8 +60,8 @@ _start +args="-d":
     && wait_docker \
     || true
 
-_stop:
-    @rm common.sh .netrc.test || true
+_stop dirname=".":
+    @rm common.sh {{dirname}}/.netrc.test.https || true
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
 

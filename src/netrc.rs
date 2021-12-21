@@ -8,7 +8,9 @@ fn get_possible_netrc_path() -> String {
     let candidates = vec![
         current_directory.clone() + "/.netrc",
         current_directory.clone() + "/.netrc.test",
-        current_directory + "/.netrc.utest",
+        current_directory.clone() + "/.netrc.test.ftp",
+        current_directory.clone() + "/.netrc.test.https",
+        current_directory.clone() + "/.netrc.test.unit",
         "~/.netrc".to_string(),
     ];
     for cantidate in candidates {
@@ -33,19 +35,12 @@ pub fn netrc() -> Option<netrc::Netrc> {
 #[test]
 fn test_netrc_with_file_works_when_typical() {
     use std::io::Write;
-    let mut file = std::fs::File::create(".netrc.utest").unwrap();
+    let mut file = std::fs::File::create(".netrc.test.unit").unwrap();
     file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
         .unwrap();
 
     let netrc = netrc();
 
     assert!(netrc.is_some());
-    std::fs::remove_file(".netrc.utest").unwrap();
-}
-
-#[test]
-fn test_netrc_with_no_file_works_when_typical() {
-    let netrc = netrc();
-
-    assert!(netrc.is_none());
+    std::fs::remove_file(".netrc.test.unit").unwrap();
 }

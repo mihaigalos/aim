@@ -12,14 +12,14 @@ server_port := "21"
 build:
     docker build -t {{docker_image}} .
 
-_start +args="-d":
+_start dirname="." +args="-d":
     #!/bin/bash
     function wait_docker() {
         while [ $(docker ps | grep aim_tests_ftp | wc -l) -eq 0 ]; do
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port 21" > .netrc.test
+    echo "machine 127.0.0.1 login user password pass port {{ server_port }}" > {{dirname}}/.netrc.test.ftp
     docker run {{args}} \
         -it \
         --rm \
@@ -35,8 +35,8 @@ _start +args="-d":
     && wait_docker \
     || true
 
-_stop:
-    @rm common.sh .netrc.test
+_stop dirname=".":
+    @rm common.sh {{dirname}}/.netrc.test.ftp || true
     @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
     @docker rm --force aim_tests_ftp > /dev/null 2>&1
 

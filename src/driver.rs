@@ -95,12 +95,37 @@ async fn test_ftp_get_works_when_typical() {
     std::fs::remove_file("downloaded_ftp_README.md").unwrap();
 }
 
-#[tokio::test]
-async fn test_https_put_works_when_typical() {
+#[cfg(test)]
+fn just_start(justfile: &str) {
+    use std::env;
     use std::process::Command;
     let _ = Command::new("just")
-        .args(["--justfile", "test/https/Justfile", "_start"])
+        .args([
+            "--justfile",
+            justfile,
+            "_start",
+            env::current_dir().unwrap().to_str().unwrap(),
+        ])
         .output();
+}
+
+#[cfg(test)]
+fn just_stop(justfile: &str) {
+    use std::env;
+    use std::process::Command;
+    let _ = Command::new("just")
+        .args([
+            "--justfile",
+            justfile,
+            "_stop",
+            env::current_dir().unwrap().to_str().unwrap(),
+        ])
+        .output();
+}
+
+#[tokio::test]
+async fn test_https_put_works_when_typical() {
+    just_start("test/https/Justfile");
 
     let result = Driver::put(
         "test/https/binary_file.tar.gz",
@@ -111,7 +136,20 @@ async fn test_https_put_works_when_typical() {
 
     assert!(result);
 
-    let _ = Command::new("just")
-        .args(["--justfile", "test/https/Justfile", "_stop"])
-        .output();
+    just_stop("test/https/Justfile");
+}
+
+#[tokio::test]
+async fn test_ftp_put_works_when_typical() {
+    just_start("test/ftp/Justfile");
+    let result = Driver::put(
+        "test/ftp/binary_file.tar.gz",
+        "ftp://127.0.0.1:21/_test_aim_put_binary_file",
+        WrappedBar::new(0, "", true),
+    )
+    .await;
+
+    assert!(result);
+
+    just_stop("test/ftp/Justfile");
 }
