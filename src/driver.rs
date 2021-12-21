@@ -34,7 +34,7 @@ impl Driver {
     pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) -> bool {
         let mut bar = WrappedBar::new(0, input, silent);
         let result = match &input[0..4] {
-            "http" | "ftp:" | "ftp" => Driver::get(input, output, expected_sha256, &mut bar).await,
+            "http" | "ftp:" | "ftp." => Driver::get(input, output, expected_sha256, &mut bar).await,
             _ => Driver::put(input, output, bar).await,
         };
         result
@@ -56,13 +56,13 @@ async fn test_panics_when_invalid_input() {
 #[tokio::test]
 #[should_panic]
 async fn test_get_panics_when_invalid_input() {
-    Driver::get("", "", "", &mut WrappedBar::new(0, "", true)).await;
+    Driver::get("invalid", "", "", &mut WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_put_panics_when_invalid_input() {
-    Driver::put("", "", WrappedBar::new(0, "", true)).await;
+    Driver::put("", "invalid", WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
