@@ -43,13 +43,13 @@ impl Driver {
 
 #[tokio::test]
 #[should_panic]
-async fn test_panics_when_invalid_input() {
+async fn test_panics_when_invalid_output() {
     Driver::drive("", "https://foo.bar", true, "").await;
 }
 
 #[tokio::test]
 #[should_panic]
-async fn test_panics_when_invalid_output() {
+async fn test_panics_when_invalid_input() {
     Driver::drive("https://foo.bar", "", true, "").await;
 }
 
