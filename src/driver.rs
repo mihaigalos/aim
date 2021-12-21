@@ -66,6 +66,21 @@ async fn test_put_panics_when_invalid_input() {
 }
 
 #[tokio::test]
+async fn test_driver_works_when_typical() {
+    let result = Driver::drive(
+        "https://github.com/mihaigalos/aim/blob/main/LICENSE.md",
+        "downloaded_driver_https_LICENSE.md",
+        true,
+        "",
+    )
+    .await;
+
+    assert!(result);
+
+    std::fs::remove_file("downloaded_driver_https_LICENSE.md").unwrap();
+}
+
+#[tokio::test]
 async fn test_https_get_works_when_typical() {
     let result = Driver::get(
         "https://github.com/mihaigalos/aim/blob/main/LICENSE.md",
@@ -122,6 +137,23 @@ fn just_stop(justfile: &str) {
         ])
         .output();
 }
+
+//   #[tokio::test]
+//   async fn test_driver_https_put_works_when_typical() {
+//       just_start("test/https/Justfile");
+//
+//       let result = Driver::drive(
+//           "test/https/binary_file.tar.gz",
+//           "http://127.0.0.1:8081/_test_aim_driver_https_put_binary_file",
+//           true,
+//           "",
+//       )
+//       .await;
+//
+//       assert!(result);
+//
+//       just_stop("test/https/Justfile");
+//   }
 
 #[tokio::test]
 async fn test_https_put_works_when_typical() {
