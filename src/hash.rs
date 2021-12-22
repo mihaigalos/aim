@@ -48,11 +48,21 @@ fn test_sha256sum_api() {
 }
 
 #[test]
-fn test_check_api() {
+fn test_check_api_works_when_typical() {
     let silent = false;
     let expected = "800dbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
 
     let is_match = HashChecker::check("LICENSE.md", expected, silent);
 
     assert!(is_match);
+}
+
+#[test]
+fn test_check_api_fails_when_checksum_mismatch() {
+    let silent = true;
+    let expected = "AAAAbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+
+    let is_match = HashChecker::check("LICENSE.md", expected, silent);
+
+    assert!(!is_match);
 }
