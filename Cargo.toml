@@ -27,3 +27,6 @@ strfmt = "0.1.6"
 tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = {version="0.6.9", features = ["full"]}
 url = "1.7.2"
+
+[dev-dependencies]
+serial_test = "*"
