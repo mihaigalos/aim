@@ -33,7 +33,7 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
     (file, transfered)
 }
 
-fn get_input_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
+fn get_input_file(path: &str) -> (Option<std::fs::File>, u64) {
     let mut file_size: u64 = 0;
     let mut file = None;
     if path != "stdin" {
@@ -41,15 +41,6 @@ fn get_input_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             file = Some(std::fs::OpenOptions::new().read(true).open(path).unwrap());
 
             file_size = std::fs::metadata(path).unwrap().len();
-        } else {
-            if !silent {
-                println!("Writing to new file.");
-            }
-            file = Some(
-                File::create(path)
-                    .or(Err(format!("Failed to create file '{}'", path)))
-                    .unwrap(),
-            );
         }
     }
     (file, file_size)
@@ -65,12 +56,76 @@ pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {
     (output, transfered)
 }
 
-pub fn get_input(path: &str, silent: bool) -> (Box<dyn Read>, u64) {
-    let (file, transfered) = get_input_file(path, silent);
+pub fn get_input(path: &str) -> (Box<dyn Read>, u64) {
+    let (file, transfered) = get_input_file(path);
     let output: Box<dyn Read> = Box::new(std::io::BufReader::new(match path {
         "stdin" => Box::new(std::io::stdin()) as Box<dyn Read>,
         _ => Box::new(file.unwrap()) as Box<dyn Read>,
     }));
 
     (output, transfered)
+}
+
+#[test]
+fn test_get_output_file_file_is_none_when_stdout() {
+    let is_silet = true;
+    let (file, _) = get_output_file("stdout", is_silet);
+    assert!(file.is_none());
+}
+
+#[test]
+fn test_get_output_file_pos_is_zero_when_stdout() {
+    let is_silet = true;
+    let (_, position) = get_output_file("stdout", is_silet);
+    assert_eq!(position, 0);
+}
+
+#[test]
+fn test_get_output_file_file_is_none_when_newfile() {
+    let is_silet = true;
+    let filename = "test_get_output_file_file_is_none_when_newfile";
+
+    let (file, _) = get_output_file(filename, is_silet);
+
+    assert!(file.is_some());
+    std::fs::remove_file(filename).unwrap();
+}
+
+#[test]
+fn test_get_output_file_file_is_none_when_newfile_and_not_silent() {
+    let is_silet = false;
+    let filename = "test_get_output_file_file_is_none_when_newfile_and_not_silent";
+
+    let (file, _) = get_output_file(filename, is_silet);
+
+    assert!(file.is_some());
+    std::fs::remove_file(filename).unwrap();
+}
+
+#[test]
+fn test_get_output_file_file_is_none_when_existingfile_and_not_silent() {
+    use std::io::Write;
+    let is_silet = false;
+    let filename = "test_get_output_file_file_is_none_when_existingfile_and_not_silent";
+    let expected_position_byte = 4;
+    let mut file = File::create(filename).unwrap();
+    file.write_all(b"1234").unwrap();
+
+    let (_, position) = get_output_file(filename, is_silet);
+
+    assert_eq!(position, expected_position_byte);
+    std::fs::remove_file(filename).unwrap();
+}
+
+#[test]
+fn test_get_input_file_file_is_none_when_stdin() {
+    let (file, _) = get_input_file("stdin");
+    assert!(file.is_none());
+}
+
+#[test]
+fn test_get_input_file_pos_not_zero_when_file_exists() {
+    let expected_position_byte = 1068;
+    let (_, position) = get_input_file("LICENSE.md");
+    assert_eq!(position, expected_position_byte);
 }
