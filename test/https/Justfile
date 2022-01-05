@@ -39,7 +39,7 @@ test: _start && _stop
     for test in $(grep ^_test_ Justfile | cut -d':' -f1);
     do
         highlight "$test "
-        just $test
+        just $test && true || err "Stopping."
     done
 
 _start dirname="." +args="-d":
@@ -49,7 +49,7 @@ _start dirname="." +args="-d":
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > {{dirname}}/.netrc.test.https
+    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > {{dirname}}/.netrc.test
     docker run {{args}} \
         -it \
         --rm \
@@ -61,7 +61,7 @@ _start dirname="." +args="-d":
     || true
 
 _stop dirname=".":
-    @rm common.sh {{dirname}}/.netrc.test.https || true
+    @rm common.sh {{dirname}}/.netrc.test || true
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
 

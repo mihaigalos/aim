@@ -1,6 +1,7 @@
 use clap::{clap_app, crate_version};
 
 #[tokio::main]
+#[cfg(not(tarpaulin_include))]
 async fn main() {
     let args = clap_app!(aim =>
         (version: crate_version!())

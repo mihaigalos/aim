@@ -6,7 +6,6 @@ description = "A command line download/upload tool with resume."
 categories = ["command-line-utilities"]
 keywords = ["download", "upload", "resume"]
 repository = "https://github.com/mihaigalos/aim"
-documentation = "https://github.com/mihaigalos/aim/blob/master/README.md"
 license = "MIT"
 
 

@@ -125,7 +125,7 @@ fn test_get_input_file_file_is_none_when_stdin() {
 
 #[test]
 fn test_get_input_file_pos_not_zero_when_file_exists() {
-    let expected_position_byte = 1068;
+    let expected_position_byte = 1074;
     let (_, position) = get_input_file("LICENSE.md");
     assert_eq!(position, expected_position_byte);
 }
