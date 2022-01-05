@@ -137,10 +137,6 @@ impl FTPHandler {
         let mut ftp_stream = FtpStream::connect((*parsed_address).server.clone())
             .await
             .unwrap();
-        println!(
-            "Username and password: {} {}",
-            &parsed_address.username, &parsed_address.password
-        );
         let _ = ftp_stream
             .login(&parsed_address.username, &parsed_address.password)
             .await
