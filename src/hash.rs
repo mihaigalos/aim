@@ -6,21 +6,21 @@ use std::{fs, io};
 pub struct HashChecker;
 impl HashChecker {
     pub fn check(filename: &str, expected_hash: &str, silent: bool) -> bool {
-        let actual_hash = HashChecker::sha256sum(filename);
         let mut result = true;
         if filename != "stdout" && (expected_hash != "") {
+            let actual_hash = HashChecker::sha256sum(filename);
             if actual_hash != expected_hash {
                 result = false;
             }
-        }
-        if !silent && expected_hash != "" {
-            if result {
-                println!("✅ Checksum OK.");
-            } else {
-                println!(
-                    "❌ Checksum verification failed for {}:\n  expected: {}\n  got:      {}",
-                    filename, expected_hash, actual_hash
-                );
+            if !silent {
+                if result {
+                    println!("✅ Checksum OK.");
+                } else {
+                    println!(
+                        "❌ Checksum verification failed for {}:\n  expected: {}\n  got:      {}",
+                        filename, expected_hash, actual_hash
+                    );
+                }
             }
         }
         result
@@ -40,7 +40,7 @@ impl HashChecker {
 
 #[test]
 fn test_sha256sum_api() {
-    let expected = "800dbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+    let expected = "fa701768a0ddfd65fe175ecf9865b6046f151bb05d0d4ad2cef5acb1d4c60c6b";
 
     let actual = HashChecker::sha256sum("LICENSE.md");
 
@@ -50,7 +50,7 @@ fn test_sha256sum_api() {
 #[test]
 fn test_check_api_works_when_typical() {
     let silent = false;
-    let expected = "800dbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+    let expected = "fa701768a0ddfd65fe175ecf9865b6046f151bb05d0d4ad2cef5acb1d4c60c6b";
 
     let is_match = HashChecker::check("LICENSE.md", expected, silent);
 
