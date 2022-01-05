@@ -12,7 +12,7 @@ fn get_possible_netrc_path() -> String {
     ];
     for candidate in candidates {
         if Path::new(&candidate).exists() {
-            println!("Parsed .netrc from: {}", candidate);
+            println!("🔑 Parsed .netrc from: {}", candidate);
             return candidate.to_string();
         }
     }
