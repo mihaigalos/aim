@@ -64,9 +64,9 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Print rust version
+      - name: Build backend dockers
         run: |
-          just --version
+          just build
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
