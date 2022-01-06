@@ -117,15 +117,21 @@ mod tests {
 
     fn just_start(justfile: &str) {
         use std::env;
+        use std::io::{self, Write};
         use std::process::Command;
-        let _ = Command::new("just")
+        let output = Command::new("just")
             .args([
                 "--justfile",
                 justfile,
                 "_start",
                 env::current_dir().unwrap().to_str().unwrap(),
             ])
-            .output();
+            .output()
+            .expect("failed to just _start");
+
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 
     fn just_stop(justfile: &str) {

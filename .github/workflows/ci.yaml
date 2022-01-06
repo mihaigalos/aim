@@ -52,8 +52,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
       - uses: extractions/setup-just@v1
         with:
@@ -64,6 +63,10 @@ jobs:
         with:
           toolchain: stable
           override: true
+
+      - name: Print rust version
+        run: |
+          just --version
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
