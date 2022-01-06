@@ -19,7 +19,7 @@ _start dirname="." +args="-d":
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port {{ server_port }}" > {{dirname}}/.netrc.test
+    echo "machine 127.0.0.1 login user password pass port {{ server_port }}" > {{dirname}}/.netrc.test_ftp
     docker run {{args}} \
         -it \
         --rm \
@@ -36,7 +36,7 @@ _start dirname="." +args="-d":
     || true
 
 _stop dirname=".":
-    @rm common.sh {{dirname}}/.netrc.test || true
+    @rm common.sh {{dirname}}/.netrc.test_ftp || true
     @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
     @docker rm --force aim_tests_ftp > /dev/null 2>&1
 
@@ -66,6 +66,11 @@ test: _start && _stop
         just $test && true || err "Stopping."
     done
 
+_test_sanity:
+    #!/bin/bash
+    source common.sh
+    [[ $(which aim) =~ "target/debug" ]] && ok || err "Please ensure aim not in PATH for testing"
+
 _test_curl_login:
     #!/bin/bash
     source common.sh
@@ -75,7 +80,7 @@ _test_curl_login:
 _test_curl_login_with_netrc:
     #!/bin/bash
     source common.sh
-    response=$(curl -s --netrc-file .netrc.test -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
+    response=$(curl -s --netrc-file .netrc.test_ftp -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
     [ $response = "226" ] && ok || "ERROR: Response code $response."
 
 _test_aim_checksum_works:

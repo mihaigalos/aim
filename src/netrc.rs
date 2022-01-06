@@ -2,26 +2,29 @@ use netrc::Netrc;
 use std::io::BufReader;
 use std::path::Path;
 
-fn get_possible_netrc_path() -> String {
+fn get_possible_netrc_path(silent: bool) -> String {
     let candidates = vec![
         ".netrc",
         ".netrc.test",
         ".netrc.test_https",
+        ".netrc.test_ftp",
         ".netrc.test_unit",
         "~/.netrc",
     ];
     for candidate in candidates {
         if Path::new(&candidate).exists() {
-            println!("🔑 Parsed .netrc from: {}", candidate);
+            if !silent {
+                println!("🔑 Parsed .netrc from: {}", candidate);
+            }
             return candidate.to_string();
         }
     }
     return "".to_string();
 }
 
-pub fn netrc() -> Option<netrc::Netrc> {
+pub fn netrc(silent: bool) -> Option<netrc::Netrc> {
     let mut result = None;
-    let path = get_possible_netrc_path();
+    let path = get_possible_netrc_path(silent);
     if path != "" {
         let file = std::fs::File::open(path).unwrap();
         let parsed = Netrc::parse(BufReader::new(file));
@@ -37,7 +40,7 @@ fn test_netrc_with_file_works_when_typical() {
     file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
         .unwrap();
 
-    let netrc = netrc();
+    let netrc = netrc(true);
 
     assert!(netrc.is_some());
     std::fs::remove_file(".netrc.test_unit").unwrap();

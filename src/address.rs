@@ -29,8 +29,8 @@ impl PartialEq for ParsedAddress {
 }
 
 impl ParsedAddress {
-    pub fn parse_address(address: &str) -> ParsedAddress {
-        let netrc = netrc();
+    pub fn parse_address(address: &str, silent: bool) -> ParsedAddress {
+        let netrc = netrc(silent);
         let url = Url::parse(address).unwrap();
         let server = format!(
             "{}:{}",
@@ -148,7 +148,7 @@ async fn parse_works() {
         file: "file".to_string(),
     };
 
-    let actual = ParsedAddress::parse_address("ftp://user:pass@do.main:21/index/file");
+    let actual = ParsedAddress::parse_address("ftp://user:pass@do.main:21/index/file", true);
 
     assert_eq!(actual, expected);
 }
@@ -207,7 +207,7 @@ async fn parse_works_with_netrc_mixin() {
     let data = "machine do.main login test password p@ssw0rd port 21";
 
     std::fs::write(".netrc.test", data).expect("Unable to write file");
-    let actual = ParsedAddress::parse_address("ftp://do.main/index/file");
+    let actual = ParsedAddress::parse_address("ftp://do.main/index/file", true);
 
     assert_eq!(actual, expected);
     std::fs::remove_file(".netrc.test").unwrap();

@@ -8,9 +8,9 @@ docker_image_version := `cat Cargo.toml | grep ^version | cut -d'=' -f 2 | sed -
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool+ ":" + docker_image_version
 docker_image_dockerhub := docker_user_repo + "/" + tool+ ":" + docker_image_version
 
-build:
+build dockers_only="False":
     #!/bin/bash
-    cargo build  --verbose --all || exit 1
+    [ {{ dockers_only }} = False ] && $(cargo build  --verbose --all || exit 1) || echo "Skipping cargo build and building dockers only."
     for d in $(find test -type d); do
         pushd $d > /dev/null
             [ -f Justfile ] && just build

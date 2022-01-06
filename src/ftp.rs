@@ -45,7 +45,7 @@ impl FTPHandler {
     ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
         let (out, transfered) = get_output(output, bar.silent);
 
-        let parsed_address = ParsedAddress::parse_address(input);
+        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .unwrap();
@@ -96,7 +96,7 @@ impl FTPHandler {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
 
-        let parsed_address = ParsedAddress::parse_address(output);
+        let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let transfered = 0;
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await

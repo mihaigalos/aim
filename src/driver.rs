@@ -117,15 +117,21 @@ mod tests {
 
     fn just_start(justfile: &str) {
         use std::env;
+        use std::io::{self, Write};
         use std::process::Command;
-        let _ = Command::new("just")
+        let output = Command::new("just")
             .args([
                 "--justfile",
                 justfile,
                 "_start",
                 env::current_dir().unwrap().to_str().unwrap(),
             ])
-            .output();
+            .output()
+            .expect("failed to just _start");
+
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
     }
 
     fn just_stop(justfile: &str) {
@@ -166,7 +172,7 @@ mod tests {
 
         let result = Driver::put(
             "test/https/binary_file.tar.gz",
-            "http://127.0.0.1:8081/_test_aim_put_binary_file",
+            "http://user:pass@127.0.0.1:8081/_test_aim_put_binary_file",
             WrappedBar::new(0, "", true),
         )
         .await;
