@@ -1,6 +1,7 @@
 # aim
 [![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
 [![CD](https://github.com/mihaigalos/aim/actions/workflows/cd.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/cd.yaml)
+[![codecov](https://codecov.io/gh/mihaigalos/aim/branch/main/graph/badge.svg?token=CYCF96JIOH)](https://codecov.io/gh/mihaigalos/aim)
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
 [![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/mihaigalos/aim)
 
