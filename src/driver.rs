@@ -166,7 +166,7 @@ mod tests {
 
         let result = Driver::put(
             "test/https/binary_file.tar.gz",
-            "http://127.0.0.1:8081/_test_aim_put_binary_file",
+            "http://user:pass@127.0.0.1:8081/_test_aim_put_binary_file",
             WrappedBar::new(0, "", true),
         )
         .await;

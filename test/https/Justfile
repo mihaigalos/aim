@@ -87,6 +87,16 @@ _test_curl_put_binary_file:
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm _test_curl_put_binary_file
 
+_test_aim_get_with_netrc:
+    #!/bin/bash
+    source common.sh
+    sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
+    aim -s binary_file.tar.gz http://127.0.0.1:{{server_port}}/_test_aim_get_with_netrc
+    aim -s http://127.0.0.1:{{server_port}}/_test_aim_get_with_netrc _test_aim_get_with_netrc
+    sha_output=$(sha256sum _test_aim_get_with_netrc | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm _test_aim_get_with_netrc
+
 _test_aim_get_binary_file:
     #!/bin/bash
     source common.sh

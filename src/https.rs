@@ -27,14 +27,14 @@ impl HTTPSHandler {
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
-        let parsed_address = ParsedAddress::parse_address(output);
+        let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
         let input_ = input.to_string();
         let output_ = output.to_string();
         let mut reader_stream = ReaderStream::new(file);
 
-        let mut uploaded = HTTPSHandler::get_already_uploaded(output).await;
+        let mut uploaded = HTTPSHandler::get_already_uploaded(output, bar.silent).await;
         bar.set_length(total_size);
 
         let async_stream = async_stream::stream! {
@@ -68,7 +68,7 @@ impl HTTPSHandler {
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
-        let parsed_address = ParsedAddress::parse_address(input);
+        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (mut out, mut downloaded) = get_output(output, bar.silent);
 
         let res = Client::new()
@@ -101,8 +101,8 @@ impl HTTPSHandler {
         bar.finish_download(&input, &output);
     }
 
-    async fn get_already_uploaded(output: &str) -> u64 {
-        let parsed_address = ParsedAddress::parse_address(output);
+    async fn get_already_uploaded(output: &str, silent: bool) -> u64 {
+        let parsed_address = ParsedAddress::parse_address(output, silent);
         let res = Client::new()
             .get(output)
             .header(
