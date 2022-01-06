@@ -49,7 +49,7 @@ _start dirname="." +args="-d":
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > {{dirname}}/.netrc.test
+    echo "machine 127.0.0.1 login user password pass port {{server_port}}" > {{dirname}}/.netrc.test_https
     docker run {{args}} \
         -it \
         --rm \
@@ -61,23 +61,28 @@ _start dirname="." +args="-d":
     || true
 
 _stop dirname=".":
-    @rm common.sh {{dirname}}/.netrc.test || true
+    @rm common.sh {{dirname}}/.netrc.test_https || true
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
+
+_test_sanity:
+    #!/bin/bash
+    source common.sh
+    [[ $(which aim) =~ "target/debug" ]] && ok || err "Please ensure aim not in PATH for testing"
 
 _test_curl_put_text_file:
     #!/bin/bash
     source common.sh
-    curl -s -X PUT --netrc-file .netrc.test -d `cat test.file` http://127.0.0.1:{{server_port}}/_test_curl_put_text_file
-    remote_contents=$(curl -s --netrc-file .netrc.test http://127.0.0.1:{{server_port}}/_test_curl_put_text_file)
+    curl -s -X PUT --netrc-file .netrc.test_https -d `cat test.file` http://127.0.0.1:{{server_port}}/_test_curl_put_text_file
+    remote_contents=$(curl -s --netrc-file .netrc.test_https http://127.0.0.1:{{server_port}}/_test_curl_put_text_file)
     [ "$remote_contents" = "$(cat test.file)" ] && ok || err "ERROR: remote contents doesn't equal sent content."
 
 _test_curl_put_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    curl -s --netrc-file .netrc.test -X PUT --data-binary @binary_file.tar.gz  http://127.0.0.1:{{server_port}}/_test_curl_put_binary_file
-    curl -s --netrc-file .netrc.test 127.0.0.1:{{server_port}}/_test_curl_put_binary_file -o _test_curl_put_binary_file
+    curl -s --netrc-file .netrc.test_https -X PUT --data-binary @binary_file.tar.gz  http://127.0.0.1:{{server_port}}/_test_curl_put_binary_file
+    curl -s --netrc-file .netrc.test_https 127.0.0.1:{{server_port}}/_test_curl_put_binary_file -o _test_curl_put_binary_file
     sha_output=$(sha256sum _test_curl_put_binary_file | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm _test_curl_put_binary_file
@@ -105,7 +110,7 @@ _test_aim_put_resume_binary_file:
     #!/bin/bash
     source common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    curl -s -X PUT --netrc-file .netrc.test --data-binary @binary_file.tar.gz.part1  http://127.0.0.1:{{server_port}}/_test_aim_put_resume_binary_file.tar.gz
+    curl -s -X PUT --netrc-file .netrc.test_https --data-binary @binary_file.tar.gz.part1  http://127.0.0.1:{{server_port}}/_test_aim_put_resume_binary_file.tar.gz
     aim -s binary_file.tar.gz.part2 http://127.0.0.1:8081/_test_aim_put_resume_binary_file.tar.gz
     aim -s http://127.0.0.1:8081/_test_aim_put_resume_binary_file.tar.gz _test_aim_put_resume_binary_file
     sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)

@@ -7,6 +7,7 @@ fn get_possible_netrc_path() -> String {
         ".netrc",
         ".netrc.test",
         ".netrc.test_https",
+        ".netrc.test_ftp",
         ".netrc.test_unit",
         "~/.netrc",
     ];
