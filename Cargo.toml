@@ -28,4 +28,4 @@ tokio-util = {version="0.6.9", features = ["full"]}
 url = "1.7.2"
 
 [dev-dependencies]
-serial_test = "*"
+serial_test = "0.5.1"
