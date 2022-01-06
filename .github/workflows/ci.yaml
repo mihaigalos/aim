@@ -66,7 +66,7 @@ jobs:
 
       - name: Build backend dockers
         run: |
-          just build
+          just build True
 
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
