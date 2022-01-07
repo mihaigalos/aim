@@ -12,6 +12,7 @@ impl Driver {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
             }
             "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await,
+            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -34,7 +35,9 @@ impl Driver {
     pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) -> bool {
         let mut bar = WrappedBar::new(0, input, silent);
         let result = match &input[0..4] {
-            "http" | "ftp:" | "ftp." => Driver::get(input, output, expected_sha256, &mut bar).await,
+            "http" | "ftp:" | "ftp." | "ssh:" => {
+                Driver::get(input, output, expected_sha256, &mut bar).await
+            }
             _ => Driver::put(input, output, bar).await,
         };
         result
