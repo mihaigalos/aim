@@ -7,6 +7,7 @@ use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
+use crate::consts::*;
 use crate::hash::HashChecker;
 use crate::io::get_output;
 use crate::slicer::Slicer;
@@ -68,7 +69,7 @@ impl FTPHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
-            let mut buffer = vec![0; 26214400usize];
+            let mut buffer = vec![0; BUFFER_SIZE];
             let byte_count = properties.reader.read(&mut buffer[..]).await.unwrap();
 
             buffer.truncate(byte_count);
