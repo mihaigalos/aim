@@ -30,6 +30,7 @@ tear_down:
 test: (run "-d") && tear_down
     #!/bin/bash
     source ../common.sh
+    highlight "\nRunning tests in $PWD\n\n"
     for test in $(grep ^_test_ Justfile | cut -d':' -f1); do
         highlight "$test "
         just $test && true || err "Stopping."
