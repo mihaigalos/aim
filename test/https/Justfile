@@ -17,23 +17,7 @@ push:
 
 test: _start && _stop
     #!/bin/bash
-    cat <<'EOF' > common.sh
-    #!/bin/bash
-    function err() {
-        echo -e "\e[1;31m${@}\e[0m" >&2
-        exit 1
-    }
 
-    function ok() {
-        echo -e "\e[1;32mOK\e[0m"
-    }
-
-    function highlight() {
-        echo -en "\e[1;37m${@}\e[0m"
-    }
-    export PATH=$PATH:$(realpath ../../target/debug/)
-    EOF
-    
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"
     for test in $(grep ^_test_ Justfile | cut -d':' -f1);
@@ -61,7 +45,7 @@ _start dirname="." +args="-d":
     || true
 
 _stop dirname=".":
-    @rm common.sh {{dirname}}/.netrc.test_https || true
+    @rm {{dirname}}/.netrc.test_https || true
     @docker stop aim_tests_https > /dev/null 2>&1
     @docker rm --force aim_tests_https > /dev/null 2>&1
 

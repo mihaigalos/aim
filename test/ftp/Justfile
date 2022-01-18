@@ -36,28 +36,13 @@ _start dirname="." +args="-d":
     || true
 
 _stop dirname=".":
-    @rm common.sh {{dirname}}/.netrc.test_ftp || true
+    @rm {{dirname}}/.netrc.test_ftp || true
     @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
     @docker rm --force aim_tests_ftp > /dev/null 2>&1
 
 test: _start && _stop
     #!/bin/bash
-    cat <<'EOF' > common.sh
-    #!/bin/bash
-    function err() {
-        echo -e "\e[1;31m${@}\e[0m" >&2
-    }
 
-    function ok() {
-        echo -e "\e[1;32mOK\e[0m"
-    }
-
-    function highlight() {
-        echo -en "\e[1;37m${@}\e[0m"
-    }
-    export PATH=$PATH:$(realpath ../../target/debug/)
-    EOF
-    
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"
     for test in $(grep ^_test_ Justfile | cut -d':' -f1);
