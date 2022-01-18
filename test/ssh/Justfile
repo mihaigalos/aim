@@ -9,11 +9,11 @@ build:
     docker build --no-cache -t {{docker_image}} .
 
 setup:
-    chmod 400 keys/*
+    @chmod 400 keys/*
 
 run docker_compose_args="": setup
     #!/bin/bash
-    docker-compose up {{docker_compose_args}}
+    docker-compose up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
         if [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q my-openssh-server)` ]; then
@@ -25,17 +25,18 @@ run docker_compose_args="": setup
     done
 
 tear_down:
-    docker-compose down
+    @docker-compose down >/dev/null 2>&1
 
-test_ssh: (run "-d") && tear_down
+test: (run "-d") && tear_down
     #!/bin/bash
-    function err() {
-        echo -e "\e[1;31m${@}\e[0m" >&2
-        exit 1
-    }
-    function ok() {
-        echo -e "\e[1;32mOK\e[0m"
-    }
+    source ../common.sh
+    for test in $(grep ^_test_ Justfile | cut -d':' -f1); do
+        highlight "$test "
+        just $test && true || err "Stopping."
+    done
 
+_test_ssh:
+    #!/bin/bash
+    source ../common.sh
     ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" user@127.0.0.1 -p 2222 'exit'
-    [ $? -ne 0 ] && err "Couldn't connect to local dockerized ssh server." || ok
+    [ $? -eq 0 ] && ok || err "Couldn't connect to local dockerized ssh server."
