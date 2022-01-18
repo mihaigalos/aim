@@ -12,4 +12,30 @@ setup:
     chmod 400 keys/*
 
 run docker_compose_args="": setup
+    #!/bin/bash
     docker-compose up {{docker_compose_args}}
+    max_seconds=30
+    for i in 1..$max_seconds; do
+        if [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q my-openssh-server)` ]; then
+          echo waiting for my-open-ssh-server..
+          sleep 1
+        else
+          break
+        fi
+    done
+
+tear_down:
+    docker-compose down
+
+test_ssh: (run "-d") && tear_down
+    #!/bin/bash
+    function err() {
+        echo -e "\e[1;31m${@}\e[0m" >&2
+        exit 1
+    }
+    function ok() {
+        echo -e "\e[1;32mOK\e[0m"
+    }
+
+    ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" user@127.0.0.1 -p 2222 'exit'
+    [ $? -ne 0 ] && err "Couldn't connect to local dockerized ssh server." || ok
