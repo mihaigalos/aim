@@ -16,7 +16,7 @@ run docker_compose_args="": setup
     docker-compose up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
-        if [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q my-openssh-server)` ]; then
+        if [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q {{tool}})` ]; then
           echo waiting for my-open-ssh-server..
           sleep 1
         else
