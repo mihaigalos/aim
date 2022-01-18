@@ -1,0 +1,15 @@
+default:
+    @just --list --unsorted
+
+tool := "my-openssh-server"
+docker_image_version := "0.0.1"
+docker_image := tool + ":" + docker_image_version
+
+build:
+    docker build --no-cache -t {{docker_image}} .
+
+setup:
+    chmod 400 keys/*
+
+run docker_compose_args="": setup
+    docker-compose up {{docker_compose_args}}
