@@ -28,20 +28,21 @@ impl SSHHandler {
         SSHHandler::_get(input, _output, bar).await;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
-        let ssh_host_port = "127.0.0.1:22";
-        let ssh_user = "mihai";
-        let remote_temp_file = "/home/mihai/.vimrc";
+    async fn _get(_: &str, _: &str, _: &mut WrappedBar) {
+        let ssh_host_port = "127.0.0.1:2222";
+        let ssh_user = "user";
+        let ssh_pass = "pass";
+        let remote_temp_file = "/tmp/.vimrc";
 
         let tcp = TcpStream::connect(&ssh_host_port).unwrap();
 
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(tcp);
         sess.handshake().expect("SSH handshake failed");
-        sess.userauth_password("demo", "demo12!").unwrap();
+        sess.userauth_password(ssh_user, ssh_pass).unwrap();
 
         let (remote_file, stat) = sess.scp_recv(Path::new(remote_temp_file)).unwrap();
-        let stream: ssh2::Stream = remote_file.stream(1);
+        let _: ssh2::Stream = remote_file.stream(1);
 
         let mut target = File::create("/tmp/done.txt").unwrap();
         let pb = ProgressBar::new(stat.size());
