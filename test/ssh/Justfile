@@ -4,6 +4,7 @@ default:
 tool := "my-openssh-server"
 docker_image_version := "0.0.1"
 docker_image := tool + ":" + docker_image_version
+dockerfile_with_keys := "docker-compose.yaml.with_keys"
 
 build:
     docker build --no-cache -t {{docker_image}} .
@@ -13,10 +14,10 @@ setup:
 
 run docker_compose_args="": setup
     #!/bin/bash
-    docker-compose up {{docker_compose_args}} >/dev/null 2>&1
+    docker-compose --file {{ dockerfile_with_keys }} up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
-        if [ -z `docker ps -q --no-trunc | grep $(docker-compose ps -q {{tool}})` ]; then
+        if [ -z `docker ps -q --no-trunc | grep $(docker-compose --file {{ dockerfile_with_keys }} ps -q {{tool}})` ]; then
           echo waiting for my-open-ssh-server..
           sleep 1
         else
@@ -25,7 +26,7 @@ run docker_compose_args="": setup
     done
 
 tear_down:
-    @docker-compose down >/dev/null 2>&1
+    @docker-compose --file {{ dockerfile_with_keys }} down >/dev/null 2>&1
 
 test: (run "-d") && tear_down
     #!/bin/bash
