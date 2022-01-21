@@ -36,7 +36,7 @@ test: (run "-d") && tear_down
         just $test && true || err "Stopping."
     done
 
-_test_ssh:
+_test_ssh_server_up:
     #!/bin/bash
     source ../common.sh
     ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" user@127.0.0.1 -p 2222 'exit'
