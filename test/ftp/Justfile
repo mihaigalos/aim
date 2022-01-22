@@ -60,13 +60,13 @@ _test_curl_login:
     #!/bin/bash
     source ../common.sh
     response=$(curl -s -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
-    [ $response = "226" ] && ok || "ERROR: Response code $response."
+    [ $response = "226" ] && ok || err "ERROR: Response code $response."
 
 _test_curl_login_with_netrc:
     #!/bin/bash
     source ../common.sh
     response=$(curl -s --netrc-file .netrc.test_ftp -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
-    [ $response = "226" ] && ok || "ERROR: Response code $response."
+    [ $response = "226" ] && ok || err "ERROR: Response code $response."
 
 _test_aim_checksum_works:
     #!/bin/bash
