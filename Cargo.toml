@@ -3,8 +3,16 @@ name = "aim"
 version = "0.1.0"
 edition = "2021"
 description = "🎯 A command line download/upload tool with resume."
-categories = ["command-line-utilities"]
-keywords = ["download", "upload", "resume"]
+categories = ["command-line-utilities", "network-programming"]
+keywords = [ 
+    "cli",
+    "download",
+    "ftp",
+    "https",
+    "resume",
+    "ssh",
+    "upload"
+]
 repository = "https://github.com/mihaigalos/aim"
 license = "MIT"
 
