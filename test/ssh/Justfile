@@ -4,7 +4,10 @@ default:
 tool := "my-openssh-server"
 docker_image_version := "0.0.1"
 docker_image := tool + ":" + docker_image_version
-dockerfile_with_keys := "docker-compose.yaml.with_keys"
+docker_compose_file_keys := "docker-compose.yaml.with_keys"
+docker_compose_file_user_pass := "docker-compose.yaml.with_user_pass"
+
+docker_compose_file := docker_compose_file_user_pass
 
 build:
     docker build --no-cache -t {{docker_image}} .
@@ -12,12 +15,12 @@ build:
 setup:
     @chmod 400 keys/*
 
-run docker_compose_args="": setup
+start_ssh_server +docker_compose_args="": setup
     #!/bin/bash
-    docker-compose --file {{ dockerfile_with_keys }} up {{docker_compose_args}} >/dev/null 2>&1
+    docker-compose --file {{ docker_compose_file }} up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
-        if [ -z `docker ps -q --no-trunc | grep $(docker-compose --file {{ dockerfile_with_keys }} ps -q {{tool}})` ]; then
+        if [ -z `docker ps -q --no-trunc | grep $(docker-compose --file {{ docker_compose_file_keys }} ps -q {{tool}})` ]; then
           echo waiting for my-open-ssh-server..
           sleep 1
         else
@@ -26,9 +29,9 @@ run docker_compose_args="": setup
     done
 
 tear_down:
-    @docker-compose --file {{ dockerfile_with_keys }} down >/dev/null 2>&1
+    @docker-compose --file {{ docker_compose_file }} down >/dev/null 2>&1
 
-test: (run "-d") && tear_down
+test: (start_ssh_server "-d") && tear_down
     #!/bin/bash
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"

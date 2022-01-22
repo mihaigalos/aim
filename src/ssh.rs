@@ -8,7 +8,6 @@ use std::path::Path;
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::hash::HashChecker;
-use crate::io;
 use crate::slicer::Slicer;
 
 use indicatif::ProgressBar;
@@ -28,18 +27,24 @@ impl SSHHandler {
         SSHHandler::_get(input, _output, bar).await;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
-    async fn _get(_: &str, _: &str, _: &mut WrappedBar) {
+    async fn _get(input: &str, _: &str, bar: &mut WrappedBar) {
         let ssh_host_port = "127.0.0.1:2222";
-        let ssh_user = "user";
-        let ssh_pass = "pass";
         let remote_temp_file = "/tmp/.vimrc";
 
+        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let tcp = TcpStream::connect(&ssh_host_port).unwrap();
 
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(tcp);
         sess.handshake().expect("SSH handshake failed");
-        sess.userauth_password(ssh_user, ssh_pass).unwrap();
+
+        if parsed_address.password != "" {
+            sess.userauth_password(&parsed_address.username, &parsed_address.password)
+                .unwrap();
+        } else {
+            sess.userauth_password(&parsed_address.username, "")
+                .unwrap();
+        }
 
         let (remote_file, stat) = sess.scp_recv(Path::new(remote_temp_file)).unwrap();
         let _: ssh2::Stream = remote_file.stream(1);
