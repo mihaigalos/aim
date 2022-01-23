@@ -1,3 +1,6 @@
+# Use $0 as recipe name in tests
+set positional-arguments
+
 default:
     @just --list
 
@@ -70,47 +73,52 @@ _test_curl_login_with_netrc:
 
 _test_aim_checksum_works:
     #!/bin/bash
+    test=$(echo $0 | awk -F"/" '{print $NF}')
     source ../common.sh
     sha_expected="1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b"
-    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README _test_aim_checksum_works $sha_expected
+    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README $test $sha_expected
     [ $? -eq 0 ] && ok || err "ERROR: expected and actual SHA256s don't match."
-    rm _test_aim_checksum_works
+    rm $test
 
 _test_aim_checksum_fails_when_checksum_mismatch:
     #!/bin/bash
+    test=$(echo $0 | awk -F"/" '{print $NF}')
     source ../common.sh
     sha_expected="AAAA0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
-    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README _test_aim_checksum_fails_when_checksum_mismatch $sha_expected
+    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README $test $sha_expected
     [ $? -ne 0 ] && ok || err "ERROR: expected checksum mismatch, got equal."
-    rm _test_aim_checksum_fails_when_checksum_mismatch
+    rm $test
 
 _test_aim_put_binary_file:
     #!/bin/bash
+    test=$(echo $0 | awk -F"/" '{print $NF}')
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    aim -s binary_file.tar.gz ftp://user:pass@127.0.0.1:21/_test_aim_put_binary_file
-    aim -s ftp://user:pass@127.0.0.1:21/_test_aim_put_binary_file _test_aim_put_binary_file
-    sha_output=$(sha256sum _test_aim_put_binary_file | cut -d' ' -f1)
+    aim -s binary_file.tar.gz ftp://user:pass@127.0.0.1:21/$test
+    aim -s ftp://user:pass@127.0.0.1:21/$test $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
-    rm _test_aim_put_binary_file
+    rm $test
 
 _test_aim_put_resume_binary_file:
     #!/bin/bash
+    test=$(echo $0 | awk -F"/" '{print $NF}')
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    aim -s binary_file.tar.gz.part1 ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz
-    aim -s binary_file.tar.gz.part2 ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz
-    aim -s ftp://user:pass@127.0.0.1:21/_test_aim_put_resume_binary_file.tar.gz _test_aim_put_resume_binary_file
-    sha_output=$(sha256sum _test_aim_put_resume_binary_file | cut -d' ' -f1)
+    aim -s binary_file.tar.gz.part1 ftp://user:pass@127.0.0.1:21/$test.tar.gz
+    aim -s binary_file.tar.gz.part2 ftp://user:pass@127.0.0.1:21/$test.tar.gz
+    aim -s ftp://user:pass@127.0.0.1:21/$test.tar.gz $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
-    rm _test_aim_put_resume_binary_file
+    rm $test
 
 _test_aim_get_with_netrc:
     #!/bin/bash
+    test=$(echo $0 | awk -F"/" '{print $NF}')
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
-    aim -s binary_file.tar.gz ftp://127.0.0.1:21/_test_aim_put_with_netrc
-    aim -s ftp://127.0.0.1:21/_test_aim_put_with_netrc _test_aim_put_with_netrc
-    sha_output=$(sha256sum _test_aim_put_with_netrc | cut -d' ' -f1)
+    aim -s binary_file.tar.gz ftp://127.0.0.1:21/$test
+    aim -s ftp://127.0.0.1:21/$test $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
-    rm _test_aim_put_with_netrc
+    rm $test
