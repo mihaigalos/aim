@@ -14,7 +14,7 @@ build:
 
 setup:
     @chmod 400 keys/*
-    [ $(dpkg --list | grep sshpass  | wc -l) -gt 0 ] && true || sudo apt install sshpass
+    @[ $(dpkg --list | grep sshpass  | wc -l) -gt 0 ] && true || sudo apt install sshpass
 
 start_ssh_server +docker_compose_args="": setup
     #!/bin/bash

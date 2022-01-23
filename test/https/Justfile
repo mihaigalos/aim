@@ -59,7 +59,7 @@ _test_sanity:
 
 _test_curl_put_text_file:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     curl -s -X PUT --netrc-file .netrc.test_https -d `cat test.file` http://127.0.0.1:{{server_port}}/$test
     remote_contents=$(curl -s --netrc-file .netrc.test_https http://127.0.0.1:{{server_port}}/$test)
@@ -67,7 +67,7 @@ _test_curl_put_text_file:
 
 _test_curl_put_binary_file:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     curl -s --netrc-file .netrc.test_https -X PUT --data-binary @binary_file.tar.gz  http://127.0.0.1:{{server_port}}/$test
@@ -78,7 +78,7 @@ _test_curl_put_binary_file:
 
 _test_aim_get_with_netrc:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     aim -s binary_file.tar.gz http://127.0.0.1:{{server_port}}/$test
@@ -89,7 +89,7 @@ _test_aim_get_with_netrc:
 
 _test_aim_get_binary_file:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     aim -s http://127.0.0.1:8081/_test_curl_put_binary_file $test
@@ -99,7 +99,7 @@ _test_aim_get_binary_file:
 
 _test_aim_put_binary_file:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     aim -s binary_file.tar.gz http://127.0.0.1:8081/$test
@@ -110,7 +110,7 @@ _test_aim_put_binary_file:
 
 _test_aim_put_resume_binary_file:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     curl -s -X PUT --netrc-file .netrc.test_https --data-binary @binary_file.tar.gz.part1  http://127.0.0.1:{{server_port}}/$test.tar.gz
@@ -122,7 +122,7 @@ _test_aim_put_resume_binary_file:
 
 _test_aim_checksum_works:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_expected="0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
     aim -s https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz $test $sha_expected
@@ -131,7 +131,7 @@ _test_aim_checksum_works:
 
 _test_aim_checksum_fails_when_checksum_mismatch:
     #!/bin/bash
-    test=$(echo $0 | awk -F"/" '{print $NF}')
+    test=$(basename $0)
     source ../common.sh
     sha_expected="AAAA0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
     aim -s https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz $test $sha_expected
