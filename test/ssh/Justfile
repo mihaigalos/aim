@@ -14,6 +14,7 @@ build:
 
 setup:
     @chmod 400 keys/*
+    [ $(dpkg --list | grep sshpass  | wc -l) -gt 0 ] && true || sudo apt install sshpass
 
 start_ssh_server +docker_compose_args="": setup
     #!/bin/bash
@@ -28,10 +29,10 @@ start_ssh_server +docker_compose_args="": setup
         fi
     done
 
-tear_down:
+stop:
     @docker-compose --file {{ docker_compose_file }} down >/dev/null 2>&1
 
-test: (start_ssh_server "-d") && tear_down
+test: (start_ssh_server "-d") && stop
     #!/bin/bash
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"
@@ -43,5 +44,7 @@ test: (start_ssh_server "-d") && tear_down
 _test_ssh_server_up:
     #!/bin/bash
     source ../common.sh
-    ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" user@127.0.0.1 -p 2222 'exit'
+    user="user"
+    pass="pass"
+    sshpass -p $pass ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" $user@127.0.0.1 -p 2222 'exit'
     [ $? -eq 0 ] && ok || err "Couldn't connect to local dockerized ssh server."
