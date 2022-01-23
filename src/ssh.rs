@@ -29,15 +29,11 @@ impl SSHHandler {
     }
     async fn _get(input: &str, _: &str, bar: &mut WrappedBar) {
         let ssh_host_port = "127.0.0.1:2222";
-        let remote_temp_file = "/tmp/.vimrc";
-
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let tcp = TcpStream::connect(&ssh_host_port).unwrap();
-
         let mut sess = Session::new().unwrap();
         sess.set_tcp_stream(tcp);
         sess.handshake().expect("SSH handshake failed");
-
         if parsed_address.password != "" {
             sess.userauth_password(&parsed_address.username, &parsed_address.password)
                 .unwrap();
@@ -45,13 +41,17 @@ impl SSHHandler {
             sess.userauth_password(&parsed_address.username, "")
                 .unwrap();
         }
-
-        let (remote_file, stat) = sess.scp_recv(Path::new(remote_temp_file)).unwrap();
-        let _: ssh2::Stream = remote_file.stream(1);
+        let remote_file = &(String::from("/")
+            + &parsed_address.path_segments.join("/")
+            + "/"
+            + &parsed_address.file);
+        println!("{}", remote_file);
+        let (remote_file_contents, stat) = sess.scp_recv(Path::new(remote_file)).unwrap();
+        let _: ssh2::Stream = remote_file_contents.stream(1);
 
         let mut target = File::create("/tmp/done.txt").unwrap();
         let pb = ProgressBar::new(stat.size());
-        std::io::copy(&mut pb.wrap_read(remote_file), &mut target).unwrap();
+        std::io::copy(&mut pb.wrap_read(remote_file_contents), &mut target).unwrap();
 
         //let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
