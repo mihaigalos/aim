@@ -3,7 +3,12 @@ name = "aim"
 version = "0.1.0"
 edition = "2021"
 description = "🎯 A command line download/upload tool with resume."
-categories = ["command-line-utilities", "network-programming"]
+categories = [
+    "HTTP client",
+    "command-line-utilities",
+    "network-programming",
+    "web-programming::http-client"
+]
 keywords = [ 
     "cli",
     "download",
