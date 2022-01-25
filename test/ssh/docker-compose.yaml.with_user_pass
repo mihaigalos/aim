@@ -15,6 +15,7 @@ services:
       - USER_PASSWORD=pass
     volumes:
       - ~/.history_make_shell:/root/.history_make_shell
+      - /tmp/binfile:/tmp/binfile
     ports:
       - 2222:2222
     restart: unless-stopped

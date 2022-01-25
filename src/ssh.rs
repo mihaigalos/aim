@@ -10,8 +10,6 @@ use crate::bar::WrappedBar;
 use crate::hash::HashChecker;
 use crate::slicer::Slicer;
 
-use indicatif::ProgressBar;
-
 pub struct SSHHandler;
 impl SSHHandler {
     pub async fn get(
@@ -27,7 +25,7 @@ impl SSHHandler {
         SSHHandler::_get(input, _output, bar).await;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
-    async fn _get(input: &str, _: &str, bar: &mut WrappedBar) {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let ssh_host_port = "127.0.0.1:2222";
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let tcp = TcpStream::connect(&ssh_host_port).unwrap();
@@ -49,9 +47,13 @@ impl SSHHandler {
         let (remote_file_contents, stat) = sess.scp_recv(Path::new(remote_file)).unwrap();
         let _: ssh2::Stream = remote_file_contents.stream(1);
 
-        let mut target = File::create("/tmp/done.txt").unwrap();
-        let pb = ProgressBar::new(stat.size());
-        std::io::copy(&mut pb.wrap_read(remote_file_contents), &mut target).unwrap();
+        let mut target = File::create(output).unwrap();
+        bar.set_length(stat.size());
+        std::io::copy(
+            &mut bar.output.as_ref().unwrap().wrap_read(remote_file_contents),
+            &mut target,
+        )
+        .unwrap();
 
         //let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
