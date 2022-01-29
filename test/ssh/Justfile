@@ -18,10 +18,11 @@ setup:
 
 start_ssh_server +docker_compose_args="": setup
     #!/bin/bash
+    echo foobar > /tmp/binfile
     docker-compose --file {{ docker_compose_file }} up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
-        if [ -z `docker ps -q --no-trunc | grep $(docker-compose --file {{ docker_compose_file_keys }} ps -q {{tool}})` ]; then
+        if [ -z `docker ps -q --no-trunc | grep $(docker-compose --file {{ docker_compose_file }} ps -q {{tool}})` ]; then
           echo waiting for my-open-ssh-server..
           sleep 1
         else
