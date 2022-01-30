@@ -201,4 +201,23 @@ mod tests {
 
         just_stop("test/ftp/Justfile");
     }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ssh_get_works_when_typical() {
+        let out_file = "_test_ssh_get_works_when_typical";
+        just_start("test/ssh/Justfile");
+        let result = Driver::get(
+            "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
+            out_file,
+            "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f",
+            &mut WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result);
+
+        just_stop("test/ssh/Justfile");
+        std::fs::remove_file(out_file).unwrap();
+    }
 }

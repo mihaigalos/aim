@@ -45,7 +45,7 @@ impl SSHHandler {
             + "/"
             + &parsed_address.file);
 
-        let (mut channel, stat) = sess
+        let (channel, stat) = sess
             .scp_recv(Path::new(remote_file))
             .expect(&format!("Remove file does not exist: {}", input));
 
@@ -58,60 +58,5 @@ impl SSHHandler {
             &mut target,
         )
         .expect("Cannot write contents to file.");
-    }
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use serial_test::serial;
-
-    fn just_start(justfile: &str) {
-        use std::env;
-        use std::io::{self, Write};
-        use std::process::Command;
-        let output = Command::new("just")
-            .args([
-                "--justfile",
-                justfile,
-                "_start",
-                env::current_dir().unwrap().to_str().unwrap(),
-            ])
-            .output()
-            .expect("failed to just _start");
-
-        println!("status: {}", output.status);
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
-    }
-
-    fn just_stop(justfile: &str) {
-        use std::env;
-        use std::process::Command;
-        let _ = Command::new("just")
-            .args([
-                "--justfile",
-                justfile,
-                "_stop",
-                env::current_dir().unwrap().to_str().unwrap(),
-            ])
-            .output();
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn test_ssh_get_works_when_typical() {
-        //just_start("test/ssh/Justfile");
-
-        let result = SSHHandler::get(
-            "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
-            "_test_ssh_get_works_when_typical",
-            &mut WrappedBar::new(0, "", false),
-            "",
-        )
-        .await;
-
-        assert!(result);
-
-        //just_stop("test/https/Justfile");
     }
 }
