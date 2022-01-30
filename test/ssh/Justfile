@@ -18,6 +18,7 @@ setup:
 
 start_ssh_server +docker_compose_args="": setup
     #!/bin/bash
+    echo foobar > /tmp/binfile
     docker-compose --file {{ docker_compose_file }} up {{docker_compose_args}} >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
@@ -52,7 +53,6 @@ _test_ssh_server_up:
 _test_aim_get:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
-    echo foobar > /tmp/binfile
     sha_input=$(sha256sum /tmp/binfile | cut -d' ' -f1)
     aim ssh://user:pass@127.0.0.1:2222/tmp/binfile $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
