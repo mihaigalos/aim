@@ -1,25 +1,25 @@
-use std::str;
-
 use sha2::{Digest, Sha256};
+use std::str;
 use std::{fs, io};
+
+use crate::error::ValidateError;
 
 pub struct HashChecker;
 impl HashChecker {
-    pub fn check(filename: &str, expected_hash: &str, silent: bool) -> bool {
-        let mut result = true;
+    pub fn check(filename: &str, expected_hash: &str, silent: bool) -> Result<(), ValidateError> {
+        let mut result = Ok(());
         if filename != "stdout" && (expected_hash != "") {
             let actual_hash = HashChecker::sha256sum(filename);
             if actual_hash != expected_hash {
-                result = false;
+                result = Err(ValidateError::Sha256Mismatch);
             }
             if !silent {
-                if result {
-                    println!("✅ Checksum OK.");
-                } else {
-                    println!(
+                match result {
+                    Ok(()) => println!("✅ Checksum OK."),
+                    Err(ValidateError::Sha256Mismatch) => println!(
                         "❌ Checksum verification failed for {}:\n  expected: {}\n  got:      {}",
                         filename, expected_hash, actual_hash
-                    );
+                    ),
                 }
             }
         }
@@ -52,17 +52,32 @@ fn test_check_api_works_when_typical() {
     let silent = false;
     let expected = "fa701768a0ddfd65fe175ecf9865b6046f151bb05d0d4ad2cef5acb1d4c60c6b";
 
-    let is_match = HashChecker::check("LICENSE.md", expected, silent);
+    let is_match = HashChecker::check("LICENSE.md", expected, silent).is_ok();
 
     assert!(is_match);
 }
 
-#[test]
-fn test_check_api_fails_when_checksum_mismatch() {
-    let silent = true;
-    let expected = "AAAAbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let is_match = HashChecker::check("LICENSE.md", expected, silent);
+    macro_rules! assert_err {
+        ($expression:expr, $($pattern:tt)+) => {
+            match $expression {
+                $($pattern)+ => (),
+                ref e => panic!("expected `{}` but got `{:?}`", stringify!($($pattern)+), e),
+            }
+        }
+    }
 
-    assert!(!is_match);
+    #[test]
+    fn test_check_api_fails_when_checksum_mismatch() {
+        let silent = true;
+        let expected = "AAAAbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+
+        let result = assert_err!(
+            HashChecker::check("LICENSE.md", expected, silent),
+            Err(ValidateError::Sha256Mismatch)
+        );
+    }
 }

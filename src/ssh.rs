@@ -17,13 +17,13 @@ impl SSHHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
-    ) -> bool {
+    ) -> Result<ValidateError> {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
         SSHHandler::_get(input, _output, bar).await;
-        HashChecker::check(_output, expected_sha256, bar.silent)
+        HashChecker::check(_output, expected_sha256, bar.silent)?
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
