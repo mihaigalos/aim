@@ -26,9 +26,8 @@ impl SSHHandler {
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
-        let ssh_host_port = "127.0.0.1:2222";
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let tcp = TcpStream::connect(&ssh_host_port).unwrap();
+        let tcp = TcpStream::connect(&parsed_address.server).unwrap();
         let mut sess = Session::new().unwrap();
 
         sess.set_tcp_stream(tcp);
