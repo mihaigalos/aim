@@ -45,17 +45,19 @@ impl SSHHandler {
             + "/"
             + &parsed_address.file);
 
-        let (remote_file_contents, stat) = sess
+        let (mut channel, stat) = sess
             .scp_recv(Path::new(remote_file))
             .expect(&format!("Remove file does not exist: {}", input));
 
-        let mut target = File::create(output).unwrap();
+        let mut target =
+            File::create(output).expect(&format!("Cannot create output file: {}", output));
         bar.set_length(stat.size());
+
         std::io::copy(
-            &mut bar.output.as_ref().unwrap().wrap_read(remote_file_contents),
+            &mut bar.output.as_ref().unwrap().wrap_read(channel),
             &mut target,
         )
-        .unwrap();
+        .expect("Cannot write contents to file.");
     }
 }
 #[cfg(test)]
@@ -103,7 +105,7 @@ mod tests {
         let result = SSHHandler::get(
             "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
             "_test_ssh_get_works_when_typical",
-            &mut WrappedBar::new_empty(),
+            &mut WrappedBar::new(0, "", false),
             "",
         )
         .await;
