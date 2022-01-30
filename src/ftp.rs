@@ -189,7 +189,7 @@ async fn get_ftp_works_same_filename() {
 
 #[tokio::test]
 async fn get_ftp_resume_works() {
-    let expected_size = 1370827;
+    let expected_size = 989941;
     let out_file = "test/get_ftp_resume_works";
 
     std::fs::copy("test/incomplete_debian_bullseye_ChageLog", out_file).unwrap();
