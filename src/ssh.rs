@@ -27,25 +27,27 @@ impl SSHHandler {
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let tcp = TcpStream::connect(&parsed_address.server).unwrap();
+        let tcp =
+            TcpStream::connect(&parsed_address.server).expect("Cannot connect to SSH address.");
         let mut sess = Session::new().unwrap();
 
         sess.set_tcp_stream(tcp);
-        sess.handshake().expect("SSH handshake failed");
+        sess.handshake().expect("SSH handshake failed.");
         if parsed_address.password != "" {
             sess.userauth_password(&parsed_address.username, &parsed_address.password)
-                .unwrap();
+                .expect("SSH Authentication failed.");
         } else {
             sess.userauth_password(&parsed_address.username, "")
-                .unwrap();
+                .expect("SSH Authentication failed. No password specified. Is passwordless authentication set up?");
         }
         let remote_file = &(String::from("/")
             + &parsed_address.path_segments.join("/")
             + "/"
             + &parsed_address.file);
 
-        let (remote_file_contents, stat) = sess.scp_recv(Path::new(remote_file)).unwrap();
-        let _: ssh2::Stream = remote_file_contents.stream(1);
+        let (remote_file_contents, stat) = sess
+            .scp_recv(Path::new(remote_file))
+            .expect(&format!("Remove file does not exist: {}", input));
 
         let mut target = File::create(output).unwrap();
         bar.set_length(stat.size());
@@ -54,5 +56,60 @@ impl SSHHandler {
             &mut target,
         )
         .unwrap();
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test::serial;
+
+    fn just_start(justfile: &str) {
+        use std::env;
+        use std::io::{self, Write};
+        use std::process::Command;
+        let output = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_start",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output()
+            .expect("failed to just _start");
+
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+    }
+
+    fn just_stop(justfile: &str) {
+        use std::env;
+        use std::process::Command;
+        let _ = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_stop",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ssh_get_works_when_typical() {
+        //just_start("test/ssh/Justfile");
+
+        let result = SSHHandler::get(
+            "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
+            "_test_ssh_get_works_when_typical",
+            &mut WrappedBar::new_empty(),
+            "",
+        )
+        .await;
+
+        assert!(result);
+
+        //just_stop("test/https/Justfile");
     }
 }

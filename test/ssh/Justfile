@@ -14,11 +14,11 @@ docker_compose_file := docker_compose_file_user_pass
 build:
     docker build --no-cache -t {{docker_image}} .
 
-setup:
+_setup:
     @chmod 400 keys/*
     @[ $(dpkg --list | grep sshpass  | wc -l) -gt 0 ] && true || sudo apt install sshpass
 
-start_ssh_server +docker_compose_args="": setup
+_start +docker_compose_args="": _setup
     #!/bin/bash
     echo foobar > /tmp/binfile
     docker-compose --file {{ docker_compose_file }} up {{docker_compose_args}} >/dev/null 2>&1
@@ -28,10 +28,10 @@ start_ssh_server +docker_compose_args="": setup
         [ $? -eq 0 ] && break || sleep 1
     done
 
-stop:
+_stop:
     @docker-compose --file {{ docker_compose_file }} down >/dev/null 2>&1
 
-test: (start_ssh_server "-d") && stop
+test: (_start "-d") && _stop
     #!/bin/bash
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"
@@ -48,6 +48,7 @@ _test_ssh_server_up:
 
 _test_aim_get:
     #!/bin/bash
+    set -x
     test=$(basename $0) && source ../common.sh
     sha_input=$(sha256sum /tmp/binfile | cut -d' ' -f1)
     aim ssh://{{ user }}:{{ pass }}@127.0.0.1:2222/tmp/binfile $test
