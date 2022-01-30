@@ -28,14 +28,14 @@ impl SSHHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let tcp =
-            TcpStream::connect(&parsed_address.server).expect("Cannot connect to SSH address.");
+            TcpStream::connect(&parsed_address.server).expect("Cannot connect to SSH address");
         let mut sess = Session::new().unwrap();
 
         sess.set_tcp_stream(tcp);
-        sess.handshake().expect("SSH handshake failed.");
+        sess.handshake().expect("SSH handshake failed");
         if parsed_address.password != "" {
             sess.userauth_password(&parsed_address.username, &parsed_address.password)
-                .expect("SSH Authentication failed.");
+                .expect("SSH Authentication failed");
         } else {
             sess.userauth_password(&parsed_address.username, "")
                 .expect("SSH Authentication failed. No password specified. Is passwordless authentication set up?");
@@ -57,6 +57,6 @@ impl SSHHandler {
             &mut bar.output.as_ref().unwrap().wrap_read(channel),
             &mut target,
         )
-        .expect("Cannot write contents to file.");
+        .expect("Cannot write contents to file");
     }
 }
