@@ -190,15 +190,11 @@ async fn get_ftp_works_same_filename() {
 #[tokio::test]
 async fn get_ftp_resume_works() {
     let expected_size = 1370827;
-    let out_file = "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
+    let out_file = "test/get_ftp_resume_works";
 
-    std::fs::copy(
-        "test/incomplete_wpa_supplicant-2XX2.9-8-x86_64.pkg.tar.zst",
-        out_file,
-    )
-    .unwrap();
+    std::fs::copy("test/incomplete_debian_bullseye_ChageLog", out_file).unwrap();
     FTPHandler::get(
-        "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
+        "ftp://ftp.fau.de/debian/dists/bullseye/ChangeLog",
         out_file,
         &mut WrappedBar::new_empty(),
         "",
