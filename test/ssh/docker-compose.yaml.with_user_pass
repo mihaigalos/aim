@@ -1,0 +1,21 @@
+---
+version: "2.1"
+services:
+  my-openssh-server:
+    image: my-openssh-server:0.0.1
+    hostname: my-openssh-server #optional
+    environment:
+      - HISTFILE=/root/.history_make_shell
+      - PASSWORD_ACCESS=true
+      - PGID=1000
+      - PUID=1000
+      - SUDO_ACCESS=true
+      - TZ=Europe/London
+      - USER_NAME=user
+      - USER_PASSWORD=pass
+    volumes:
+      - ~/.history_make_shell:/root/.history_make_shell
+      - /tmp/binfile:/tmp/binfile
+    ports:
+      - 2222:2222
+    restart: unless-stopped

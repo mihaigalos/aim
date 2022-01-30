@@ -3,8 +3,21 @@ name = "aim"
 version = "0.1.0"
 edition = "2021"
 description = "🎯 A command line download/upload tool with resume."
-categories = ["command-line-utilities"]
-keywords = ["download", "upload", "resume"]
+categories = [
+    "HTTP client",
+    "command-line-utilities",
+    "network-programming",
+    "web-programming::http-client"
+]
+keywords = [ 
+    "cli",
+    "download",
+    "ftp",
+    "https",
+    "resume",
+    "ssh",
+    "upload"
+]
 repository = "https://github.com/mihaigalos/aim"
 license = "MIT"
 
@@ -22,6 +35,7 @@ netrc = "0.4.1"
 openssl = { version = "0.10", features = ["vendored"] }
 reqwest = { version = "0.11.3", features = ["stream"] }
 sha2 = "0.10.0"
+ssh2 = "0.9.3"
 strfmt = "0.1.6"
 tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = {version="0.6.9", features = ["full"]}

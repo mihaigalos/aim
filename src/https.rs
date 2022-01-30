@@ -7,7 +7,7 @@ use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
 use crate::hash::HashChecker;
-use crate::io::get_output;
+use crate::io;
 use crate::slicer::Slicer;
 
 pub struct HTTPSHandler;
@@ -69,7 +69,7 @@ impl HTTPSHandler {
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let (mut out, mut downloaded) = get_output(output, bar.silent);
+        let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
         let res = Client::new()
             .get(input)

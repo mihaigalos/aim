@@ -8,3 +8,4 @@ pub mod https;
 pub mod io;
 pub mod netrc;
 pub mod slicer;
+pub mod ssh;

@@ -38,7 +38,7 @@ fn construct_progress_bar(
 
 pub struct WrappedBar {
     pub silent: bool,
-    output: Option<indicatif::ProgressBar>,
+    pub output: Option<indicatif::ProgressBar>,
     downloaded_message: String,
     uploaded_message: String,
 }

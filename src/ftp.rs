@@ -7,6 +7,7 @@ use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
+use crate::consts::*;
 use crate::hash::HashChecker;
 use crate::io::get_output;
 use crate::slicer::Slicer;
@@ -68,7 +69,7 @@ impl FTPHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
         let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
-            let mut buffer = vec![0; 26214400usize];
+            let mut buffer = vec![0; BUFFER_SIZE];
             let byte_count = properties.reader.read(&mut buffer[..]).await.unwrap();
 
             buffer.truncate(byte_count);
@@ -188,16 +189,12 @@ async fn get_ftp_works_same_filename() {
 
 #[tokio::test]
 async fn get_ftp_resume_works() {
-    let expected_size = 1370827;
-    let out_file = "test/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst";
+    let expected_size = 989941;
+    let out_file = "test/get_ftp_resume_works";
 
-    std::fs::copy(
-        "test/incomplete_wpa_supplicant-2XX2.9-8-x86_64.pkg.tar.zst",
-        out_file,
-    )
-    .unwrap();
+    std::fs::copy("test/incomplete_debian_bullseye_ChageLog", out_file).unwrap();
     FTPHandler::get(
-        "ftp://ftp.fau.de/archlinux/core/os/x86_64/wpa_supplicant-2:2.9-8-x86_64.pkg.tar.zst",
+        "ftp://ftp.fau.de/debian/dists/bullseye/ChangeLog",
         out_file,
         &mut WrappedBar::new_empty(),
         "",

@@ -12,6 +12,7 @@ impl Driver {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
             }
             "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await,
+            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -23,6 +24,7 @@ impl Driver {
         let result = match &output[0..4] {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
+            "ssh:" => panic!("Currently not implemented."),
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -34,7 +36,9 @@ impl Driver {
     pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) -> bool {
         let mut bar = WrappedBar::new(0, input, silent);
         let result = match &input[0..4] {
-            "http" | "ftp:" | "ftp." => Driver::get(input, output, expected_sha256, &mut bar).await,
+            "http" | "ftp:" | "ftp." | "ssh:" => {
+                Driver::get(input, output, expected_sha256, &mut bar).await
+            }
             _ => Driver::put(input, output, bar).await,
         };
         result
@@ -196,5 +200,24 @@ mod tests {
         assert!(result);
 
         just_stop("test/ftp/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ssh_get_works_when_typical() {
+        let out_file = "_test_ssh_get_works_when_typical";
+        just_start("test/ssh/Justfile");
+        let result = Driver::get(
+            "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
+            out_file,
+            "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f",
+            &mut WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result);
+
+        just_stop("test/ssh/Justfile");
+        std::fs::remove_file(out_file).unwrap();
     }
 }
