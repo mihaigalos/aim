@@ -29,8 +29,14 @@ impl HTTPSHandler {
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let file = tokio::fs::File::open(&input).await.unwrap();
-        let total_size = file.metadata().await.unwrap().len();
+        let file = tokio::fs::File::open(&input)
+            .await
+            .expect("Cannot open input file for HTTPS read");
+        let total_size = file
+            .metadata()
+            .await
+            .expect("Cannot determine input file size for HTTPS read")
+            .len();
         let input_ = input.to_string();
         let output_ = output.to_string();
         let mut reader_stream = ReaderStream::new(file);

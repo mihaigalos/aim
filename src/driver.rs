@@ -30,7 +30,7 @@ impl Driver {
         let result = match &output[0..4] {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
-            "ssh:" => panic!("Currently not implemented."),
+            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
