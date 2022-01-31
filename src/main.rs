@@ -25,10 +25,8 @@ async fn main() {
     let silent = args.is_present("silent");
     let expected_sha256 = args.value_of("SHA256").unwrap_or("");
 
-    let result  = aim::driver::Driver::drive(input, output, silent, expected_sha256).await;
-    if result{
-        std::process::exit(0);
-    } else {
-        std::process::exit(255);
+    match aim::driver::Driver::drive(input, output, silent, expected_sha256).await{
+        Ok(_) => std::process::exit(0),
+        _ => std::process::exit(255),
     }
 }

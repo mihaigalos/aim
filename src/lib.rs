@@ -1,6 +1,7 @@
 pub mod address;
 pub mod bar;
 pub mod consts;
+pub mod driver;
 pub mod error;
 pub mod ftp;
 pub mod hash;

@@ -8,6 +8,7 @@ use tokio_util::io::ReaderStream;
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
+use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io::get_output;
 use crate::slicer::Slicer;
@@ -30,7 +31,7 @@ impl FTPHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
-    ) -> bool {
+    ) -> Result<(), ValidateError> {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
@@ -93,7 +94,7 @@ impl FTPHandler {
         bar.finish_download(&input, &output);
     }
 
-    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
 
@@ -128,7 +129,7 @@ impl FTPHandler {
             .await
             .unwrap();
 
-        true
+        Ok(())
     }
 
     async fn get_stream(
