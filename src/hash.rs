@@ -75,7 +75,7 @@ mod tests {
         let silent = true;
         let expected = "AAAAbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
 
-        let result = assert_err!(
+        let _ = assert_err!(
             HashChecker::check("LICENSE.md", expected, silent),
             Err(ValidateError::Sha256Mismatch)
         );

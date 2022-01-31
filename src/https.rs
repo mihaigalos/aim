@@ -130,7 +130,7 @@ async fn get_https_works() {
 
     let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(result);
+    assert!(result.is_ok());
     std::fs::remove_file(out_file).unwrap();
 }
 
@@ -141,7 +141,7 @@ async fn get_https_works_same_filename() {
 
     let result = HTTPSHandler::get("https://github.com/casey/just/releases/download/0.10.2/just-0.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(result);
+    assert!(result.is_ok());
     std::fs::remove_file("just-0.10.2-x86_64-unknown-linux-musl.tar.gz").unwrap();
 }
 
@@ -155,7 +155,7 @@ async fn get_resume_works() {
     )
     .unwrap();
 
-    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
+    let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
 
     let actual_size = std::fs::metadata(out_file).unwrap().len();
     assert_eq!(actual_size, expected_size);

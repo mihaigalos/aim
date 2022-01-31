@@ -59,25 +59,25 @@ impl Driver {
 #[tokio::test]
 #[should_panic]
 async fn test_panics_when_invalid_output() {
-    Driver::drive("", "https://foo.bar", true, "").await;
+    let _ = Driver::drive("", "https://foo.bar", true, "").await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_panics_when_invalid_input() {
-    Driver::drive("https://foo.bar", "", true, "").await;
+    let _ = Driver::drive("https://foo.bar", "", true, "").await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_get_panics_when_invalid_input() {
-    Driver::get("invalid", "", "", &mut WrappedBar::new(0, "", true)).await;
+    let _ = Driver::get("invalid", "", "", &mut WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_put_panics_when_invalid_input() {
-    Driver::put("", "invalid", WrappedBar::new(0, "", true)).await;
+    let _ = Driver::put("", "invalid", WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
@@ -90,7 +90,7 @@ async fn test_driver_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_driver_https_LICENSE.md").unwrap();
 }
@@ -105,7 +105,7 @@ async fn test_https_get_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_https_LICENSE.md").unwrap();
 }
@@ -120,7 +120,7 @@ async fn test_ftp_get_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_ftp_README.md").unwrap();
 }
@@ -175,7 +175,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
     }
@@ -192,7 +192,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
     }
@@ -208,7 +208,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/ftp/Justfile");
     }
@@ -226,7 +226,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/ssh/Justfile");
         std::fs::remove_file(out_file).unwrap();
