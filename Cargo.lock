@@ -18,6 +18,7 @@ dependencies = [
  "async-stream",
  "async_ftp",
  "clap",
+ "custom_error",
  "dotenv",
  "futures-util",
  "indicatif",
@@ -212,6 +213,12 @@ checksum = "683d6b536309245c849479fba3da410962a43ed8e51c26b729208ec0ac2798d0"
 dependencies = [
  "generic-array",
 ]
+
+[[package]]
+name = "custom_error"
+version = "1.9.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f8a51dd197fa6ba5b4dc98a990a43cc13693c23eb0089ebb0fcc1f04152bca6"
 
 [[package]]
 name = "digest"

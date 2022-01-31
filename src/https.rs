@@ -6,6 +6,7 @@ use tokio_util::io::ReaderStream;
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
+use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
 use crate::slicer::Slicer;
@@ -17,7 +18,7 @@ impl HTTPSHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
-    ) -> bool {
+    ) -> Result<(), ValidateError> {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
@@ -26,7 +27,7 @@ impl HTTPSHandler {
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
-    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> bool {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let file = tokio::fs::File::open(&input).await.unwrap();
         let total_size = file.metadata().await.unwrap().len();
@@ -64,7 +65,7 @@ impl HTTPSHandler {
             .send()
             .await
             .unwrap();
-        return true;
+        Ok(())
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
@@ -129,7 +130,7 @@ async fn get_https_works() {
 
     let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(result);
+    assert!(result.is_ok());
     std::fs::remove_file(out_file).unwrap();
 }
 
@@ -140,7 +141,7 @@ async fn get_https_works_same_filename() {
 
     let result = HTTPSHandler::get("https://github.com/casey/just/releases/download/0.10.2/just-0.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(result);
+    assert!(result.is_ok());
     std::fs::remove_file("just-0.10.2-x86_64-unknown-linux-musl.tar.gz").unwrap();
 }
 
@@ -154,7 +155,7 @@ async fn get_resume_works() {
     )
     .unwrap();
 
-    HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
+    let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
 
     let actual_size = std::fs::metadata(out_file).unwrap().len();
     assert_eq!(actual_size, expected_size);

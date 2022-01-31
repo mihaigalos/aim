@@ -1,4 +1,5 @@
 use crate::bar::WrappedBar;
+use crate::error::ValidateError;
 pub struct Driver;
 
 trait RESTVerbs {
@@ -6,7 +7,12 @@ trait RESTVerbs {
 }
 
 impl Driver {
-    async fn get(input: &str, output: &str, expected_sha256: &str, bar: &mut WrappedBar) -> bool {
+    async fn get(
+        input: &str,
+        output: &str,
+        expected_sha256: &str,
+        bar: &mut WrappedBar,
+    ) -> Result<(), ValidateError> {
         let result = match &input[0..4] {
             "ftp:" | "ftp." => {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
@@ -20,7 +26,7 @@ impl Driver {
         };
         result
     }
-    async fn put(input: &str, output: &str, bar: WrappedBar) -> bool {
+    async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
         let result = match &output[0..4] {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
@@ -33,7 +39,12 @@ impl Driver {
         result
     }
 
-    pub async fn drive(input: &str, output: &str, silent: bool, expected_sha256: &str) -> bool {
+    pub async fn drive(
+        input: &str,
+        output: &str,
+        silent: bool,
+        expected_sha256: &str,
+    ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
         let result = match &input[0..4] {
             "http" | "ftp:" | "ftp." | "ssh:" => {
@@ -48,25 +59,25 @@ impl Driver {
 #[tokio::test]
 #[should_panic]
 async fn test_panics_when_invalid_output() {
-    Driver::drive("", "https://foo.bar", true, "").await;
+    let _ = Driver::drive("", "https://foo.bar", true, "").await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_panics_when_invalid_input() {
-    Driver::drive("https://foo.bar", "", true, "").await;
+    let _ = Driver::drive("https://foo.bar", "", true, "").await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_get_panics_when_invalid_input() {
-    Driver::get("invalid", "", "", &mut WrappedBar::new(0, "", true)).await;
+    let _ = Driver::get("invalid", "", "", &mut WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
 #[should_panic]
 async fn test_put_panics_when_invalid_input() {
-    Driver::put("", "invalid", WrappedBar::new(0, "", true)).await;
+    let _ = Driver::put("", "invalid", WrappedBar::new(0, "", true)).await;
 }
 
 #[tokio::test]
@@ -79,7 +90,7 @@ async fn test_driver_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_driver_https_LICENSE.md").unwrap();
 }
@@ -94,7 +105,7 @@ async fn test_https_get_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_https_LICENSE.md").unwrap();
 }
@@ -109,7 +120,7 @@ async fn test_ftp_get_works_when_typical() {
     )
     .await;
 
-    assert!(result);
+    assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_ftp_README.md").unwrap();
 }
@@ -164,7 +175,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
     }
@@ -181,7 +192,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
     }
@@ -197,7 +208,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/ftp/Justfile");
     }
@@ -215,7 +226,7 @@ mod tests {
         )
         .await;
 
-        assert!(result);
+        assert!(result.is_ok());
 
         just_stop("test/ssh/Justfile");
         std::fs::remove_file(out_file).unwrap();

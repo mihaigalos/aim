@@ -7,6 +7,7 @@ use std::path::Path;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
+use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::slicer::Slicer;
 
@@ -17,7 +18,7 @@ impl SSHHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
-    ) -> bool {
+    ) -> Result<(), ValidateError> {
         let _output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
