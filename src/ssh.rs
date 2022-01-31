@@ -23,10 +23,10 @@ impl SSHHandler {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        SSHHandler::_get(input, _output, bar).await;
+        SSHHandler::_get(input, _output, bar).await?;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SSHHandler::setup_session(input, bar.silent);
 
         let (channel, stat) = session
@@ -42,6 +42,7 @@ impl SSHHandler {
             &mut target,
         )
         .expect("Cannot write contents to file");
+        Ok(())
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {

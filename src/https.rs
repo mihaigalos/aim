@@ -23,7 +23,7 @@ impl HTTPSHandler {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        HTTPSHandler::_get(input, _output, bar).await;
+        HTTPSHandler::_get(input, _output, bar).await?;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
@@ -74,7 +74,7 @@ impl HTTPSHandler {
         Ok(())
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
@@ -106,6 +106,7 @@ impl HTTPSHandler {
         }
 
         bar.finish_download(&input, &output);
+        Ok(())
     }
 
     async fn get_already_uploaded(output: &str, silent: bool) -> u64 {
