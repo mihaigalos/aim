@@ -30,15 +30,16 @@ impl SSHHandler {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let tcp =
             TcpStream::connect(&parsed_address.server).expect("Cannot connect to SSH address");
-        let mut sess = Session::new().unwrap();
+        let mut session = Session::new().unwrap();
 
-        sess.set_tcp_stream(tcp);
-        sess.handshake().expect("SSH handshake failed");
+        session.set_tcp_stream(tcp);
+        session.handshake().expect("SSH handshake failed");
         if parsed_address.password != "" {
-            sess.userauth_password(&parsed_address.username, &parsed_address.password)
+            session
+                .userauth_password(&parsed_address.username, &parsed_address.password)
                 .expect("SSH Authentication failed");
         } else {
-            sess.userauth_password(&parsed_address.username, "")
+            session.userauth_password(&parsed_address.username, "")
                 .expect("SSH Authentication failed. No password specified. Is passwordless authentication set up?");
         }
         let remote_file = &(String::from("/")
@@ -46,7 +47,7 @@ impl SSHHandler {
             + "/"
             + &parsed_address.file);
 
-        let (channel, stat) = sess
+        let (channel, stat) = session
             .scp_recv(Path::new(remote_file))
             .expect(&format!("Remove file does not exist: {}", input));
 
@@ -61,19 +62,20 @@ impl SSHHandler {
         .expect("Cannot write contents to file");
     }
 
-    pub async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let tcp =
             TcpStream::connect(&parsed_address.server).expect("Cannot connect to SSH address");
-        let mut sess = Session::new().unwrap();
+        let mut session = Session::new().unwrap();
 
-        sess.set_tcp_stream(tcp);
-        sess.handshake().expect("SSH handshake failed");
+        session.set_tcp_stream(tcp);
+        session.handshake().expect("SSH handshake failed");
         if parsed_address.password != "" {
-            sess.userauth_password(&parsed_address.username, &parsed_address.password)
+            session
+                .userauth_password(&parsed_address.username, &parsed_address.password)
                 .expect("SSH Authentication failed");
         } else {
-            sess.userauth_password(&parsed_address.username, "")
+            session.userauth_password(&parsed_address.username, "")
                 .expect("SSH Authentication failed. No password specified. Is passwordless authentication set up?");
         }
         let remote_file = &(String::from("/")
@@ -81,19 +83,21 @@ impl SSHHandler {
             + "/"
             + &parsed_address.file);
 
-        let mut file = File::open(&input).expect("Cannot open input file for SSH read");
-        let total_size = file
+        let input_file = File::open(&input).expect("Cannot open input file for SSH read");
+        let total_size = input_file
             .metadata()
             .expect("Cannot determine input file size for HTTPS read")
             .len();
 
-        let channel = sess
+        let mut channel = session
             .scp_send(Path::new(remote_file), 0o644, total_size, None)
             .expect(&format!("Cannot create SSH channel"));
 
+        bar.set_length(total_size);
+
         std::io::copy(
-            &mut file,
-            &mut bar.output.as_ref().unwrap().wrap_write(channel),
+            &mut bar.output.as_ref().unwrap().wrap_read(input_file),
+            &mut channel,
         )
         .expect("Cannot write contents to file");
         Ok(())
