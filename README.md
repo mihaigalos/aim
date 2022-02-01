@@ -45,15 +45,11 @@ Simplicity: download or upload files depending on parameter order with default s
   ```
 
 ### Resume
+Resume support for both download and upload for `http(s)`, `ftp`.
 
-* Download resume:
-  * [x] http
-  * [x] ftp
-  * [x] ssh
-* Upload resume:
-  * [x] http implemented but experimental. You need a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`). `_test_aim_put_resume_binary_file` should cover this case.
-  * [x] ftp
-  * [ ] ssh
+Download and upload support for `ssh`, resume under development.
+
+Http upload needs a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 ### Authentication
 
