@@ -36,7 +36,7 @@ impl FTPHandler {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        FTPHandler::_get(input, _output, bar).await;
+        FTPHandler::_get(input, _output, bar).await?;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
@@ -70,7 +70,7 @@ impl FTPHandler {
         })
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let mut properties = FTPHandler::setup(input, output, bar).await.unwrap();
         loop {
             let mut buffer = vec![0; BUFFER_SIZE];
@@ -99,6 +99,7 @@ impl FTPHandler {
         }
 
         bar.finish_download(&input, &output);
+        Ok(())
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {

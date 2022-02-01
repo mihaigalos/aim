@@ -23,14 +23,20 @@ impl HTTPSHandler {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
-        HTTPSHandler::_get(input, _output, bar).await;
+        HTTPSHandler::_get(input, _output, bar).await?;
         HashChecker::check(_output, expected_sha256, bar.silent)
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let file = tokio::fs::File::open(&input).await.unwrap();
-        let total_size = file.metadata().await.unwrap().len();
+        let file = tokio::fs::File::open(&input)
+            .await
+            .expect("Cannot open input file for HTTPS read");
+        let total_size = file
+            .metadata()
+            .await
+            .expect("Cannot determine input file size for HTTPS read")
+            .len();
         let input_ = input.to_string();
         let output_ = output.to_string();
         let mut reader_stream = ReaderStream::new(file);
@@ -68,7 +74,7 @@ impl HTTPSHandler {
         Ok(())
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
@@ -100,6 +106,7 @@ impl HTTPSHandler {
         }
 
         bar.finish_download(&input, &output);
+        Ok(())
     }
 
     async fn get_already_uploaded(output: &str, silent: bool) -> u64 {

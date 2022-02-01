@@ -30,7 +30,7 @@ impl Driver {
         let result = match &output[0..4] {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
-            "ssh:" => panic!("Currently not implemented."),
+            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -230,5 +230,22 @@ mod tests {
 
         just_stop("test/ssh/Justfile");
         std::fs::remove_file(out_file).unwrap();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ssh_put_works_when_typical() {
+        just_start("test/ssh/Justfile");
+
+        let result = Driver::put(
+            "test/ssh/binary_file.tar.gz",
+            "ssh://user:pass@127.0.0.1:2222/tmp/_test_ssh_put_works_when_typical",
+            WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        //just_stop("test/ssh/Justfile");
     }
 }
