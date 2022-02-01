@@ -231,4 +231,21 @@ mod tests {
         just_stop("test/ssh/Justfile");
         std::fs::remove_file(out_file).unwrap();
     }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ssh_put_works_when_typical() {
+        just_start("test/ssh/Justfile");
+
+        let result = Driver::put(
+            "test/ssh/binary_file.tar.gz",
+            "ssh://user:pass@127.0.0.1:2222/tmp/_test_ssh_put_works_when_typical",
+            WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        //just_stop("test/ssh/Justfile");
+    }
 }

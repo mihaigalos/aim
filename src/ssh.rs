@@ -54,7 +54,7 @@ impl SSHHandler {
             .len();
 
         let mut channel = session
-            .scp_send(Path::new(&remote_file), 0o644, total_size, None)
+            .scp_send(Path::new(&remote_file), 0o777, total_size, None)
             .expect(&format!("Cannot create SSH channel"));
 
         bar.set_length(total_size);
