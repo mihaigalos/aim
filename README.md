@@ -18,7 +18,7 @@ Simplicity: download or upload files depending on parameter order with default s
   * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
   * `aim source.file https://domain.com/source.file` -> Upload.
-
+* support for `http(s)`, `ftp`, `ssh`.
 * resumable file transfers.
 * optional check of sha256 checksum:
   ```rust
@@ -47,7 +47,8 @@ Simplicity: download or upload files depending on parameter order with default s
 ### Resume
 Resume support for both download and upload for `http(s)`, `ftp`.
 
-Download and upload support for `ssh`, resume under development.
+Download and upload support for `ssh`, resume (using `sftp`) under development.
+Currently, only user/pass auth working for `ssh`. Key support under development.
 
 Http upload needs a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
