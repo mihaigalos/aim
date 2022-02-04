@@ -50,7 +50,7 @@ Resume support for both download and upload for `http(s)`, `ftp`.
 Download and upload support for `ssh`, resume (using `sftp`) under development.
 Currently, only user/pass auth working for `ssh`. Key support under development.
 
-Http upload needs a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
+If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 ### Authentication
 
