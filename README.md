@@ -60,7 +60,7 @@ machine mydomain.com login myuser password mypass port server_port
 ```
 ### Docker
 
-For convenience, an alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
+For convenience, alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
 
 ```bash
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
