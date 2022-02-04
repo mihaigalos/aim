@@ -12,10 +12,7 @@ categories = [
 keywords = [ 
     "cli",
     "download",
-    "ftp",
-    "https",
     "resume",
-    "ssh",
     "upload"
 ]
 repository = "https://github.com/mihaigalos/aim"
