@@ -50,7 +50,7 @@ Resume support for both download and upload for `http(s)`, `ftp`.
 Download and upload support for `ssh`, resume (using `sftp`) under development.
 Currently, only user/pass auth working for `ssh`. Key support under development.
 
-Http upload needs a webserver implementing `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
+If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 ### Authentication
 
@@ -60,7 +60,7 @@ machine mydomain.com login myuser password mypass port server_port
 ```
 ### Docker
 
-For convenience, an alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
+For convenience, alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
 
 ```bash
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
