@@ -14,9 +14,9 @@ services:
       - TZ=Europe/London
       - USER_NAME=user #optional
     volumes:
-      - /path/to/appdata/config:/config
       - $PWD/keys/id_ed25519.pub:/root/.ssh/id_ed25519.pub
+      - /tmp/foobar_keys:/tmp/foobar_keys
       - ~/.history_make_shell:/root/.history_make_shell
     ports:
-      - 2222:2222
+      - 2223:2222
     restart: unless-stopped

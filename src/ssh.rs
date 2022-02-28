@@ -75,7 +75,7 @@ impl SSHHandler {
 
         session.set_tcp_stream(tcp);
         session.handshake().expect("SSH handshake failed");
-        if parsed_address.password != "" {
+        if parsed_address.password != "anonymous" {
             session
                 .userauth_password(&parsed_address.username, &parsed_address.password)
                 .expect("SSH Authentication failed");

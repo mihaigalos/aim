@@ -9,7 +9,6 @@ docker_compose_file_user_pass := "docker-compose.yaml.with_user_pass"
 user := "user"
 pass := "pass"
 
-docker_compose_file := docker_compose_file_user_pass
 
 build:
     docker build --no-cache -t {{docker_image}} .
@@ -18,20 +17,31 @@ _setup:
     @chmod 400 keys/*
     @[ $(dpkg --list | grep sshpass  | wc -l) -gt 0 ] && true || sudo apt install sshpass
 
-_start _="": _setup
+_start_with_user_pass _="": _setup
     #!/bin/bash
     echo foobar > /tmp/binfile
-    docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file }} up -d >/dev/null 2>&1
+    docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_user_pass }} up -d >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
         sshpass -p {{ pass }} ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2222 'exit'
         [ $? -eq 0 ] && break || sleep 1
     done
 
-_stop:
-    @docker-compose --file {{ docker_compose_file }} down >/dev/null 2>&1
+_start_with_keys _="": _setup
+    #!/bin/bash
+    echo foobar_keys > /tmp/foobar_keys
+    docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_keys }} up -d >/dev/null 2>&1
+    max_seconds=30
+    for i in 1..$max_seconds; do
+        sshpass -p {{ pass }} ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2223 'exit'
+        [ $? -eq 0 ] && break || sleep 1
+    done
 
-test: _start && _stop
+_stop:
+    @docker-compose --file {{ docker_compose_file_user_pass }} down >/dev/null 2>&1
+    @docker-compose --file {{ docker_compose_file_keys }} down >/dev/null 2>&1
+
+test: _start_with_user_pass _start_with_keys && _stop
     #!/bin/bash
     source ../common.sh
     highlight "\nRunning tests in $PWD\n\n"
