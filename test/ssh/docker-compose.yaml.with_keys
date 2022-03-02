@@ -1,7 +1,7 @@
 ---
 version: "2.1"
 services:
-  my-openssh-server:
+  my-openssh-server_with_keys:
     image: my-openssh-server:0.0.1
     hostname: my-openssh-server #optional
     environment:
@@ -19,4 +19,3 @@ services:
       - ~/.history_make_shell:/root/.history_make_shell
     ports:
       - 2223:2222
-    restart: unless-stopped

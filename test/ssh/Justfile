@@ -19,6 +19,7 @@ _setup:
 
 _start_with_user_pass _="": _setup
     #!/bin/bash
+    echo "Starting ssh docker with user/pass."
     echo foobar > /tmp/binfile
     docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_user_pass }} up -d >/dev/null 2>&1
     max_seconds=30
@@ -29,17 +30,18 @@ _start_with_user_pass _="": _setup
 
 _start_with_keys _="": _setup
     #!/bin/bash
+    echo "Starting ssh docker with ssh keys."
     echo foobar_keys > /tmp/foobar_keys
     docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_keys }} up -d >/dev/null 2>&1
     max_seconds=30
     for i in 1..$max_seconds; do
-        sshpass -p {{ pass }} ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2223 'exit'
+        ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2223 'exit'
         [ $? -eq 0 ] && break || sleep 1
     done
 
 _stop:
-    @docker-compose --file {{ docker_compose_file_user_pass }} down >/dev/null 2>&1
-    @docker-compose --file {{ docker_compose_file_keys }} down >/dev/null 2>&1
+    @docker-compose --file {{ docker_compose_file_user_pass }} down --remove-orphans
+    @docker-compose --file {{ docker_compose_file_keys }} down --remove-orphans
 
 test: _start_with_user_pass _start_with_keys && _stop
     #!/bin/bash
@@ -56,11 +58,20 @@ _test_ssh_server_up:
     sshpass -p {{ pass }} ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2222 'exit'
     [ $? -eq 0 ] && ok || err "Couldn't connect to local dockerized ssh server."
 
-_test_aim_get:
+_test_aim_get_with_user_pass:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
     sha_input=$(sha256sum /tmp/binfile | cut -d' ' -f1)
     aim ssh://{{ user }}:{{ pass }}@127.0.0.1:2222/tmp/binfile $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm $test
+
+_test_aim_get_with_ssh_keys:
+    #!/bin/bash
+    test=$(basename $0) && source ../common.sh
+    sha_input=$(sha256sum /tmp/binfile | cut -d' ' -f1)
+    aim ssh://{{ user }}@127.0.0.1:2223/tmp/binfile $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm $test

@@ -149,6 +149,25 @@ mod tests {
         io::stderr().write_all(&output.stderr).unwrap();
     }
 
+    fn just_start_with_keys(justfile: &str) {
+        use std::env;
+        use std::io::{self, Write};
+        use std::process::Command;
+        let output = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_start_with_keys",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output()
+            .expect("failed to just _start");
+
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+    }
+
     fn just_stop(justfile: &str) {
         use std::env;
         use std::process::Command;
@@ -217,9 +236,9 @@ mod tests {
     #[serial]
     async fn test_ssh_get_works_when_typical() {
         let out_file = "_test_ssh_get_works_when_typical";
-        just_start("test/ssh/Justfile");
+        just_start_with_keys("test/ssh/Justfile");
         let result = Driver::get(
-            "ssh://user:pass@127.0.0.1:2222/tmp/binfile",
+            "ssh://user@127.0.0.1:2223/tmp/binfile",
             out_file,
             "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f",
             &mut WrappedBar::new(0, "", false),
@@ -235,11 +254,11 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_ssh_put_works_when_typical() {
-        just_start("test/ssh/Justfile");
+        just_start_with_keys("test/ssh/Justfile");
 
         let result = Driver::put(
             "test/ssh/binary_file.tar.gz",
-            "ssh://user:pass@127.0.0.1:2222/tmp/_test_ssh_put_works_when_typical",
+            "ssh://user@127.0.0.1:2223/tmp/_test_ssh_put_works_when_typical",
             WrappedBar::new(0, "", false),
         )
         .await;
