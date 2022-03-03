@@ -80,6 +80,7 @@ impl SSHHandler {
                 .userauth_password(&parsed_address.username, &parsed_address.password)
                 .expect("SSH Authentication failed");
         } else {
+            // session.userauth_pubkey_file(&parsed_address.username, "")
             session.userauth_password(&parsed_address.username, "")
                 .expect("SSH Authentication failed. No password specified. Is passwordless authentication set up?");
         }
