@@ -213,3 +213,18 @@ async fn parse_works_with_netrc_mixin() {
     assert_eq!(actual, expected);
     std::fs::remove_file(".netrc.test").unwrap();
 }
+
+#[tokio::test]
+async fn parse_works_when_ssh_user() {
+    let expected = ParsedAddress {
+        server: "localhost:2223".to_string(),
+        username: "user".to_string(),
+        password: "anonymous".to_string(),
+        path_segments: vec!["".to_string()],
+        file: "file".to_string(),
+    };
+
+    let actual = ParsedAddress::parse_address("ssh://user@localhost:2223/file", true);
+
+    assert_eq!(actual, expected);
+}
