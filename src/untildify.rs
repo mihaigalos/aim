@@ -1,3 +1,5 @@
+// Remove this file and use the untildify dependency once this is merged: https://github.com/sathishsoundharajan/untildify/pull/2
+
 use regex::Regex;
 use std::env;
 use std::path::PathBuf;
