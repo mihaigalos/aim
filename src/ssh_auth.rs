@@ -2,7 +2,8 @@ use std::path::Path;
 
 use crate::untildify::untildify;
 
-fn get_possible_ssh_keys_path(silent: bool) -> String {
+pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
+    let mut result: Vec<String> = vec![];
     let candidates = vec![
         "id_ed25519",
         "id_rsa",
@@ -17,24 +18,15 @@ fn get_possible_ssh_keys_path(silent: bool) -> String {
             if !silent {
                 println!("🔑 Parsed ssh key from: {}", candidate);
             }
-            return candidate.to_string();
+            result.push(candidate.to_string());
         }
-    }
-    return "".to_string();
-}
-
-pub fn get_ssh_keys_path(silent: bool) -> Option<String> {
-    let mut result = None;
-    let path = get_possible_ssh_keys_path(silent);
-    if path != "" {
-        result = Some(path);
     }
     result
 }
 
 #[test]
-fn test_get_ssh_keys_path_works_when_typical() {
-    let actual = get_ssh_keys_path(true);
+fn test_get_possible_ssh_keys_path_when_typical() {
+    let actual = get_possible_ssh_keys_path(false);
 
-    assert!(actual.is_some());
+    assert!(actual.len() > 0);
 }
