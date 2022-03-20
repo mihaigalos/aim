@@ -70,8 +70,8 @@ _test_aim_get_with_user_pass:
 _test_aim_get_with_ssh_keys:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
-    sha_input=$(sha256sum /tmp/binfile | cut -d' ' -f1)
-    aim ssh://{{ user }}@127.0.0.1:2223/tmp/binfile $test
+    sha_input=$(sha256sum /tmp/foobar_keys | cut -d' ' -f1)
+    aim ssh://{{ user }}@127.0.0.1:2223/tmp/foobar_keys $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm $test

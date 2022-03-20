@@ -32,7 +32,7 @@ impl SSHHandler {
 
         let (channel, stat) = session
             .scp_recv(Path::new(&remote_file))
-            .expect(&format!("Remove file does not exist: {}", input));
+            .expect(&format!("Remote file does not exist: {}", input));
 
         let mut target =
             File::create(output).expect(&format!("Cannot create output file: {}", output));
@@ -84,7 +84,6 @@ impl SSHHandler {
             let ssh_keys = get_possible_ssh_keys_path(silent);
             let mut is_ok = false;
             for ssh_key in ssh_keys.iter() {
-                println!("Trying {}", ssh_key);
                 if session
                     .userauth_pubkey_file(
                         &parsed_address.username,
