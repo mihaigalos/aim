@@ -12,7 +12,7 @@ pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
         "test/ssh/keys/id_ed25519",
         "test/ssh/keys/id_rsa",
         "~/.ssh/id_rsa",
-        "~/.ssh/keys/id_ed25519",
+        "~/.ssh/id_ed25519",
     ];
     for candidate in candidates {
         let candidate = untildify(&candidate);

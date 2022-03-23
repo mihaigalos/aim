@@ -54,10 +54,33 @@ If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [pa
 
 ### Authentication
 
+#### Basicauth in url
+
+Just use the syntax `protocol://user:pass@server:port`. This can be used for all `http(s)`, `ftp` and `ssh`.
+
+Example for downloading:
+
+```bash
+aim ftp://user:pass@127.0.0.1:21/myfile .
+```
+
+#### Netrc
+
 Create a file named `.netrc` with read permissions in `~` or the current folder you're running `aim` from to automate login to that endpoint:
 ```bash
 machine mydomain.com login myuser password mypass port server_port
 ```
+
+#### SSH keys
+
+Keys that match the following patterns are automatically tried:
+* id_ed25519
+* id_rsa
+* keys/id_ed25519
+* keys/id_rsa
+* ~/.ssh/id_rsa
+* ~/.ssh/keys/id_ed25519
+
 ### Docker
 
 For convenience, alpine-based docker images for `x64` and `aarch64` are available, so arguments can be passed directly to them.
