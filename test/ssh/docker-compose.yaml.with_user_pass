@@ -1,7 +1,7 @@
 ---
 version: "2.1"
 services:
-  my-openssh-server:
+  my-openssh-server_with_user_pass:
     image: my-openssh-server:0.0.1
     hostname: my-openssh-server #optional
     environment:
@@ -18,4 +18,3 @@ services:
       - /tmp/binfile:/tmp/binfile
     ports:
       - 2222:2222
-    restart: unless-stopped

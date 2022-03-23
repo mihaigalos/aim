@@ -24,6 +24,7 @@ dependencies = [
  "indicatif",
  "netrc",
  "openssl",
+ "regex",
  "reqwest",
  "serial_test",
  "sha2",

@@ -10,3 +10,5 @@ pub mod io;
 pub mod netrc;
 pub mod slicer;
 pub mod ssh;
+pub mod ssh_auth;
+pub mod untildify;

@@ -2,6 +2,8 @@ use netrc::Netrc;
 use std::io::BufReader;
 use std::path::Path;
 
+use crate::untildify::untildify;
+
 fn get_possible_netrc_path(silent: bool) -> String {
     let candidates = vec![
         ".netrc",
@@ -12,6 +14,7 @@ fn get_possible_netrc_path(silent: bool) -> String {
         "~/.netrc",
     ];
     for candidate in candidates {
+        let candidate = untildify(&candidate);
         if Path::new(&candidate).exists() {
             if !silent {
                 println!("🔑 Parsed .netrc from: {}", candidate);

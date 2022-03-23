@@ -39,5 +39,8 @@ tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = {version="0.6.9", features = ["full"]}
 url = "1.7.2"
 
+regex = "1.5.4" # Remove this dep once this is merged: https://github.com/sathishsoundharajan/untildify/pull/2
+#untildify = "0.1.0" Remove comment once this is merged: https://github.com/sathishsoundharajan/untildify/pull/2
+
 [dev-dependencies]
 serial_test = "0.5.1"
