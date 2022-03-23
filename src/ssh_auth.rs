@@ -9,6 +9,8 @@ pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
         "id_rsa",
         "keys/id_ed25519",
         "keys/id_rsa",
+        "test/ssh/keys/id_ed25519",
+        "test/ssh/keys/id_rsa",
         "~/.ssh/id_rsa",
         "~/.ssh/keys/id_ed25519",
     ];

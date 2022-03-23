@@ -4,20 +4,6 @@ use regex::Regex;
 use std::env;
 use std::path::PathBuf;
 
-/// Convert a tilde path to an absolute path: ~/Desktop → /Users/sathish/Desktop
-///
-/// Example
-///
-/// ```
-/// use untildify::untildify;
-///
-/// fn main() {
-///    println!("Untildify : {}", untildify::untildify("~/Desktop")); // prints /Users/<user_name>/Desktop
-///    println!("Untildify : {}", untildify("~/a/b/c/d/e")); // prints "/User/Untildify/a/b/c/d/e"
-///    println!("Untildify : {}", untildify("~/")); // prints "/User/Untildify/"
-/// }
-/// ```
-
 pub fn untildify(input_path: &str) -> String {
     if input_path.is_empty() {
         return String::from(input_path);

@@ -238,9 +238,9 @@ mod tests {
         let out_file = "_test_ssh_get_works_when_typical";
         just_start_with_keys("test/ssh/Justfile");
         let result = Driver::get(
-            "ssh://user@127.0.0.1:2223/tmp/binfile",
+            "ssh://user@127.0.0.1:2223/tmp/foobar_keys",
             out_file,
-            "aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f",
+            "364f419c559bd3eb24434b97353cfaa4792cc70c9151f9cd8274bbe16b42a29a",
             &mut WrappedBar::new(0, "", false),
         )
         .await;
