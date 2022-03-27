@@ -213,12 +213,12 @@ async fn get_ftp_works_same_filename() {
 
 #[tokio::test]
 async fn get_ftp_resume_works() {
-    let expected_size = 989941;
+    let expected_size = 163806;
     let out_file = "test/get_ftp_resume_works";
 
-    std::fs::copy("test/incomplete_debian_bullseye_ChageLog", out_file).unwrap();
+    std::fs::copy("test/incomplete_resumable_file", out_file).unwrap();
     let _ = FTPHandler::get(
-        "ftp://ftp.fau.de/debian/dists/bullseye/ChangeLog",
+        "ftp://ftp.fau.de:21/debian/dists/unstable/Release",
         out_file,
         &mut WrappedBar::new_empty(),
         "",
