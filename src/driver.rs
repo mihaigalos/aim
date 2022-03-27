@@ -46,13 +46,19 @@ impl Driver {
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
-        let result = match &input[0..4] {
-            "http" | "ftp:" | "ftp." | "ssh:" => {
-                Driver::get(input, output, expected_sha256, &mut bar).await
-            }
-            _ => Driver::put(input, output, bar).await,
-        };
-        result
+
+        if input.contains("http:")
+            || input.contains("https:")
+            || input.contains("ftp:")
+            || input.contains("ssh:")
+        {
+            return Driver::get(input, output, expected_sha256, &mut bar).await;
+        } else {
+            return match output {
+                "stdout" => crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await,
+                _ => Driver::put(input, output, bar).await,
+            };
+        }
     }
 }
 
@@ -265,6 +271,27 @@ mod tests {
 
         assert!(result.is_ok());
 
-        //just_stop("test/ssh/Justfile");
+        just_stop("test/ssh/Justfile");
     }
+}
+
+#[tokio::test]
+async fn test_http_serve_folder_works_when_typical() {
+    tokio::spawn(async {
+        let _ = crate::http_serve_folder::WarpyWrapper::run(".".to_string()).await;
+    });
+
+    use tokio::time::*;
+    sleep(Duration::from_millis(2000)).await;
+    let result = Driver::get(
+        "http://127.0.0.1:8082/test/http_serve_folder/test.file",
+        "downloaded_test_http_serve_folder_works_when_typical",
+        "",
+        &mut WrappedBar::new(0, "", true),
+    )
+    .await;
+
+    assert!(result.is_ok());
+
+    std::fs::remove_file("downloaded_test_http_serve_folder_works_when_typical").unwrap();
 }
