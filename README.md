@@ -21,30 +21,12 @@ Simplicity: download or upload files depending on parameter order with default s
   * `aim https://domain.com/source.file .` -> Download.
   * `aim source.file https://domain.com/source.file` -> Upload.
 * support for `http(s)`, `ftp`, `ssh`.
-* resumable file transfers.
-* optional check of sha256 checksum:
-  ```rust
-  aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz . 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
-  ```
-* automatic no display of progressbar if content length <1MB (easy display contents of remote).
 
-* defaults to stdout (pipe-able) to other commands:
-  ```bash
-  aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xvz
-  aim https://www.rust-lang.org/ | htmlq --attribute href a
-  ```
-* use as curl alternative:
-  ```bash
-  aim https://raw.githubusercontent.com/mihaigalos/aim/main/README.md
-  ```
-* configurable indicators via [`indicatif`](https://crates.io/crates/indicatif): you can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
-  ```bash
-  AIM_PROGRESSBAR_DOWNLOADED_MESSAGE="🎯 Downloaded {input} to {output}"
-  AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transfering {url}"
-  AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
-  AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
-  AIM_PROGRESSBAR_UPLOADED_MESSAGE="🎯 Uploaded {input} to {output}"
-  ```
+#### Optional check of sha256
+To validate that a download matches a desired checksum, just list it at the end when invoking `aim`. 
+```rust
+aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz . 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
+```
 
 #### Resume
 Resume support for both download and upload for `http(s)`, `ftp`.
@@ -55,7 +37,6 @@ Currently, only user/pass auth working for `ssh`. Key support under development.
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 #### Sharing a folder
-
 `aim` can serve a folder over `http` on one device so that you can download it on another.
 
 `Machine A`
@@ -69,8 +50,31 @@ aim http://ip_of_Machine_A # list contents
 aim http://ip_of_Machine_A/file . # download
 ```
 
+#### Indicators
+By default, a progressbar is disaplayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
 
+You can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
+```bash
+AIM_PROGRESSBAR_DOWNLOADED_MESSAGE="🎯 Downloaded {input} to {output}"
+AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transfering {url}"
+AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
+AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
+AIM_PROGRESSBAR_UPLOADED_MESSAGE="🎯 Uploaded {input} to {output}"
+```
 
+By default, no progressbar is displayed if content length <1MB (easy display contents of remote).
+
+#### Output
+
+Default output is stdout (pipe-able) to other commands:
+```bash
+aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xvz
+aim https://www.rust-lang.org/ | htmlq --attribute href a
+```
+`aim` is therefore usable as curl alternative:
+```bash
+aim https://raw.githubusercontent.com/mihaigalos/aim/main/README.md
+```
 #### Authentication
 
 ##### Basicauth in url
