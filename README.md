@@ -47,7 +47,7 @@ aim . # to serve current folder
 `Machine B`
 ```bash
 aim http://ip_of_Machine_A # list contents
-aim http://ip_of_Machine_A/file . # download
+aim http://ip_of_Machine_A:8082/file . # download
 ```
 
 #### Indicators
