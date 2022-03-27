@@ -14,6 +14,8 @@ A command line download/upload tool with resume.
 Simplicity: download or upload files depending on parameter order with default settings.
 
 ### Features
+
+#### Download / Upload
 * default action implied from parameter order.
   * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
@@ -44,7 +46,7 @@ Simplicity: download or upload files depending on parameter order with default s
   AIM_PROGRESSBAR_UPLOADED_MESSAGE="🎯 Uploaded {input} to {output}"
   ```
 
-### Resume
+#### Resume
 Resume support for both download and upload for `http(s)`, `ftp`.
 
 Download and upload support for `ssh`, resume (using `sftp`) under development.
@@ -52,9 +54,26 @@ Currently, only user/pass auth working for `ssh`. Key support under development.
 
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
-### Authentication
+#### Sharing a folder
 
-#### Basicauth in url
+`aim` can serve a folder over `http` on one device so that you can download it on another.
+
+`Machine A`
+```bash
+aim . # to serve current folder
+```
+
+`Machine B`
+```bash
+aim http://ip_of_Machine_A # list contents
+aim http://ip_of_Machine_A/file . # download
+```
+
+
+
+#### Authentication
+
+##### Basicauth in url
 
 Just use the syntax `protocol://user:pass@server:port`. This can be used for all `http(s)`, `ftp` and `ssh`.
 
