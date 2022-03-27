@@ -4,7 +4,7 @@ use warpy;
 pub struct WarpyWrapper;
 
 impl WarpyWrapper {
-    pub async fn http_serve_folder(folder: String) -> Result<(), ValidateError> {
+    pub async fn run(folder: String) -> Result<(), ValidateError> {
         let ip = [0, 0, 0, 0];
         let port = 8082;
         let footer = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));

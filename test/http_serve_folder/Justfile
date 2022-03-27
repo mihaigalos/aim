@@ -1,0 +1,36 @@
+# Use $0 as recipe name in tests
+set positional-arguments
+
+default:
+    @just --list
+
+server_port := "8082"
+
+_start dirname=".":
+    #!/bin/bash
+    source ../common.sh
+    aim {{ dirname }} &
+    sleep 2
+
+@_stop:
+    pgrep aim | xargs kill -9
+
+test: _start && _stop
+    #!/bin/bash
+
+    source ../common.sh
+    highlight "\nRunning tests in $PWD\n\n"
+    for test in $(grep ^_test_ Justfile | cut -d':' -f1);
+    do
+        highlight "$test "
+        just $test && true || err "Stopping."
+    done
+
+_test_aim_get_selfhosted_works_when_typical:
+    #!/bin/bash
+    test=$(basename $0) && source ../common.sh
+    sha_input=$(sha256sum test.file | cut -d' ' -f1)
+    aim -s http://127.0.0.1:{{server_port}}/test.file $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm $test
