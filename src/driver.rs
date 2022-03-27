@@ -47,24 +47,21 @@ impl Driver {
     ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
 
-        if input == "." && output == "stdout" {
-            return crate::http_serve_folder::WarpyWrapper::http_serve_folder(input.to_string())
-                .await;
-        }
-
-        let result = match &input[0..4] {
-            "http" | "ftp:" | "ftp." | "ssh:" => {
-                Driver::get(input, output, expected_sha256, &mut bar).await
-            }
-            _ => match output {
+        if input.contains("http:")
+            || input.contains("https:")
+            || input.contains("ftp:")
+            || input.contains("ssh:")
+        {
+            return Driver::get(input, output, expected_sha256, &mut bar).await;
+        } else {
+            return match output {
                 "stdout" => {
                     crate::http_serve_folder::WarpyWrapper::http_serve_folder(input.to_string())
                         .await
                 }
                 _ => Driver::put(input, output, bar).await,
-            },
-        };
-        result
+            };
+        }
     }
 }
 
