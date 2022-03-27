@@ -32,7 +32,6 @@ impl ParsedAddress {
     pub fn parse_address(address: &str, silent: bool) -> ParsedAddress {
         let netrc = netrc(silent);
         let url = Url::parse(address).unwrap();
-        println!("{}", url);
         let server = format!(
             "{}:{}",
             url.host_str()
