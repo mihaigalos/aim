@@ -86,14 +86,14 @@ Example for downloading:
 aim ftp://user:pass@127.0.0.1:21/myfile .
 ```
 
-#### Netrc
+##### Netrc
 
 Create a file named `.netrc` with read permissions in `~` or the current folder you're running `aim` from to automate login to that endpoint:
 ```bash
 machine mydomain.com login myuser password mypass port server_port
 ```
 
-#### SSH keys
+##### SSH keys
 
 Keys that match the following patterns are automatically tried:
 * id_ed25519
