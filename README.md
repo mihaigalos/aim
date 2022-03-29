@@ -50,7 +50,7 @@ aim http://ip_of_Machine_A:8082/file . # download
 ```
 
 #### Indicators
-By default, a progressbar is disaplayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
+By default, a progressbar is displayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
 
 You can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
 ```bash
