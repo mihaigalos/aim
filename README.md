@@ -110,5 +110,20 @@ For convenience, alpine-based docker images for `x64` and `aarch64` are availabl
 ```bash
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
 ```
+
+#### Hosting on machine A
+```
+cd $(mktemp -d)
+echo hello > myfile
+docker run --rm -it -v $(pwd):/src --user $UID:$UID -p 8082:8082 mihaigalos/aim /src
+``` 
+#### Downloading on machine B
+
+Adapt IP to match that of machine `A`.
+
+```bash
+docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8082/myfile /src/myfile
+```
+
 ### Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
