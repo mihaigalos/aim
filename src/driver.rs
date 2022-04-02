@@ -284,7 +284,7 @@ async fn test_http_serve_folder_works_when_typical() {
     use tokio::time::*;
     sleep(Duration::from_millis(2000)).await;
     let result = Driver::get(
-        "http://127.0.0.1:8082/test/http_serve_folder/test.file",
+        "http://127.0.0.1:8080/test/http_serve_folder/test.file",
         "downloaded_test_http_serve_folder_works_when_typical",
         "",
         &mut WrappedBar::new(0, "", true),

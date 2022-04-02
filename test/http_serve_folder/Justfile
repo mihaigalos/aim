@@ -4,7 +4,7 @@ set positional-arguments
 default:
     @just --list
 
-server_port := "8082"
+server_port := "8080"
 
 _start dirname=".":
     #!/bin/bash
