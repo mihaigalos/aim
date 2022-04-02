@@ -36,7 +36,7 @@ Download and upload support for `ssh`, resume (using `sftp`) under development.
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 #### Sharing a folder
-`aim` can serve a folder over `http` on one device so that you can download it on another.
+`aim` can serve a folder over `http` on one device so that you can download it on another. By default, the serving port is `8080` or the next free port.
 
 `Machine A`
 ```bash
@@ -45,8 +45,8 @@ aim . # to serve current folder
 
 `Machine B`
 ```bash
-aim http://ip_of_Machine_A:8082 # list contents
-aim http://ip_of_Machine_A:8082/file . # download
+aim http://ip_of_Machine_A:8080 # list contents
+aim http://ip_of_Machine_A:8080/file . # download
 ```
 
 #### Indicators
@@ -115,14 +115,14 @@ docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.g
 ```
 cd $(mktemp -d)
 echo hello > myfile
-docker run --rm -it -v $(pwd):/src --user $UID:$UID -p 8082:8082 mihaigalos/aim /src
+docker run --rm -it -v $(pwd):/src --user $UID:$UID -p 8080:8080 mihaigalos/aim /src
 ``` 
 #### Downloading on machine B
 
 Adapt IP to match that of machine `A`.
 
 ```bash
-docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8082/myfile /src/myfile
+docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8080/myfile /src/myfile
 ```
 
 ### Similar work

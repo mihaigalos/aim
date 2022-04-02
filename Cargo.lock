@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.1.0"
+version = "1.1.1"
 dependencies = [
  "async-stream",
  "async_ftp",
@@ -1746,11 +1746,12 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.1.2"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb16582fd4054ec28e93fec5584a70444f391c7a5dfe3970154a64cab808d80b"
+checksum = "44749e0a063c360e6ff097811dabf90a5b4ae454e58f36594a33baa91cddaa36"
 dependencies = [
  "build_html",
+ "chrono",
  "env_logger",
  "local_ipaddress",
  "log",
