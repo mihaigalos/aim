@@ -15,7 +15,7 @@ async fn main() {
             * Uploading: directly uploads file to URL.\n\
             * if none present, writes to stdout.")
         
-        (@arg SHA256: +takes_value "Expected sha256 for verification. Will return a non-zero if mismatch")
+        (@arg SHA256: +takes_value "Expected sha256 for verification. Will return a non-zero if mismatch.")
     )
     .get_matches_safe()
     .unwrap_or_else(|e| e.exit());
