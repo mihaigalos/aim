@@ -49,6 +49,9 @@ aim http://ip_of_Machine_A:8080 # list contents
 aim http://ip_of_Machine_A:8080/file . # download
 ```
 
+Moreover, since hosting is done over http, the client can even be a browser:
+![hosting example](screenshots/self_hosting.png)
+
 #### Indicators
 By default, a progressbar is displayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
 
