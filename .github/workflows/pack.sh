@@ -60,6 +60,7 @@ make_deb() {
     homepage="https://github.com/mihaigalos/aim"
     maintainer="Mihai Galos <mihaigalos@gmail.com>"
     copyright_years="2021 - "$(date "+%Y")
+    description="A command line download/upload tool with resume."
 
     case $TARGET in
         x86_64*)
@@ -154,14 +155,12 @@ Package: $dpkgname
 Version: $version
 Section: utils
 Priority: optional
-Maintainer: Dan Davison <dandavison7@gmail.com>
+Maintainer: $maintainer
 Architecture: $architecture
 Depends: $depends
 Provides: $PROJECT_NAME
 Conflicts: $conflictname
-Description: Syntax highlighter for git.
- Delta provides language syntax-highlighting, within-line insertion/deletion
- detection, and restructured diff output for git on the command line.
+Description: $description
 EOF
 
     fakeroot dpkg-deb --build "$tempdir" "${dpkgname}_${version}_${architecture}.deb"
