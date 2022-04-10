@@ -13,6 +13,10 @@ A command line download/upload tool with resume.
 ## Why?
 Simplicity: download or upload files depending on parameter order with default settings.
 
+## Installation
+
+Download a release for Linux or MacOS from [releases](https://github.com/mihaigalos/aim/releases). See the [Docker](https://github.com/mihaigalos/aim#docker) section on how to run it platform-independently.
+
 ## Features
 
 ### Download / Upload
