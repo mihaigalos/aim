@@ -2,6 +2,7 @@
 name = "aim"
 version = "1.1.1"
 edition = "2021"
+authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "🎯 A command line download/upload tool with resume."
 categories = [
     "HTTP client",
@@ -24,7 +25,8 @@ license = "MIT"
 [dependencies]
 async_ftp = "6.0.0"
 async-stream = "0.3.2"
-clap = "2.33.2"
+autoclap = "0.2.2"
+clap = { version = "3.1.8", features = ["cargo"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
 futures-util = "0.3.14"
