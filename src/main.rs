@@ -12,7 +12,8 @@ async fn main() {
     let args = app
         .arg(
             Arg::new("INPUT")
-                .help("Input to aim from.")
+                .help("Input to aim from.\n\
+                If input is a folder, it will be served via http.")
                 .takes_value(true)
                 .required(true),
         )
