@@ -8,7 +8,7 @@ impl WarpyWrapper {
         let ip = [0, 0, 0, 0];
         let footer = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
 
-        warpy::server::run_auto_port(folder, ip, footer)
+        warpy::server::run(folder, ip, footer, None, false)
             .await
             .unwrap();
         Ok(())
