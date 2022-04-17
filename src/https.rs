@@ -24,7 +24,7 @@ impl HTTPSHandler {
             _ => output,
         };
         HTTPSHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256, bar.silent)
+        HashChecker::check(_output, expected_sha256)
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
