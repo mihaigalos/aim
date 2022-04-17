@@ -23,7 +23,7 @@ test: build
 
     for d in $(find test -type d); do
         pushd $d > /dev/null
-            [ -f Justfile ] && just test
+            [ -f Justfile ] && just test && true || err "Stopping."
         popd > /dev/null
     done
 
