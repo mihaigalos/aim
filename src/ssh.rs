@@ -25,7 +25,7 @@ impl SSHHandler {
             _ => output,
         };
         SSHHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256, bar.silent)
+        HashChecker::check(_output, expected_sha256)
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SSHHandler::setup_session(input, bar.silent);

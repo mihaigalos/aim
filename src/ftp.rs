@@ -37,7 +37,7 @@ impl FTPHandler {
             _ => output,
         };
         FTPHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256, bar.silent)
+        HashChecker::check(_output, expected_sha256)
     }
 
     async fn setup(
