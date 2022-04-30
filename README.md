@@ -23,7 +23,7 @@ Download a release for Linux or MacOS from [releases](https://github.com/mihaiga
 * default action implied from parameter order.
   * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
-  * `aim source.file https://domain.com/source.file` -> Upload.
+  * `aim source.file https://domain.com/destination.file` -> Upload.
 * support for `http(s)`, `ftp`, `ssh`.
 
 ### Optional check of sha256
