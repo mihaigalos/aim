@@ -128,7 +128,7 @@ docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.g
 ```
 
 ### Hosting on machine A
-```
+```bash
 cd $(mktemp -d)
 echo hello > myfile
 docker run --rm -it -v $(pwd):/src --user $UID:$UID -p 8080:8080 mihaigalos/aim /src
