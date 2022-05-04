@@ -71,14 +71,10 @@ By default, no progressbar is displayed if content length <1MB (easy display con
 
 ### Output
 
-Default output is stdout (pipe-able) to other commands:
+Because default output is stdout, `aim` is pipe-able to other commands:
 ```bash
 aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz | tar xvz
 aim https://www.rust-lang.org/ | htmlq --attribute href a
-```
-`aim` is therefore usable as curl alternative:
-```bash
-aim https://raw.githubusercontent.com/mihaigalos/aim/main/README.md
 ```
 
 ----------------------------------------
