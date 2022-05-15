@@ -1,11 +1,11 @@
 # Use $0 as recipe name in tests
-set positional-arguments
+
+set positional-arguments := true
 
 default:
     @just --list
 
 tool := "vsftp_alpine"
-
 docker_container_registry := "docker.pkg.github.com"
 docker_user_repo := "mihaigalos/docker"
 docker_image_version := "latest"
@@ -13,7 +13,7 @@ docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool 
 server_port := "21"
 
 build:
-    docker build -t {{docker_image}} .
+    docker build -t {{ docker_image }} .
 
 _start dirname="." +args="-d":
     #!/bin/bash
@@ -22,8 +22,8 @@ _start dirname="." +args="-d":
           sleep 0.1
         done 
     }
-    echo "machine 127.0.0.1 login user password pass port {{ server_port }}" > {{dirname}}/.netrc.test_ftp
-    docker run {{args}} \
+    echo "machine 127.0.0.1 login user password pass port {{ server_port }}" > {{ dirname }}/.netrc.test_ftp
+    docker run {{ args }} \
         -it \
         --rm \
         --name aim_tests_ftp \
@@ -31,15 +31,15 @@ _start dirname="." +args="-d":
         -e PASV_MIN_PORT=21100 \
         -e PASV_MAX_PORT=21110 \
         -v $(pwd):/src \
-        -p {{server_port}}:21 \
+        -p {{ server_port }}:21 \
         -p 20:20 \
         -p 21100-21110:21100-21110 \
-        {{docker_image}} > /dev/null \
+        {{ docker_image }} > /dev/null \
     && wait_docker \
     || true
 
 _stop dirname=".":
-    @rm {{dirname}}/.netrc.test_ftp || true
+    @rm {{ dirname }}/.netrc.test_ftp || true
     @docker stop -t 1 aim_tests_ftp > /dev/null 2>&1
     @docker rm --force aim_tests_ftp > /dev/null 2>&1
 

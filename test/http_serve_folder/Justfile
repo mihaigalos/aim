@@ -1,5 +1,6 @@
 # Use $0 as recipe name in tests
-set positional-arguments
+
+set positional-arguments := true
 
 default:
     @just --list
@@ -30,7 +31,7 @@ _test_aim_get_selfhosted_works_when_typical:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
     sha_input=$(sha256sum test.file | cut -d' ' -f1)
-    aim -s http://127.0.0.1:{{server_port}}/test.file $test
+    aim -s http://127.0.0.1:{{ server_port }}/test.file $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
     rm $test

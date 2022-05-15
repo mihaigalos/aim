@@ -9,9 +9,8 @@ docker_compose_file_user_pass := "docker-compose.yaml.with_user_pass"
 user := "user"
 pass := "pass"
 
-
 build:
-    docker build --no-cache -t {{docker_image}} .
+    docker build --no-cache -t {{ docker_image }} .
 
 _setup:
     @chmod 400 keys/*
