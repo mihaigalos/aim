@@ -48,7 +48,7 @@ impl Driver {
     ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
 
-        let _output = match output {
+        let output = match output {
             "." => Slicer::target_with_extension(input),
             _ => output,
         };
