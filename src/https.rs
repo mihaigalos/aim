@@ -9,7 +9,6 @@ use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
-use crate::slicer::Slicer;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
@@ -19,12 +18,8 @@ impl HTTPSHandler {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        let _output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
-        HTTPSHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256)
+        HTTPSHandler::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
@@ -139,17 +134,6 @@ async fn get_https_works() {
 
     assert!(result.is_ok());
     std::fs::remove_file(out_file).unwrap();
-}
-
-#[tokio::test]
-async fn get_https_works_same_filename() {
-    let expected_hash = "280a6edf58076e90d2002b44d38f93dcd708209c446dbcc38344ed6d21a8aaf7";
-    let out_file = ".";
-
-    let result = HTTPSHandler::get("https://github.com/casey/just/releases/download/0.10.2/just-0.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
-
-    assert!(result.is_ok());
-    std::fs::remove_file("just-0.10.2-x86_64-unknown-linux-musl.tar.gz").unwrap();
 }
 
 #[tokio::test]

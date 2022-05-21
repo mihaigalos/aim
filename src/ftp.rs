@@ -11,7 +11,6 @@ use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io::get_output;
-use crate::slicer::Slicer;
 
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
@@ -32,12 +31,8 @@ impl FTPHandler {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        let _output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
-        FTPHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256)
+        FTPHandler::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
     }
 
     async fn setup(
@@ -190,23 +185,6 @@ async fn get_ftp_works() {
     )
     .await;
     std::fs::remove_file(out_file).unwrap();
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn get_ftp_works_same_filename() {
-    let out_file = ".";
-    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
-
-    let result = FTPHandler::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        out_file,
-        &mut WrappedBar::new_empty(),
-        expected_hash,
-    )
-    .await;
-    std::fs::remove_file("README").unwrap();
 
     assert!(result.is_ok());
 }

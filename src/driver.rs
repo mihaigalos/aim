@@ -1,6 +1,7 @@
 use crate::bar::WrappedBar;
 use crate::error::ValidateError;
 pub struct Driver;
+use crate::slicer::Slicer;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -13,6 +14,11 @@ impl Driver {
         expected_sha256: &str,
         bar: &mut WrappedBar,
     ) -> Result<(), ValidateError> {
+        let output = match output {
+            "." => Slicer::target_with_extension(input),
+            _ => output,
+        };
+
         let result = match &input[0..4] {
             "ftp:" | "ftp." => {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
@@ -294,4 +300,21 @@ async fn test_http_serve_folder_works_when_typical() {
     assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_test_http_serve_folder_works_when_typical").unwrap();
+}
+
+#[tokio::test]
+async fn test_ftp_get_works_same_filename() {
+    let out_file = ".";
+    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
+
+    let result = Driver::get(
+        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
+        out_file,
+        expected_hash,
+        &mut WrappedBar::new(0, "", true),
+    )
+    .await;
+    std::fs::remove_file("README").unwrap();
+
+    assert!(result.is_ok());
 }
