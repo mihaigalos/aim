@@ -16,6 +16,9 @@ _start dirname=".":
 @_stop:
     pgrep aim | xargs kill -9
 
+build:
+    true
+
 test: _start && _stop
     #!/bin/bash
 

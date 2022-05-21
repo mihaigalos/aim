@@ -11,7 +11,6 @@ use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io::get_output;
-use crate::slicer::Slicer;
 
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
@@ -32,12 +31,8 @@ impl FTPHandler {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        let _output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
-        FTPHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256)
+        FTPHandler::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
     }
 
     async fn setup(

@@ -9,7 +9,6 @@ use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
-use crate::slicer::Slicer;
 use crate::ssh_auth::get_possible_ssh_keys_path;
 
 pub struct SSHHandler;
@@ -20,12 +19,8 @@ impl SSHHandler {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        let _output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
-        SSHHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256)
+        SSHHandler::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SSHHandler::setup_session(input, bar.silent);

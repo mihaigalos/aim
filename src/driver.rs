@@ -1,6 +1,7 @@
 use crate::bar::WrappedBar;
 use crate::error::ValidateError;
 pub struct Driver;
+use crate::slicer::Slicer;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -47,6 +48,10 @@ impl Driver {
     ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
 
+        let _output = match output {
+            "." => Slicer::target_with_extension(input),
+            _ => output,
+        };
         if input.contains("http:")
             || input.contains("https:")
             || input.contains("ftp:")

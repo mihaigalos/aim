@@ -9,7 +9,6 @@ use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
-use crate::slicer::Slicer;
 
 pub struct HTTPSHandler;
 impl HTTPSHandler {
@@ -19,12 +18,8 @@ impl HTTPSHandler {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        let _output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
-        HTTPSHandler::_get(input, _output, bar).await?;
-        HashChecker::check(_output, expected_sha256)
+        HTTPSHandler::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
