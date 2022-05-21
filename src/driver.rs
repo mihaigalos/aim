@@ -14,6 +14,11 @@ impl Driver {
         expected_sha256: &str,
         bar: &mut WrappedBar,
     ) -> Result<(), ValidateError> {
+        let output = match output {
+            "." => Slicer::target_with_extension(input),
+            _ => output,
+        };
+
         let result = match &input[0..4] {
             "ftp:" | "ftp." => {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
@@ -48,10 +53,6 @@ impl Driver {
     ) -> Result<(), ValidateError> {
         let mut bar = WrappedBar::new(0, input, silent);
 
-        let output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
-        };
         if input.contains("http:")
             || input.contains("https:")
             || input.contains("ftp:")
