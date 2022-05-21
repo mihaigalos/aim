@@ -300,3 +300,20 @@ async fn test_http_serve_folder_works_when_typical() {
 
     std::fs::remove_file("downloaded_test_http_serve_folder_works_when_typical").unwrap();
 }
+
+#[tokio::test]
+async fn test_ftp_get_works_same_filename() {
+    let out_file = ".";
+    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
+
+    let result = Driver::get(
+        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
+        out_file,
+        expected_hash,
+        &mut WrappedBar::new(0, "", true),
+    )
+    .await;
+    std::fs::remove_file("README").unwrap();
+
+    assert!(result.is_ok());
+}

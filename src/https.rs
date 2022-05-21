@@ -137,17 +137,6 @@ async fn get_https_works() {
 }
 
 #[tokio::test]
-async fn get_https_works_same_filename() {
-    let expected_hash = "280a6edf58076e90d2002b44d38f93dcd708209c446dbcc38344ed6d21a8aaf7";
-    let out_file = ".";
-
-    let result = HTTPSHandler::get("https://github.com/casey/just/releases/download/0.10.2/just-0.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
-
-    assert!(result.is_ok());
-    std::fs::remove_file("just-0.10.2-x86_64-unknown-linux-musl.tar.gz").unwrap();
-}
-
-#[tokio::test]
 async fn get_resume_works() {
     let expected_size = 561553;
     let out_file = "test/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz";

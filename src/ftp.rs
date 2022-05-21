@@ -190,23 +190,6 @@ async fn get_ftp_works() {
 }
 
 #[tokio::test]
-async fn get_ftp_works_same_filename() {
-    let out_file = ".";
-    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
-
-    let result = FTPHandler::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        out_file,
-        &mut WrappedBar::new_empty(),
-        expected_hash,
-    )
-    .await;
-    std::fs::remove_file("README").unwrap();
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
 async fn get_ftp_resume_works() {
     let expected_size = 163806;
     let out_file = "test/get_ftp_resume_works";
