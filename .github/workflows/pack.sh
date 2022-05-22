@@ -38,9 +38,9 @@ pack() {
     # archiving
     pushd "$tempdir/$package_name"
     if [ "$OS_NAME" = windows-latest ]; then
-        7z a "../$out_dir/$package_name.zip" *
+        7z a "$out_dir/$package_name.zip" *
     else
-        tar czf "../$out_dir/$package_name.tar.gz" *
+        tar czf "$out_dir/$package_name.tar.gz" *
     fi
     popd
     rm -r "$tempdir"
