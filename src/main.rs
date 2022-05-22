@@ -1,5 +1,3 @@
-extern crate clap;
-
 use autoclap::autoclap;
 use clap::Arg;
 use clap::Command;
@@ -43,13 +41,35 @@ async fn main() {
         .try_get_matches()
         .unwrap_or_else(|e| e.exit());
 
+    tokio::task::spawn_blocking(move || {
+        if let Err(e) = update() {
+            println!("[ERROR] {}", e);
+            ::std::process::exit(1);
+        }
+    })
+    .await
+    .unwrap();
+
     let input = args.value_of("INPUT").unwrap();
     let output = args.value_of("OUTPUT").unwrap_or("stdout");
-    let expected_sha256 = args.value_of("SHA256").unwrap_or("");
     let silent = args.is_present("silent");
+    let expected_sha256 = args.value_of("SHA256").unwrap_or("");
 
     match aim::driver::Driver::drive(input, output, silent, expected_sha256).await {
         Ok(_) => std::process::exit(0),
         _ => std::process::exit(255),
     }
+}
+
+fn update() -> Result<(), Box<dyn ::std::error::Error>> {
+    let status = self_update::backends::github::Update::configure()
+        .repo_owner("mihaigalos")
+        .repo_name("aim")
+        .bin_name("aim")
+        .show_download_progress(true)
+        .current_version(env!("CARGO_PKG_VERSION"))
+        .build()?
+        .update()?;
+    println!("Update status: `{}`!", status.version());
+    Ok(())
 }

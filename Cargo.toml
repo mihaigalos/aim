@@ -34,6 +34,7 @@ indicatif = "0.16.2"
 netrc = "0.4.1"
 openssl = { version = "0.10", features = ["vendored"] }
 reqwest = { version = "0.11.3", features = ["stream"] }
+self_update = { version = "0.30.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.0"
 ssh2 = "0.9.3"
 strfmt = "0.1.6"
