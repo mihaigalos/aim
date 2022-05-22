@@ -36,11 +36,11 @@ pack() {
     cp LICENSE.md "$tempdir/$package_name"
 
     # archiving
-    pushd "$tempdir"
+    pushd "$tempdir/$package_name"
     if [ "$OS_NAME" = windows-latest ]; then
-        7z a "$out_dir/$package_name.zip" "$package_name"/*
+        7z a "$out_dir/$package_name.zip" *
     else
-        tar czf "$out_dir/$package_name.tar.gz" "$package_name"/*
+        tar czf "$out_dir/$package_name.tar.gz" *
     fi
     popd
     rm -r "$tempdir"
