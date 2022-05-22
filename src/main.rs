@@ -38,18 +38,26 @@ async fn main() {
                 .help("Silent or quiet mode. Don't show progress meter or error messages.")
                 .required(false),
         )
+        .arg(
+            Arg::new("update")
+                .long("update")
+                .short('u')
+                .help("Update the executable in-place.")
+                .required(false),
+        )
         .try_get_matches()
         .unwrap_or_else(|e| e.exit());
 
-    tokio::task::spawn_blocking(move || {
-        if let Err(e) = update() {
-            println!("[ERROR] {}", e);
-            ::std::process::exit(1);
-        }
-    })
-    .await
-    .unwrap();
-
+    if args.is_present("update") {
+        tokio::task::spawn_blocking(move || {
+            if let Err(e) = update() {
+                println!("ERROR: {}", e);
+                ::std::process::exit(1);
+            }
+        })
+        .await
+        .unwrap();
+    }
     let input = args.value_of("INPUT").unwrap();
     let output = args.value_of("OUTPUT").unwrap_or("stdout");
     let silent = args.is_present("silent");
