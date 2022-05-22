@@ -6,8 +6,7 @@ use std::env;
 #[tokio::main]
 #[cfg(not(tarpaulin_include))]
 async fn main() {
-    let app: clap::Command = autoclap!();
-    let args = app
+    let mut app: clap::Command = autoclap!()
         .arg(
             Arg::new("INPUT")
                 .help("Input to aim from.\n\
@@ -44,9 +43,8 @@ async fn main() {
                 .short('u')
                 .help("Update the executable in-place.")
                 .required(false),
-        )
-        .try_get_matches()
-        .unwrap_or_else(|e| e.exit());
+        );
+    let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
     if args.is_present("update") {
         tokio::task::spawn_blocking(move || match update() {
@@ -59,9 +57,10 @@ async fn main() {
         .await
         .unwrap();
     }
-    let input = args
-        .value_of("INPUT")
-        .unwrap_or_else(|| ::std::process::exit(0));
+    let input = args.value_of("INPUT").unwrap_or_else(|| {
+        app.print_help().unwrap();
+        ::std::process::exit(0)
+    });
     let output = args.value_of("OUTPUT").unwrap_or("stdout");
     let silent = args.is_present("silent");
     let expected_sha256 = args.value_of("SHA256").unwrap_or("");
@@ -77,7 +76,7 @@ fn update() -> Result<(), Box<dyn ::std::error::Error>> {
     let _status = self_update::backends::github::Update::configure()
         .repo_owner("mihaigalos")
         .repo_name("aim")
-        .bin_name("aim")
+        .bin_name(env!("CARGO_PKG_NAME"))
         .show_download_progress(true)
         .current_version(env!("CARGO_PKG_VERSION"))
         .build()?
