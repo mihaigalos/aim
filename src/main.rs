@@ -69,6 +69,7 @@ async fn main() {
     }
 }
 
+#[cfg(not(tarpaulin_include))]
 fn update() -> Result<(), Box<dyn ::std::error::Error>> {
     let status = self_update::backends::github::Update::configure()
         .repo_owner("mihaigalos")
