@@ -115,7 +115,7 @@ Keys that match the following patterns are automatically tried:
 `aim` can self update in-place using:
 
 ```bash
-aim  --update
+aim --update
 ```
 
 ## Docker
