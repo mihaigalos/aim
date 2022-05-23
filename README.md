@@ -110,6 +110,14 @@ Keys that match the following patterns are automatically tried:
 
 ----------------------------------------
 
+## Updating
+
+`aim` can self update in-place using:
+
+```bash
+aim  --update
+```
+
 ## Docker
 
 For convenience, alpine-based docker images for `aarch64` and `x64` are available, so arguments can be passed directly to them.
