@@ -1,0 +1,26 @@
+set positional-arguments := true
+
+default:
+    @just --list
+
+test: _start && _stop
+    #!/bin/bash
+
+    source ../common.sh
+    highlight "\nRunning tests in $PWD\n\n"
+    for test in $(grep ^_test_ Justfile | cut -d':' -f1);
+    do
+        highlight "$test "
+        just $test && true || err "Stopping."
+    done
+
+_start dirname="." +args="-d":
+    docker run -p 9000:9000 --name minio -d minio/minio server /export
+    docker run --rm -it --net=host -v $(realpath ~/.mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
+
+_stop dirname=".":
+    @docker stop minio > /dev/null 2>&1
+    @docker rm --force aim_tests_https > /dev/null 2>&1
+
+_test:
+    true
