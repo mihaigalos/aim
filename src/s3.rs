@@ -1,3 +1,4 @@
+extern crate http;
 extern crate s3;
 
 use std::str;
@@ -80,7 +81,7 @@ pub async fn run() -> Result<(), S3Error> {
         for bucket in buckets {
             println!("Bucket: {:?}", bucket.name);
             for content in bucket.contents {
-                println!("{:?}", content.key);
+                println!("{:?}", content);
             }
         }
         println!("Done.");
@@ -94,35 +95,39 @@ pub async fn run() -> Result<(), S3Error> {
 
         // Put a "test_file" with the contents of MESSAGE at the root of the
         // bucket.
-        let (_, code) = bucket.put_object_blocking("test_file", MESSAGE.as_bytes())?;
+        let (_, code) = bucket.put_object("test_file", MESSAGE.as_bytes()).await?;
         // println!("{}", bucket.presign_get("test_file", 604801, None)?);
-        assert_eq!(200, code);
+        assert_eq!(http::StatusCode::OK, code);
 
         // Get the "test_file" contents and make sure that the returned message
         // matches what we sent.
-        let (data, code) = bucket.get_object_blocking("test_file")?;
+        let (data, code) = bucket.get_object("test_file").await?;
         let string = str::from_utf8(&data)?;
         // println!("{}", string);
-        assert_eq!(200, code);
+        assert_eq!(http::StatusCode::OK, code);
         assert_eq!(MESSAGE, string);
 
         if backend.location_supported {
             // Get bucket location
-            println!("{:?}", bucket.location_blocking()?);
+            println!("{:?}", bucket.location().await?);
         }
 
-        bucket.put_object_tagging_blocking("test_file", &[("test", "tag")])?;
+        bucket
+            .put_object_tagging("test_file", &[("test", "tag")])
+            .await?;
         println!("Tags set");
-        let (tags, _status) = bucket.get_object_tagging_blocking("test_file")?;
+        let (tags, _status) = bucket.get_object_tagging("test_file").await?;
         println!("{:?}", tags);
 
         // Test with random byte array
 
         let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
-        let (_, code) = bucket.put_object_blocking("random.bin", random_bytes.as_slice())?;
-        assert_eq!(200, code);
-        let (data, code) = bucket.get_object_blocking("random.bin")?;
-        assert_eq!(code, 200);
+        let (_, code) = bucket
+            .put_object("random.bin", random_bytes.as_slice())
+            .await?;
+        assert_eq!(http::StatusCode::OK, code);
+        let (data, code) = bucket.get_object("random.bin").await?;
+        assert_eq!(code, http::StatusCode::OK);
         assert_eq!(data.len(), 3072);
         assert_eq!(data, random_bytes);
     }

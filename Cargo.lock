@@ -39,6 +39,7 @@ dependencies = [
  "custom_error",
  "dotenv",
  "futures-util",
+ "http",
  "indicatif",
  "netrc",
  "openssl",
@@ -693,13 +694,13 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1323096b05d41827dadeaee54c9981958c0f94e670bc94ed80037d1a7b8b186b"
+checksum = "ff8670570af52249509a86f5e3e18a08c60b177071826898fde8997cf5f6bfbb"
 dependencies = [
  "bytes",
  "fnv",
- "itoa 0.4.8",
+ "itoa 1.0.2",
 ]
 
 [[package]]
