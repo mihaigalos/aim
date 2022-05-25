@@ -1,0 +1,131 @@
+extern crate s3;
+
+use std::str;
+
+use s3::bucket::Bucket;
+use s3::creds::Credentials;
+use s3::error::S3Error;
+use s3::region::Region;
+
+struct Storage {
+    name: String,
+    region: Region,
+    credentials: Credentials,
+    bucket: String,
+    location_supported: bool,
+}
+
+const MESSAGE: &str = "I want to go to S3";
+
+pub async fn run() -> Result<(), S3Error> {
+    // let aws = Storage {
+    //     name: "aws".into(),
+    //     region: "eu-central-1".parse()?,
+    //     // credentials: Credentials::from_profile(Some("rust-s3"))?,
+    //     credentials: Credentials::from_env_specific(
+    //         Some("minioadmin"),
+    //         Some("EU_AWS_SECRET_ACCESS_KEY"),
+    //         None,
+    //         None,
+    //     )?,
+    //     bucket: "rust-s3-test".to_string(),
+    //     location_supported: true,
+    // };
+
+    // let aws_public = Storage {
+    //     name: "aws-public".into(),
+    //     region: "eu-central-1".parse()?,
+    //     credentials: Credentials::anonymous()?,
+    //     bucket: "rust-s3-public".to_string(),
+    //     location_supported: true,
+    // };
+
+    let minio = Storage {
+        name: "minio".into(),
+        region: Region::Custom {
+            region: "".into(),
+            endpoint: "http://172.17.0.2:9000".into(),
+        },
+        credentials: Credentials {
+            access_key: Some("minioadmin".to_owned()),
+            secret_key: Some("minioadmin".to_owned()),
+            security_token: None,
+            session_token: None,
+        },
+        bucket: "test-bucket".to_string(),
+        location_supported: false,
+    };
+
+    // let yandex = Storage {
+    //     name: "yandex".into(),
+    //     region: "ru-central1".parse()?,
+    //     credentials: Credentials::from_profile(Some("yandex"))?,
+    //     bucket: "soundcloud".to_string(),
+    //     location_supported: false,
+    // };
+
+    for backend in vec![minio] {
+        println!("Running {}", backend.name);
+        // Create Bucket in REGION for BUCKET
+        // let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)?;
+        // With Minio, the bucket name is part of the path of the requests.
+        // You will need to instantiante bucket using the `new_with_path_style` method.
+        // let bucket =
+        //     Bucket::new_with_path_style(&backend.bucket, backend.region, backend.credentials)?;
+        let bucket =
+            Bucket::new(&backend.bucket, backend.region, backend.credentials)?.with_path_style();
+
+        // List out contents of directory
+        let buckets = bucket.list("/".to_string(), Some("/".to_string())).await?;
+        for bucket in buckets {
+            println!("Bucket: {:?}", bucket.name);
+            for content in bucket.contents {
+                println!("{:?}", content.key);
+            }
+        }
+        println!("Done.");
+
+        // Make sure that our "test_file" doesn't exist, delete it if it does. Note
+        // that the s3 library returns the HTTP code even if it indicates a failure
+        // (i.e. 404) since we can't predict desired usage. For example, you may
+        // expect a 404 to make sure a fi le doesn't exist.
+        //    let (_, code) = bucket.delete("test_file")?;
+        //    assert_eq!(204, code);
+
+        // Put a "test_file" with the contents of MESSAGE at the root of the
+        // bucket.
+        let (_, code) = bucket.put_object_blocking("test_file", MESSAGE.as_bytes())?;
+        // println!("{}", bucket.presign_get("test_file", 604801, None)?);
+        assert_eq!(200, code);
+
+        // Get the "test_file" contents and make sure that the returned message
+        // matches what we sent.
+        let (data, code) = bucket.get_object_blocking("test_file")?;
+        let string = str::from_utf8(&data)?;
+        // println!("{}", string);
+        assert_eq!(200, code);
+        assert_eq!(MESSAGE, string);
+
+        if backend.location_supported {
+            // Get bucket location
+            println!("{:?}", bucket.location_blocking()?);
+        }
+
+        bucket.put_object_tagging_blocking("test_file", &[("test", "tag")])?;
+        println!("Tags set");
+        let (tags, _status) = bucket.get_object_tagging_blocking("test_file")?;
+        println!("{:?}", tags);
+
+        // Test with random byte array
+
+        let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
+        let (_, code) = bucket.put_object_blocking("random.bin", random_bytes.as_slice())?;
+        assert_eq!(200, code);
+        let (data, code) = bucket.get_object_blocking("random.bin")?;
+        assert_eq!(code, 200);
+        assert_eq!(data.len(), 3072);
+        assert_eq!(data, random_bytes);
+    }
+
+    Ok(())
+}
