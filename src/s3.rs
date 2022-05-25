@@ -77,7 +77,7 @@ pub async fn run() -> Result<(), S3Error> {
             Bucket::new(&backend.bucket, backend.region, backend.credentials)?.with_path_style();
 
         // List out contents of directory
-        let buckets = bucket.list("/".to_string(), Some("/".to_string())).await?;
+        let buckets = bucket.list("".to_string(), None).await?;
         for bucket in buckets {
             println!("Bucket: {:?}", bucket.name);
             for content in bucket.contents {
