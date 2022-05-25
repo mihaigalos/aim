@@ -15,12 +15,17 @@ test: _start && _stop
     done
 
 _start dirname="." +args="-d":
-    docker run -p 9000:9000 --name minio -d minio/minio server /export
-    docker run --rm -it --net=host -v $(realpath ~/.mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
+    #!/bin/bash
+    function wait_docker() {
+        while [ $(docker ps | grep $1 | wc -l) -eq 0 ]; do
+          sleep 0.1
+        done
+    }
+    docker run -p 9000:9000 --name minio -d minio/minio server /export && wait_docker "minio"
+    docker run --rm -it --net=host -v $(realpath .mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
 
 _stop dirname=".":
-    @docker stop minio > /dev/null 2>&1
-    @docker rm --force aim_tests_https > /dev/null 2>&1
+    @docker rm --force minio > /dev/null 2>&1
 
 _test:
     true
