@@ -44,13 +44,6 @@ impl S3 {
             let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
             let _ = S3::get_string(&bucket).await;
 
-            bucket
-                .put_object_tagging("test_file", &[("test", "tag")])
-                .await?;
-            println!("Tags set");
-            let (tags, _status) = bucket.get_object_tagging("test_file").await?;
-            println!("{:?}", tags);
-
             // Test with random byte array
 
             let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
@@ -66,6 +59,21 @@ impl S3 {
 
         Ok(())
     }
+
+    async fn _get_tags(bucket: &Bucket) -> Result<(), S3Error> {
+        let (tags, _status) = bucket.get_object_tagging("test_file").await?;
+        println!("{:?}", tags);
+        Ok(())
+    }
+
+    async fn _set_tags(bucket: &Bucket) -> Result<(), S3Error> {
+        bucket
+            .put_object_tagging("test_file", &[("test", "tag")])
+            .await?;
+        println!("Tags set");
+        Ok(())
+    }
+
     async fn _print_bucket_location(backend: Storage, bucket: &Bucket) -> Result<(), S3Error> {
         if backend.location_supported {
             // Get bucket location
@@ -73,6 +81,7 @@ impl S3 {
         }
         Ok(())
     }
+
     async fn put_string(
         bucket: &Bucket,
         destination_file: &str,
@@ -94,6 +103,7 @@ impl S3 {
         assert_eq!(http::StatusCode::OK, code);
         Ok(())
     }
+
     async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
         // Get the "test_file" contents and make sure that the returned message
         // matches what we sent.
@@ -104,6 +114,7 @@ impl S3 {
         assert_eq!(MESSAGE, string);
         Ok(string.to_string())
     }
+
     fn new_storage(
         kind: &str,
         access_key: &str,
