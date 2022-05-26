@@ -44,11 +44,6 @@ impl S3 {
             let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
             let _ = S3::get_string(&bucket).await;
 
-            if backend.location_supported {
-                // Get bucket location
-                println!("{:?}", bucket.location().await?);
-            }
-
             bucket
                 .put_object_tagging("test_file", &[("test", "tag")])
                 .await?;
@@ -69,6 +64,13 @@ impl S3 {
             assert_eq!(data, random_bytes);
         }
 
+        Ok(())
+    }
+    async fn _print_bucket_location(backend: Storage, bucket: &Bucket) -> Result<(), S3Error> {
+        if backend.location_supported {
+            // Get bucket location
+            println!("{:?}", bucket.location().await?);
+        }
         Ok(())
     }
     async fn put_string(
