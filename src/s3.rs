@@ -21,7 +21,13 @@ const MESSAGE: &str = "I want to go to S3";
 pub struct S3;
 impl S3 {
     pub async fn run() -> Result<(), S3Error> {
-        for backend in vec![S3::new_storage("minio")] {
+        for backend in vec![S3::new_storage(
+            "minio",
+            "minioadmin",
+            "minioadmin",
+            "test-bucket",
+            "http://172.17.0.2:9000",
+        )] {
             println!("Running {}", backend.name);
             let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)?
                 .with_path_style();
@@ -83,48 +89,54 @@ impl S3 {
 
         Ok(())
     }
-    fn new_storage(kind: &str) -> Storage {
+    fn new_storage(
+        kind: &str,
+        access_key: &str,
+        secret_key: &str,
+        bucket: &str,
+        endpoint: &str,
+    ) -> Storage {
         let storage = match kind {
             "minio" => Storage {
                 name: "minio".into(),
                 region: Region::Custom {
                     region: "".into(),
-                    endpoint: "http://172.17.0.2:9000".into(),
+                    endpoint: endpoint.into(),
                 },
                 credentials: Credentials {
-                    access_key: Some("minioadmin".to_owned()),
-                    secret_key: Some("minioadmin".to_owned()),
+                    access_key: Some(access_key.to_owned()),
+                    secret_key: Some(secret_key.to_owned()),
                     security_token: None,
                     session_token: None,
                 },
-                bucket: "test-bucket".to_string(),
+                bucket: bucket.to_string(),
                 location_supported: false,
             },
             "aws" => Storage {
                 name: "aws".into(),
                 region: "eu-central-1".parse().unwrap(),
                 credentials: Credentials::from_env_specific(
-                    Some("minioadmin"),
-                    Some("EU_AWS_SECRET_ACCESS_KEY"),
+                    Some(access_key),
+                    Some(secret_key),
                     None,
                     None,
                 )
                 .unwrap(),
-                bucket: "rust-s3-test".to_string(),
+                bucket: bucket.to_string(),
                 location_supported: true,
             },
             "aws_public" => Storage {
                 name: "aws-public".into(),
                 region: "eu-central-1".parse().unwrap(),
                 credentials: Credentials::anonymous().unwrap(),
-                bucket: "rust-s3-public".to_string(),
+                bucket: bucket.to_string(),
                 location_supported: true,
             },
             _ => Storage {
                 name: "yandex".into(),
                 region: "ru-central1".parse().unwrap(),
                 credentials: Credentials::from_profile(Some("yandex")).unwrap(),
-                bucket: "soundcloud".to_string(),
+                bucket: bucket.to_string(),
                 location_supported: false,
             },
         };
