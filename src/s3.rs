@@ -41,19 +41,7 @@ impl S3 {
             }
             println!("Done.");
 
-            // Make sure that our "test_file" doesn't exist, delete it if it does. Note
-            // that the s3 library returns the HTTP code even if it indicates a failure
-            // (i.e. 404) since we can't predict desired usage. For example, you may
-            // expect a 404 to make sure a fi le doesn't exist.
-            //    let (_, code) = bucket.delete("test_file")?;
-            //    assert_eq!(204, code);
-
-            // Put a "test_file" with the contents of MESSAGE at the root of the
-            // bucket.
-            let (_, code) = bucket.put_object("test_file", MESSAGE.as_bytes()).await?;
-            // println!("{}", bucket.presign_get("test_file", 604801, None)?);
-            assert_eq!(http::StatusCode::OK, code);
-
+            S3::put_string(&bucket, "test_file", MESSAGE).await;
             // Get the "test_file" contents and make sure that the returned message
             // matches what we sent.
             let (data, code) = bucket.get_object("test_file").await?;
@@ -88,6 +76,23 @@ impl S3 {
         }
 
         Ok(())
+    }
+    async fn put_string(bucket: &Bucket, destination_file: &str, string: &str) {
+        // Make sure that our "test_file" doesn't exist, delete it if it does. Note
+        // that the s3 library returns the HTTP code even if it indicates a failure
+        // (i.e. 404) since we can't predict desired usage. For example, you may
+        // expect a 404 to make sure a fi le doesn't exist.
+        //    let (_, code) = bucket.delete("test_file")?;
+        //    assert_eq!(204, code);
+
+        // Put a "test_file" with the contents of MESSAGE at the root of the
+        // bucket.
+        let (_, code) = bucket
+            .put_object(destination_file, string.as_bytes())
+            .await
+            .unwrap();
+        // println!("{}", bucket.presign_get("test_file", 604801, None)?);
+        assert_eq!(http::StatusCode::OK, code);
     }
     fn new_storage(
         kind: &str,
