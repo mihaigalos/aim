@@ -46,7 +46,7 @@ async fn main() {
         );
     let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
-    aim::s3::run().await.unwrap();
+    aim::s3::S3::run().await.unwrap();
 
     if args.is_present("update") {
         tokio::task::spawn_blocking(move || match update() {
