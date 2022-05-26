@@ -41,14 +41,8 @@ impl S3 {
             }
             println!("Done.");
 
-            S3::put_string(&bucket, "test_file", MESSAGE).await;
-            // Get the "test_file" contents and make sure that the returned message
-            // matches what we sent.
-            let (data, code) = bucket.get_object("test_file").await?;
-            let string = str::from_utf8(&data)?;
-            // println!("{}", string);
-            assert_eq!(http::StatusCode::OK, code);
-            assert_eq!(MESSAGE, string);
+            let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
+            let _ = S3::get_string(&bucket).await;
 
             if backend.location_supported {
                 // Get bucket location
@@ -77,7 +71,11 @@ impl S3 {
 
         Ok(())
     }
-    async fn put_string(bucket: &Bucket, destination_file: &str, string: &str) {
+    async fn put_string(
+        bucket: &Bucket,
+        destination_file: &str,
+        string: &str,
+    ) -> Result<(), S3Error> {
         // Make sure that our "test_file" doesn't exist, delete it if it does. Note
         // that the s3 library returns the HTTP code even if it indicates a failure
         // (i.e. 404) since we can't predict desired usage. For example, you may
@@ -89,10 +87,20 @@ impl S3 {
         // bucket.
         let (_, code) = bucket
             .put_object(destination_file, string.as_bytes())
-            .await
-            .unwrap();
+            .await?;
         // println!("{}", bucket.presign_get("test_file", 604801, None)?);
         assert_eq!(http::StatusCode::OK, code);
+        Ok(())
+    }
+    async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
+        // Get the "test_file" contents and make sure that the returned message
+        // matches what we sent.
+        let (data, code) = bucket.get_object("test_file").await?;
+        let string = str::from_utf8(&data)?;
+        // println!("{}", string);
+        assert_eq!(http::StatusCode::OK, code);
+        assert_eq!(MESSAGE, string);
+        Ok(string.to_string())
     }
     fn new_storage(
         kind: &str,
