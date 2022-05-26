@@ -13,7 +13,7 @@ struct Storage {
     region: Region,
     credentials: Credentials,
     bucket: String,
-    location_supported: bool,
+    _location_supported: bool,
 }
 
 const MESSAGE: &str = "I want to go to S3";
@@ -75,7 +75,7 @@ impl S3 {
     }
 
     async fn _print_bucket_location(backend: Storage, bucket: &Bucket) -> Result<(), S3Error> {
-        if backend.location_supported {
+        if backend._location_supported {
             // Get bucket location
             println!("{:?}", bucket.location().await?);
         }
@@ -136,7 +136,7 @@ impl S3 {
                     session_token: None,
                 },
                 bucket: bucket.to_string(),
-                location_supported: false,
+                _location_supported: false,
             },
             "aws" => Storage {
                 name: "aws".into(),
@@ -149,21 +149,21 @@ impl S3 {
                 )
                 .unwrap(),
                 bucket: bucket.to_string(),
-                location_supported: true,
+                _location_supported: true,
             },
             "aws_public" => Storage {
                 name: "aws-public".into(),
                 region: "eu-central-1".parse().unwrap(),
                 credentials: Credentials::anonymous().unwrap(),
                 bucket: bucket.to_string(),
-                location_supported: true,
+                _location_supported: true,
             },
             _ => Storage {
                 name: "yandex".into(),
                 region: "ru-central1".parse().unwrap(),
                 credentials: Credentials::from_profile(Some("yandex")).unwrap(),
                 bucket: bucket.to_string(),
-                location_supported: false,
+                _location_supported: false,
             },
         };
         return storage;
