@@ -43,20 +43,24 @@ impl S3 {
 
             let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
             let _ = S3::get_string(&bucket).await;
-
-            // Test with random byte array
-
-            let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
-            let (_, code) = bucket
-                .put_object("random.bin", random_bytes.as_slice())
-                .await?;
-            assert_eq!(http::StatusCode::OK, code);
-            let (data, code) = bucket.get_object("random.bin").await?;
-            assert_eq!(code, http::StatusCode::OK);
-            assert_eq!(data.len(), 3072);
-            assert_eq!(data, random_bytes);
         }
 
+        Ok(())
+    }
+
+    async fn _get_binary(bucket: &Bucket) -> Result<(), S3Error> {
+        let (data, code) = bucket.get_object("random.bin").await?;
+        assert_eq!(code, http::StatusCode::OK);
+        assert_eq!(data.len(), 3072);
+        Ok(())
+    }
+
+    async fn _put_binary(bucket: &Bucket) -> Result<(), S3Error> {
+        let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
+        let (_, code) = bucket
+            .put_object("random.bin", random_bytes.as_slice())
+            .await?;
+        assert_eq!(http::StatusCode::OK, code);
         Ok(())
     }
 
