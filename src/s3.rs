@@ -91,19 +91,12 @@ impl S3 {
         destination_file: &str,
         string: &str,
     ) -> Result<(), S3Error> {
-        // Make sure that our "test_file" doesn't exist, delete it if it does. Note
-        // that the s3 library returns the HTTP code even if it indicates a failure
-        // (i.e. 404) since we can't predict desired usage. For example, you may
-        // expect a 404 to make sure a fi le doesn't exist.
-        //    let (_, code) = bucket.delete("test_file")?;
-        //    assert_eq!(204, code);
+        let (_, code) = bucket.delete_object(destination_file).await?;
+        assert_eq!(204, code);
 
-        // Put a "test_file" with the contents of MESSAGE at the root of the
-        // bucket.
         let (_, code) = bucket
             .put_object(destination_file, string.as_bytes())
             .await?;
-        // println!("{}", bucket.presign_get("test_file", 604801, None)?);
         assert_eq!(http::StatusCode::OK, code);
         Ok(())
     }
@@ -113,7 +106,6 @@ impl S3 {
         // matches what we sent.
         let (data, code) = bucket.get_object("test_file").await?;
         let string = str::from_utf8(&data)?;
-        // println!("{}", string);
         assert_eq!(http::StatusCode::OK, code);
         assert_eq!(MESSAGE, string);
         Ok(string.to_string())
