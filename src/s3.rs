@@ -8,6 +8,12 @@ use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
 
+use crate::address::ParsedAddress;
+use crate::bar::WrappedBar;
+use crate::error::ValidateError;
+use crate::hash::HashChecker;
+use crate::io;
+
 struct Storage {
     name: String,
     region: Region,
@@ -20,19 +26,34 @@ const MESSAGE: &str = "I want to go to S3";
 
 pub struct S3;
 impl S3 {
-    pub async fn run(kind: &str, user: &str, pass: &str, bucket: &str) -> Result<(), S3Error> {
+    pub async fn get(
+        input: &str,
+        output: &str,
+        bar: &mut WrappedBar,
+        expected_sha256: &str,
+    ) -> Result<(), ValidateError> {
+        S3::_get(input, output, bar).await?;
+        HashChecker::check(output, expected_sha256)
+    }
+
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
+        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
+        let (_, _) = io::get_output(output, bar.silent);
+
+        let bucket = &parsed_address.path_segments[0];
         for backend in vec![S3::new_storage(
-            kind,
-            user,
-            pass,
-            bucket,
-            "http://172.17.0.2:9000",
+            "minio",
+            &parsed_address.username,
+            &parsed_address.password,
+            &bucket,
+            &parsed_address.server,
         )] {
             println!("Running {}", backend.name);
-            let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)?
+            let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
+                .unwrap()
                 .with_path_style();
 
-            let buckets = bucket.list("".to_string(), None).await?;
+            let buckets = bucket.list("".to_string(), None).await.unwrap();
             for bucket in buckets {
                 println!("Bucket: {:?}", bucket.name);
                 for content in bucket.contents {
