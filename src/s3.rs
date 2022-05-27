@@ -40,7 +40,12 @@ impl S3 {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (_, _) = io::get_output(output, bar.silent);
 
-        let bucket = &parsed_address.path_segments[0];
+        let bucket: &str = match parsed_address.path_segments.len() {
+            0 => &parsed_address.file,
+            _ => &parsed_address.path_segments[0],
+        };
+
+        println!("{:?}", parsed_address);
         for backend in vec![S3::new_storage(
             "minio",
             &parsed_address.username,
