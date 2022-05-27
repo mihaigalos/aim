@@ -20,12 +20,12 @@ const MESSAGE: &str = "I want to go to S3";
 
 pub struct S3;
 impl S3 {
-    pub async fn run() -> Result<(), S3Error> {
+    pub async fn run(kind: &str, user: &str, pass: &str, bucket: &str) -> Result<(), S3Error> {
         for backend in vec![S3::new_storage(
-            "minio",
-            "minioadmin",
-            "minioadmin",
-            "test-bucket",
+            kind,
+            user,
+            pass,
+            bucket,
             "http://172.17.0.2:9000",
         )] {
             println!("Running {}", backend.name);
@@ -98,6 +98,7 @@ impl S3 {
             .put_object(destination_file, string.as_bytes())
             .await?;
         assert_eq!(http::StatusCode::OK, code);
+
         Ok(())
     }
 

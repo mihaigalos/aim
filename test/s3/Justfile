@@ -14,7 +14,7 @@ test: _start && _stop
         just $test && true || err "Stopping."
     done
 
-_start dirname="." +args="-d":
+_start dirname="." +args="-d": _stop
     #!/bin/bash
     function wait_docker() {
         while [ $(docker ps | grep $1 | wc -l) -eq 0 ]; do
