@@ -15,7 +15,7 @@ use crate::hash::HashChecker;
 use crate::io;
 
 struct Storage {
-    name: String,
+    _name: String,
     region: Region,
     credentials: Credentials,
     bucket: String,
@@ -45,27 +45,23 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
-        println!("{:?}", parsed_address);
         for backend in vec![S3::new_storage(
             "minio",
             &parsed_address.username,
             &parsed_address.password,
             &bucket,
-            &parsed_address.server,
+            &("http://".to_string() + &parsed_address.server),
         )] {
-            println!("Running {}", backend.name);
             let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
                 .unwrap()
                 .with_path_style();
 
             let buckets = bucket.list("".to_string(), None).await.unwrap();
             for bucket in buckets {
-                println!("Bucket: {:?}", bucket.name);
                 for content in bucket.contents {
-                    println!("{:?}", content);
+                    println!("{}", content.key);
                 }
             }
-            println!("Done.");
 
             let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
             let _ = S3::get_string(&bucket).await;
@@ -147,7 +143,7 @@ impl S3 {
     ) -> Storage {
         let storage = match kind {
             "minio" => Storage {
-                name: "minio".into(),
+                _name: "minio".into(),
                 region: Region::Custom {
                     region: "".into(),
                     endpoint: endpoint.into(),
@@ -162,7 +158,7 @@ impl S3 {
                 _location_supported: false,
             },
             "aws" => Storage {
-                name: "aws".into(),
+                _name: "aws".into(),
                 region: "eu-central-1".parse().unwrap(),
                 credentials: Credentials::from_env_specific(
                     Some(access_key),
@@ -175,14 +171,14 @@ impl S3 {
                 _location_supported: true,
             },
             "aws_public" => Storage {
-                name: "aws-public".into(),
+                _name: "aws-public".into(),
                 region: "eu-central-1".parse().unwrap(),
                 credentials: Credentials::anonymous().unwrap(),
                 bucket: bucket.to_string(),
                 _location_supported: true,
             },
             _ => Storage {
-                name: "yandex".into(),
+                _name: "yandex".into(),
                 region: "ru-central1".parse().unwrap(),
                 credentials: Credentials::from_profile(Some("yandex")).unwrap(),
                 bucket: bucket.to_string(),
