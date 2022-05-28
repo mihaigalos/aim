@@ -7,6 +7,8 @@ pub const CLIENT_ID: &str = concat!(
 );
 pub const BUFFER_SIZE: usize = 26_214_400;
 
+pub const HTTP_HEADER_SERVER: &str = "server";
+
 #[cfg(debug_assertions)]
 pub const AUTO_ALLOW_HTTP: bool = true;
 

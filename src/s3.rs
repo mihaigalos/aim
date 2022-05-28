@@ -51,7 +51,7 @@ impl S3 {
 
         let transport = S3::_get_transport(&parsed_address.server, AUTO_ALLOW_HTTP);
         let fqdn = transport.to_string() + &parsed_address.server;
-        let bucket_kind = S3::_get_header(&fqdn, "server").await;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await;
         for backend in vec![S3::new(
             &bucket_kind,
             &parsed_address.username,
@@ -80,10 +80,12 @@ impl S3 {
     async fn _get_header(server: &str, header: &str) -> String {
         let client = reqwest::Client::new();
         let res = client.post(server).send().await.unwrap();
-        let result = res.headers().get(header).unwrap(); //_or(Some(http::HeaderValue::from_static("")));
+        let empty_value = &http::HeaderValue::from_static("");
+        let result = res.headers().get(header).unwrap_or(empty_value);
 
         result.to_str().unwrap().to_lowercase().to_string()
     }
+
     fn _get_transport(server: &str, auto_allow_http: bool) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
         let host = parts[0];
