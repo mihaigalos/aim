@@ -13,6 +13,7 @@ use s3::region::Region;
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
+use crate::error::HTTPHeaderError;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
@@ -36,11 +37,11 @@ impl S3 {
         bar: &mut WrappedBar,
         expected_sha256: &str,
     ) -> Result<(), ValidateError> {
-        S3::_get(input, output, bar).await?;
+        S3::_get(input, output, bar).await.unwrap();
         HashChecker::check(output, expected_sha256)
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (_, _) = io::get_output(output, bar.silent);
 
@@ -51,7 +52,7 @@ impl S3 {
 
         let transport = S3::_get_transport(&parsed_address.server, AUTO_ALLOW_HTTP);
         let fqdn = transport.to_string() + &parsed_address.server;
-        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
         for backend in vec![S3::new(
             &bucket_kind,
             &parsed_address.username,
@@ -77,13 +78,16 @@ impl S3 {
         Ok(())
     }
 
-    async fn _get_header(server: &str, header: &str) -> String {
+    async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
         let client = reqwest::Client::new();
         let res = client.post(server).send().await.unwrap();
-        let empty_value = &http::HeaderValue::from_static("");
-        let result = res.headers().get(header).unwrap_or(empty_value);
 
-        result.to_str().unwrap().to_lowercase().to_string()
+        let result = res
+            .headers()
+            .get(header)
+            .ok_or(HTTPHeaderError::NotPresent)?;
+
+        Ok(result.to_str().unwrap().to_lowercase().to_string())
     }
 
     fn _get_transport(server: &str, auto_allow_http: bool) -> &str {
