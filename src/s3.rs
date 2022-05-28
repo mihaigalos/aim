@@ -12,6 +12,7 @@ use s3::region::Region;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
+use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
@@ -48,7 +49,7 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
-        let transport = S3::_get_transport(&parsed_address.server);
+        let transport = S3::_get_transport(&parsed_address.server, AUTO_ALLOW_HTTP);
         for backend in vec![S3::new(
             "minio",
             &parsed_address.username,
@@ -74,17 +75,18 @@ impl S3 {
         Ok(())
     }
 
-    fn _get_transport(server: &str) -> &str {
+    fn _get_transport(server: &str, auto_allow_http: bool) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
         let host = parts[0];
         let port = parts[1];
         if tls::has_tls(host, port) {
             return "https://";
         } else {
-            if Question::new("Unsecure HTTP host. Continue? [Y/n]")
-                .default(Answer::YES)
-                .confirm()
-                == Answer::YES
+            if auto_allow_http
+                || Question::new("Unsecure HTTP host. Continue? [Y/n]")
+                    .default(Answer::YES)
+                    .confirm()
+                    == Answer::YES
             {
                 return "http://";
             } else {
