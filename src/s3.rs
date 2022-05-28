@@ -50,12 +50,14 @@ impl S3 {
         };
 
         let transport = S3::_get_transport(&parsed_address.server, AUTO_ALLOW_HTTP);
+        let fqdn = transport.to_string() + &parsed_address.server;
+        let bucket_kind = S3::_get_header(&fqdn, "server").await;
         for backend in vec![S3::new(
-            "minio",
+            &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
             &bucket,
-            &(transport.to_string() + &parsed_address.server),
+            &fqdn,
         )] {
             let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
                 .unwrap()
@@ -75,6 +77,13 @@ impl S3 {
         Ok(())
     }
 
+    async fn _get_header(server: &str, header: &str) -> String {
+        let client = reqwest::Client::new();
+        let res = client.post(server).send().await.unwrap();
+        let result = res.headers().get(header).unwrap(); //_or(Some(http::HeaderValue::from_static("")));
+
+        result.to_str().unwrap().to_lowercase().to_string()
+    }
     fn _get_transport(server: &str, auto_allow_http: bool) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
         let host = parts[0];
