@@ -1,6 +1,8 @@
 extern crate http;
 extern crate s3;
 
+use question::Answer;
+use question::Question;
 use std::str;
 
 use s3::bucket::Bucket;
@@ -13,6 +15,7 @@ use crate::bar::WrappedBar;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
+use crate::tls;
 
 struct Storage {
     _name: String,
@@ -45,12 +48,13 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
+        let transport = S3::_get_transport(&parsed_address.server);
         for backend in vec![S3::new(
             "minio",
             &parsed_address.username,
             &parsed_address.password,
             &bucket,
-            &("http://".to_string() + &parsed_address.server),
+            &(transport.to_string() + &parsed_address.server),
         )] {
             let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
                 .unwrap()
@@ -70,6 +74,24 @@ impl S3 {
         Ok(())
     }
 
+    fn _get_transport(server: &str) -> &str {
+        let parts: Vec<&str> = server.split(":").collect();
+        let host = parts[0];
+        let port = parts[1];
+        if tls::has_tls(host, port) {
+            return "https://";
+        } else {
+            if Question::new("Unsecure HTTP host. Continue? [Y/n]")
+                .default(Answer::YES)
+                .confirm()
+                == Answer::YES
+            {
+                return "http://";
+            } else {
+                return "";
+            }
+        }
+    }
     async fn _get_binary(bucket: &Bucket) -> Result<(), S3Error> {
         let (data, code) = bucket.get_object("random.bin").await?;
         assert_eq!(code, http::StatusCode::OK);

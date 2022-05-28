@@ -44,6 +44,7 @@ dependencies = [
  "native-tls",
  "netrc",
  "openssl",
+ "question",
  "regex",
  "reqwest",
  "rust-s3",
@@ -1300,6 +1301,12 @@ checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
 dependencies = [
  "unicode-xid",
 ]
+
+[[package]]
+name = "question"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "acbb3ede7a8f9a8ab89e714637f2cf40001b58f21340d4242b2f11533e65fa8d"
 
 [[package]]
 name = "quick-error"
