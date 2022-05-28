@@ -45,7 +45,7 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
-        for backend in vec![S3::new_storage(
+        for backend in vec![S3::new(
             "minio",
             &parsed_address.username,
             &parsed_address.password,
@@ -134,7 +134,7 @@ impl S3 {
         Ok(string.to_string())
     }
 
-    fn new_storage(
+    fn new(
         kind: &str,
         access_key: &str,
         secret_key: &str,

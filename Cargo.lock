@@ -41,6 +41,7 @@ dependencies = [
  "futures-util",
  "http",
  "indicatif",
+ "native-tls",
  "netrc",
  "openssl",
  "regex",
