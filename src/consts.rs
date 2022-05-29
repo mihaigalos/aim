@@ -6,3 +6,5 @@ pub const CLIENT_ID: &str = concat!(
     crate_version!()
 );
 pub const BUFFER_SIZE: usize = 26_214_400;
+
+pub const HTTP_HEADER_SERVER: &str = "server";

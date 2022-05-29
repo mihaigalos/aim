@@ -23,17 +23,21 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async_ftp = "6.0.0"
 async-stream = "0.3.2"
+async_ftp = "6.0.0"
 autoclap = "0.2.2"
 clap = { version = "3.1.8", features = ["cargo"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
 futures-util = "0.3.14"
+http = "0.2.7"
 indicatif = "0.16.2"
+native-tls = "0.2"
 netrc = "0.4.1"
 openssl = { version = "0.10", features = ["vendored"] }
+question = "0.2.2"
 reqwest = { version = "0.11.3", features = ["stream"] }
+rust-s3 = { version = "0.31.0", features = ["blocking"] }
 self_update = { version = "0.30.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.0"
 ssh2 = "0.9.3"
