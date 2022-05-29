@@ -104,32 +104,6 @@ impl S3 {
             }
         }
     }
-    async fn _get_binary(file: &str, bucket: &Bucket) -> Result<Vec<u8>, S3Error> {
-        let (data, _) = bucket.get_object(file).await?;
-        Ok(data)
-    }
-
-    async fn _put_binary(data: Vec<u8>, file: &str, bucket: &Bucket) -> Result<(), S3Error> {
-        let (_, _) = bucket.put_object(file, data.as_slice()).await?;
-        Ok(())
-    }
-
-    async fn _get_tags(file: &str, bucket: &Bucket) -> Result<Vec<Tag>, S3Error> {
-        let (tags, _status) = bucket.get_object_tagging(file).await?;
-        Ok(tags)
-    }
-
-    async fn _set_tags(file: &str, tags: &[(&str, &str)], bucket: &Bucket) -> Result<(), S3Error> {
-        bucket.put_object_tagging(file, tags).await?;
-        Ok(())
-    }
-
-    async fn _print_bucket_location(backend: Storage, bucket: &Bucket) -> Result<(), S3Error> {
-        if backend._location_supported {
-            println!("{:?}", bucket.location().await?);
-        }
-        Ok(())
-    }
 
     async fn put_string(
         bucket: &Bucket,
@@ -199,61 +173,6 @@ impl S3 {
             },
         };
         return storage;
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    fn new_demo_bucket() -> Bucket {
-        Bucket::new(
-            "test-bucket",
-            Region::Custom {
-                region: "".into(),
-                endpoint: "".into(),
-            },
-            Credentials {
-                access_key: Some("accesskey".to_owned()),
-                secret_key: Some("secretkey".to_owned()),
-                security_token: None,
-                session_token: None,
-            },
-        )
-        .unwrap()
-        .with_path_style()
-    }
-    #[tokio::test]
-    async fn test_get_binary_ok_when_typical() {
-        assert!(S3::_get_binary("demofile", &new_demo_bucket())
-            .await
-            .is_ok());
-    }
-    #[tokio::test]
-    async fn test_put_binary_ok_when_typical() {
-        assert!(S3::_put_binary(vec![42], "demofile", &new_demo_bucket())
-            .await
-            .is_ok());
-    }
-    #[tokio::test]
-    async fn test_get_tags_ok_when_typical() {
-        assert!(S3::_get_tags("demofile", &new_demo_bucket()).await.is_ok());
-    }
-    #[tokio::test]
-    async fn test_set_tags_ok_when_typical() {
-        assert!(
-            S3::_set_tags("demofile", &[("key", "value")], &new_demo_bucket())
-                .await
-                .is_ok()
-        );
-    }
-    #[tokio::test]
-    async fn test_print_bucket_location_ok_when_typical() {
-        assert!(S3::_print_bucket_location(
-            S3::new("kind", "access_key", "secret_key", "bucket", "endpoint"),
-            &new_demo_bucket()
-        )
-        .await
-        .is_ok());
     }
 }
 
