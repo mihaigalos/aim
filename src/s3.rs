@@ -1,8 +1,6 @@
 extern crate http;
 extern crate s3;
 
-use question::Answer;
-use question::Question;
 use std::str;
 
 use s3::bucket::Bucket;
@@ -18,6 +16,7 @@ use crate::error::HTTPHeaderError;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
+use crate::question::*;
 use crate::tls::*;
 
 struct Storage {
@@ -51,7 +50,7 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
-        let transport = S3::_get_transport::<TLS>(&parsed_address.server, AUTO_ALLOW_HTTP);
+        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
         for backend in vec![S3::new(
@@ -91,19 +90,14 @@ impl S3 {
         Ok(result.to_str().unwrap().to_lowercase().to_string())
     }
 
-    fn _get_transport<T: TLSTrait>(server: &str, auto_allow_http: bool) -> &str {
+    fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
         let host = parts[0];
         let port = parts[1];
         if T::has_tls(host, port) {
             return "https://";
         } else {
-            if auto_allow_http
-                || Question::new("Unsecure HTTP host. Continue? [Y/n]")
-                    .default(Answer::YES)
-                    .confirm()
-                    == Answer::YES
-            {
+            if Q::yes_no() {
                 return "http://";
             } else {
                 return "";
@@ -210,6 +204,7 @@ impl S3 {
 
 #[test]
 fn test_get_transport_returns_http_transport_when_no_tls() {
+    use crate::question::*;
     pub struct TlsMockNoTLS;
     impl TLSTrait for TlsMockNoTLS {
         fn has_tls(_host: &str, _port: &str) -> bool {
@@ -217,13 +212,14 @@ fn test_get_transport_returns_http_transport_when_no_tls() {
         }
     }
     assert_eq!(
-        S3::_get_transport::<TlsMockNoTLS>("dummyhost:9000", true),
+        S3::_get_transport::<TlsMockNoTLS, QuestionWrapped>("dummyhost:9000"),
         "http://"
     );
 }
 
 #[test]
 fn test_get_transport_returns_https_transport_when_has_tls() {
+    use crate::question::*;
     pub struct TlsMockHasTLS;
     impl TLSTrait for TlsMockHasTLS {
         fn has_tls(_host: &str, _port: &str) -> bool {
@@ -231,8 +227,29 @@ fn test_get_transport_returns_https_transport_when_has_tls() {
         }
     }
     assert_eq!(
-        S3::_get_transport::<TlsMockHasTLS>("dummyhost:9000", false),
+        S3::_get_transport::<TlsMockHasTLS, QuestionWrapped>("dummyhost:9000"),
         "https://"
+    );
+}
+
+#[test]
+fn test_get_transport_returns_no_transport_when_no_tls() {
+    use crate::question::*;
+    pub struct TlsMockHasTLS;
+    impl TLSTrait for TlsMockHasTLS {
+        fn has_tls(_host: &str, _port: &str) -> bool {
+            false
+        }
+    }
+    struct QuestionWrappedMock;
+    impl QuestionTrait for QuestionWrappedMock {
+        fn yes_no() -> bool {
+            false
+        }
+    }
+    assert_eq!(
+        S3::_get_transport::<TlsMockHasTLS, QuestionWrappedMock>("dummyhost:9000"),
+        ""
     );
 }
 
