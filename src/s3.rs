@@ -4,7 +4,6 @@ extern crate s3;
 use std::str;
 
 use s3::bucket::Bucket;
-use s3::bucket::Tag;
 use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
@@ -45,10 +44,7 @@ impl S3 {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (_, _) = io::get_output(output, bar.silent);
 
-        let bucket: &str = match parsed_address.path_segments.len() {
-            0 => &parsed_address.file,
-            _ => &parsed_address.path_segments[0],
-        };
+        let bucket = S3::get_bucket(&parsed_address);
 
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
@@ -76,6 +72,14 @@ impl S3 {
         }
 
         Ok(())
+    }
+
+    fn get_bucket(parsed_address: &ParsedAddress) -> String {
+        let bucket: String = match parsed_address.path_segments.len() {
+            0 => parsed_address.file.to_string(),
+            _ => parsed_address.path_segments[0].to_string(),
+        };
+        bucket
     }
 
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
@@ -174,6 +178,29 @@ impl S3 {
         };
         return storage;
     }
+}
+#[test]
+fn test_get_bucket_works_when_typical() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "".to_string(),
+    };
+    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
+}
+
+#[test]
+fn test_get_bucket_works_when_multiple_segments() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
+        file: "".to_string(),
+    };
+    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
 }
 
 #[test]
