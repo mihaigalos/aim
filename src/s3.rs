@@ -110,8 +110,8 @@ impl S3 {
             }
         }
     }
-    async fn _get_binary(bucket: &Bucket) -> Result<Vec<u8>, S3Error> {
-        let (data, _) = bucket.get_object("random.bin").await?;
+    async fn _get_binary(file: &str, bucket: &Bucket) -> Result<Vec<u8>, S3Error> {
+        let (data, _) = bucket.get_object(file).await?;
         Ok(data)
     }
 
@@ -120,15 +120,13 @@ impl S3 {
         Ok(())
     }
 
-    async fn _get_tags(bucket: &Bucket) -> Result<Vec<Tag>, S3Error> {
-        let (tags, _status) = bucket.get_object_tagging("test_file").await?;
+    async fn _get_tags(file: &str, bucket: &Bucket) -> Result<Vec<Tag>, S3Error> {
+        let (tags, _status) = bucket.get_object_tagging(file).await?;
         Ok(tags)
     }
 
-    async fn _set_tags(bucket: &Bucket) -> Result<(), S3Error> {
-        bucket
-            .put_object_tagging("test_file", &[("test", "tag")])
-            .await?;
+    async fn _set_tags(file: &str, tags: &[(&str, &str)], bucket: &Bucket) -> Result<(), S3Error> {
+        bucket.put_object_tagging(file, tags).await?;
         Ok(())
     }
 
