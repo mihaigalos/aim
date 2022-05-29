@@ -6,6 +6,7 @@ use question::Question;
 use std::str;
 
 use s3::bucket::Bucket;
+use s3::bucket::Tag;
 use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
@@ -109,39 +110,30 @@ impl S3 {
             }
         }
     }
-    async fn _get_binary(bucket: &Bucket) -> Result<(), S3Error> {
-        let (data, code) = bucket.get_object("random.bin").await?;
-        assert_eq!(code, http::StatusCode::OK);
-        assert_eq!(data.len(), 3072);
+    async fn _get_binary(bucket: &Bucket) -> Result<Vec<u8>, S3Error> {
+        let (data, _) = bucket.get_object("random.bin").await?;
+        Ok(data)
+    }
+
+    async fn _put_binary(data: Vec<u8>, file: &str, bucket: &Bucket) -> Result<(), S3Error> {
+        let (_, _) = bucket.put_object(file, data.as_slice()).await?;
         Ok(())
     }
 
-    async fn _put_binary(bucket: &Bucket) -> Result<(), S3Error> {
-        let random_bytes: Vec<u8> = (0..3072).map(|_| 33).collect();
-        let (_, code) = bucket
-            .put_object("random.bin", random_bytes.as_slice())
-            .await?;
-        assert_eq!(http::StatusCode::OK, code);
-        Ok(())
-    }
-
-    async fn _get_tags(bucket: &Bucket) -> Result<(), S3Error> {
+    async fn _get_tags(bucket: &Bucket) -> Result<Vec<Tag>, S3Error> {
         let (tags, _status) = bucket.get_object_tagging("test_file").await?;
-        println!("{:?}", tags);
-        Ok(())
+        Ok(tags)
     }
 
     async fn _set_tags(bucket: &Bucket) -> Result<(), S3Error> {
         bucket
             .put_object_tagging("test_file", &[("test", "tag")])
             .await?;
-        println!("Tags set");
         Ok(())
     }
 
     async fn _print_bucket_location(backend: Storage, bucket: &Bucket) -> Result<(), S3Error> {
         if backend._location_supported {
-            // Get bucket location
             println!("{:?}", bucket.location().await?);
         }
         Ok(())
@@ -152,24 +144,17 @@ impl S3 {
         destination_file: &str,
         string: &str,
     ) -> Result<(), S3Error> {
-        let (_, code) = bucket.delete_object(destination_file).await?;
-        assert_eq!(204, code);
-
-        let (_, code) = bucket
+        let (_, _) = bucket.delete_object(destination_file).await?;
+        let (_, _) = bucket
             .put_object(destination_file, string.as_bytes())
             .await?;
-        assert_eq!(http::StatusCode::OK, code);
 
         Ok(())
     }
 
     async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
-        // Get the "test_file" contents and make sure that the returned message
-        // matches what we sent.
-        let (data, code) = bucket.get_object("test_file").await?;
+        let (data, _) = bucket.get_object("test_file").await?;
         let string = str::from_utf8(&data)?;
-        assert_eq!(http::StatusCode::OK, code);
-        assert_eq!(MESSAGE, string);
         Ok(string.to_string())
     }
 
