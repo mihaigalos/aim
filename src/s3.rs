@@ -17,7 +17,7 @@ use crate::error::HTTPHeaderError;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
 use crate::io;
-use crate::tls;
+use crate::tls::*;
 
 struct Storage {
     _name: String,
@@ -50,7 +50,7 @@ impl S3 {
             _ => &parsed_address.path_segments[0],
         };
 
-        let transport = S3::_get_transport(&parsed_address.server, AUTO_ALLOW_HTTP);
+        let transport = S3::_get_transport::<TLS>(&parsed_address.server, AUTO_ALLOW_HTTP);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
         for backend in vec![S3::new(
@@ -90,11 +90,11 @@ impl S3 {
         Ok(result.to_str().unwrap().to_lowercase().to_string())
     }
 
-    fn _get_transport(server: &str, auto_allow_http: bool) -> &str {
+    fn _get_transport<T: TLSTrait>(server: &str, auto_allow_http: bool) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
         let host = parts[0];
         let port = parts[1];
-        if tls::has_tls(host, port) {
+        if T::has_tls(host, port) {
             return "https://";
         } else {
             if auto_allow_http
@@ -226,4 +226,32 @@ impl S3 {
         };
         return storage;
     }
+}
+
+#[test]
+fn test_get_transport_returns_http_transport_when_no_tls() {
+    pub struct TlsMockNoTLS;
+    impl TLSTrait for TlsMockNoTLS {
+        fn has_tls(_host: &str, _port: &str) -> bool {
+            false
+        }
+    }
+    assert_eq!(
+        S3::_get_transport::<TlsMockNoTLS>("dummyhost:9000", true),
+        "http://"
+    );
+}
+
+#[test]
+fn test_get_transport_returns_https_transport_when_has_tls() {
+    pub struct TlsMockHasTLS;
+    impl TLSTrait for TlsMockHasTLS {
+        fn has_tls(_host: &str, _port: &str) -> bool {
+            true
+        }
+    }
+    assert_eq!(
+        S3::_get_transport::<TlsMockHasTLS>("dummyhost:9000", false),
+        "https://"
+    );
 }
