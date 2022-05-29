@@ -202,6 +202,61 @@ impl S3 {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn new_demo_bucket() -> Bucket {
+        Bucket::new(
+            "test-bucket",
+            Region::Custom {
+                region: "".into(),
+                endpoint: "".into(),
+            },
+            Credentials {
+                access_key: Some("accesskey".to_owned()),
+                secret_key: Some("secretkey".to_owned()),
+                security_token: None,
+                session_token: None,
+            },
+        )
+        .unwrap()
+        .with_path_style()
+    }
+    #[tokio::test]
+    async fn test_get_binary_ok_when_typical() {
+        assert!(S3::_get_binary("demofile", &new_demo_bucket())
+            .await
+            .is_ok());
+    }
+    #[tokio::test]
+    async fn test_put_binary_ok_when_typical() {
+        assert!(S3::_put_binary(vec![42], "demofile", &new_demo_bucket())
+            .await
+            .is_ok());
+    }
+    #[tokio::test]
+    async fn test_get_tags_ok_when_typical() {
+        assert!(S3::_get_tags("demofile", &new_demo_bucket()).await.is_ok());
+    }
+    #[tokio::test]
+    async fn test_set_tags_ok_when_typical() {
+        assert!(
+            S3::_set_tags("demofile", &[("key", "value")], &new_demo_bucket())
+                .await
+                .is_ok()
+        );
+    }
+    #[tokio::test]
+    async fn test_print_bucket_location_ok_when_typical() {
+        assert!(S3::_print_bucket_location(
+            S3::new("kind", "access_key", "secret_key", "bucket", "endpoint"),
+            &new_demo_bucket()
+        )
+        .await
+        .is_ok());
+    }
+}
+
 #[test]
 fn test_get_transport_returns_http_transport_when_no_tls() {
     use crate::question::*;
