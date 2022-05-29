@@ -14,8 +14,3 @@ pub fn has_tls(host: &str, port: &str) -> bool {
 fn test_has_tls_when_typical() {
     assert_eq!(has_tls("google.com", "443"), true);
 }
-
-#[test]
-fn test_has_tls_when_no_tls() {
-    assert_eq!(has_tls("localhost", "9000"), false);
-}

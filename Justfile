@@ -20,10 +20,14 @@ build dockers_only="False":
 test: build
     #!/bin/bash
     cargo test  --verbose --all || exit 1
+    source test/common.sh
 
     for d in $(find test -type d); do
+        echo Switching to $d
         pushd $d > /dev/null
-            [ -f Justfile ] && just test && true || err "Stopping."
+            if [ -f Justfile ]; then
+                just test || err "Stopping."
+            fi
         popd > /dev/null
     done
 

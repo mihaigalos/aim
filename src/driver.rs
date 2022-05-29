@@ -288,7 +288,7 @@ mod tests {
         just_start("test/s3/Justfile");
 
         let result = Driver::drive(
-            "s3://minioadmin:minioadmin@172.17.0.2:9000",
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket",
             "stdout",
             true,
             "",
