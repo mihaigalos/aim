@@ -199,27 +199,24 @@ impl S3 {
             "aws" => Storage {
                 _name: "aws".into(),
                 region: "eu-central-1".parse().unwrap(),
-                credentials: Credentials::from_env_specific(
-                    Some(access_key),
-                    Some(secret_key),
-                    None,
-                    None,
-                )
-                .unwrap(),
-                bucket: bucket.to_string(),
-                _location_supported: true,
-            },
-            "aws_public" => Storage {
-                _name: "aws-public".into(),
-                region: "eu-central-1".parse().unwrap(),
-                credentials: Credentials::anonymous().unwrap(),
+                credentials: Credentials {
+                    access_key: Some(access_key.to_owned()),
+                    secret_key: Some(secret_key.to_owned()),
+                    security_token: None,
+                    session_token: None,
+                },
                 bucket: bucket.to_string(),
                 _location_supported: true,
             },
             _ => Storage {
-                _name: "yandex".into(),
-                region: "ru-central1".parse().unwrap(),
-                credentials: Credentials::from_profile(Some("yandex")).unwrap(),
+                _name: "".into(),
+                region: "".parse().unwrap(),
+                credentials: Credentials {
+                    access_key: Some(access_key.to_owned()),
+                    secret_key: Some(secret_key.to_owned()),
+                    security_token: None,
+                    session_token: None,
+                },
                 bucket: bucket.to_string(),
                 _location_supported: false,
             },
@@ -254,4 +251,22 @@ fn test_get_transport_returns_https_transport_when_has_tls() {
         S3::_get_transport::<TlsMockHasTLS>("dummyhost:9000", false),
         "https://"
     );
+}
+
+#[test]
+fn test_storage_new_minio() {
+    let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
+    assert_eq!(storage._location_supported, false);
+}
+
+#[test]
+fn test_storage_new_aws() {
+    let storage = S3::new("aws", "user", "pass", "bucket", "fqdn");
+    assert_eq!(storage._location_supported, true);
+}
+
+#[test]
+fn test_storage_new_default() {
+    let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
+    assert_eq!(storage._location_supported, false);
 }
