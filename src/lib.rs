@@ -11,6 +11,8 @@ pub mod io;
 pub mod netrc;
 pub mod question;
 pub mod s3;
+pub mod s3_new;
+pub mod s3_new2;
 pub mod slicer;
 pub mod ssh;
 pub mod ssh_auth;

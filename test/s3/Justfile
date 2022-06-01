@@ -24,7 +24,11 @@ _start dirname="." +args="-d": _stop
           sleep 0.1
         done
     }
-    docker run -p 9000:9000 --name minio -d minio/minio server /export && wait_docker "minio"
+    docker run -p 9000:9000 --name minio \
+        --detach \
+        minio/minio \
+        server /home/shared \
+        && wait_docker "minio" || true
     docker run --rm --net=host -v $(realpath .mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
     docker run --rm --net=host -v $(realpath .mc):/root/.mc -v $(realpath .):/src --entrypoint=mc minio/mc cp /src/binary_file.tar.gz.part1 myminio/test-bucket/binary_file.tar.gz.part1
 
