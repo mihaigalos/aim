@@ -42,11 +42,14 @@ reqwest = { version = "0.11.3", features = ["stream"] }
 rusoto_core = { version = "0.48.0"}
 rusoto_credential = { version = "0.48.0"}
 rusoto_s3 = { version = "0.48.0"}
-rust-s3 = { version = "0.31.0", features = ["blocking"] }
+
+rust-s3 = { version = "0.31.0", default-features = false, features = ["with-async-std"] }
 self_update = { version = "0.30.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.0"
 ssh2 = "0.9.3"
 strfmt = "0.1.6"
+tempfile = "3.3.0"
+log = "0.4.17"
 time = "0.3.9"
 tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = {version="0.6.9", features = ["full"]}
