@@ -25,7 +25,7 @@ impl Driver {
             }
             "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await,
             "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await,
-            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await,
+            // "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -58,7 +58,7 @@ impl Driver {
             || input.contains("https:")
             || input.contains("ftp:")
             || input.contains("ssh:")
-            || input.contains("s3:")
+        // || input.contains("s3:")
         {
             return Driver::get(input, output, expected_sha256, &mut bar).await;
         } else {

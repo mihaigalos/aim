@@ -1,12 +1,27 @@
 extern crate http;
 extern crate s3;
 
+use async_std::io::{ReadExt, WriteExt};
 use std::str;
 
 use s3::bucket::Bucket;
+use s3::command::Command;
+use s3::command::HttpMethod;
+
 use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
+use s3::request_trait::Request;
+
+use async_trait::async_trait;
+
+use futures::AsyncWrite;
+use http::HeaderMap;
+
+use surf::http::headers::{HeaderName, HeaderValue};
+use time::OffsetDateTime;
+
+use surf::http::Method;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
@@ -18,256 +33,211 @@ use crate::io;
 use crate::question::*;
 use crate::tls::*;
 
-struct Storage {
-    _name: String,
-    region: Region,
-    credentials: Credentials,
-    bucket: String,
-    _location_supported: bool,
+// Temporary structure for making a request
+pub struct SurfRequest<'a> {
+    pub bucket: &'a Bucket,
+    pub path: &'a str,
+    pub command: Command<'a>,
+    pub datetime: OffsetDateTime,
+    pub sync: bool,
 }
 
-const MESSAGE: &str = "I want to go to S3";
+#[async_trait]
+impl<'a> Request for SurfRequest<'a> {
+    type Response = surf::Response;
+    type HeaderMap = HeaderMap;
 
-pub struct S3;
-impl S3 {
-    pub async fn get(
-        input: &str,
-        output: &str,
-        bar: &mut WrappedBar,
-        expected_sha256: &str,
-    ) -> Result<(), ValidateError> {
-        S3::_get(input, output, bar).await.unwrap();
-        HashChecker::check(output, expected_sha256)
+    fn datetime(&self) -> OffsetDateTime {
+        self.datetime
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
-        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let (_, _) = io::get_output(output, bar.silent);
+    fn bucket(&self) -> Bucket {
+        self.bucket.clone()
+    }
 
-        let bucket = S3::get_bucket(&parsed_address);
+    fn command(&self) -> Command {
+        self.command.clone()
+    }
 
-        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-        let fqdn = transport.to_string() + &parsed_address.server;
-        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
-        for backend in vec![S3::new(
-            &bucket_kind,
-            &parsed_address.username,
-            &parsed_address.password,
-            &bucket,
-            &fqdn,
-        )] {
-            let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
-                .unwrap()
-                .with_path_style();
+    fn path(&self) -> String {
+        self.path.to_string()
+    }
 
-            let buckets = bucket.list("".to_string(), None).await.unwrap();
-            for bucket in buckets {
-                for content in bucket.contents {
-                    println!("{}", content.key);
-                }
-            }
+    async fn response(&self) -> Result<surf::Response, S3Error> {
+        // Build headers
+        let headers = self.headers()?;
 
-            let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
-            let _ = S3::get_string(&bucket).await;
+        let request = match self.command.http_verb() {
+            HttpMethod::Get => surf::Request::builder(Method::Get, self.url()),
+            HttpMethod::Delete => surf::Request::builder(Method::Delete, self.url()),
+            HttpMethod::Put => surf::Request::builder(Method::Put, self.url()),
+            HttpMethod::Post => surf::Request::builder(Method::Post, self.url()),
+            HttpMethod::Head => surf::Request::builder(Method::Head, self.url()),
+        };
+
+        let mut request = request.body(self.request_body());
+
+        for (name, value) in headers.iter() {
+            request = request.header(
+                HeaderName::from_bytes(AsRef::<[u8]>::as_ref(&name).to_vec()).unwrap(),
+                HeaderValue::from_bytes(AsRef::<[u8]>::as_ref(&value).to_vec()).unwrap(),
+            );
         }
 
+        let response = request
+            .send()
+            .await
+            .map_err(|e| S3Error::Surf(e.to_string()))?;
+
+        if cfg!(feature = "fail-on-err") && !response.status().is_success() {
+            return Err(S3Error::HttpFail);
+        }
+
+        Ok(response)
+    }
+
+    async fn response_data(&self, etag: bool) -> Result<(Vec<u8>, u16), S3Error> {
+        let mut response = self.response().await?;
+        let status_code = response.status();
+        let body = response
+            .body_bytes()
+            .await
+            .map_err(|e| S3Error::Surf(e.to_string()))?;
+        let mut body_vec = Vec::new();
+        body_vec.extend_from_slice(&body[..]);
+        if etag {
+            if let Some(etag) = response.header("ETag") {
+                body_vec = etag.as_str().to_string().as_bytes().to_vec();
+            }
+        }
+        Ok((body_vec, status_code.into()))
+    }
+
+    async fn response_data_to_writer<T: AsyncWrite + Send + Unpin>(
+        &self,
+        writer: &mut T,
+    ) -> Result<u16, S3Error> {
+        let mut buffer = Vec::new();
+
+        let response = self.response().await?;
+
+        let status_code = response.status();
+
+        let mut stream = surf::http::Body::from_reader(response, None);
+
+        stream.read_to_end(&mut buffer).await?;
+
+        writer.write_all(&buffer).await?;
+
+        Ok(status_code.into())
+    }
+
+    async fn response_header(&self) -> Result<(HeaderMap, u16), S3Error> {
+        let mut header_map = HeaderMap::new();
+        let response = self.response().await?;
+        let status_code = response.status();
+
+        for (name, value) in response.iter() {
+            header_map.insert(
+                http::header::HeaderName::from_lowercase(
+                    name.to_string().to_ascii_lowercase().as_ref(),
+                )?,
+                value.as_str().parse()?,
+            );
+        }
+        Ok((header_map, status_code.into()))
+    }
+}
+
+impl<'a> SurfRequest<'a> {
+    pub fn new<'b>(bucket: &'b Bucket, path: &'b str, command: Command<'b>) -> SurfRequest<'b> {
+        SurfRequest {
+            bucket,
+            path,
+            command,
+            datetime: OffsetDateTime::now_utc(),
+            sync: false,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::bucket::Bucket;
+    use crate::command::Command;
+    use crate::request_trait::Request;
+    use crate::surf_request::SurfRequest;
+    use anyhow::Result;
+    use awscreds::Credentials;
+
+    // Fake keys - otherwise using Credentials::default will use actual user
+    // credentials if they exist.
+    fn fake_credentials() -> Credentials {
+        let access_key = "AKIAIOSFODNN7EXAMPLE";
+        let secert_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+        Credentials::new(Some(access_key), Some(secert_key), None, None, None).unwrap()
+    }
+
+    #[test]
+    fn url_uses_https_by_default() -> Result<()> {
+        let region = "custom-region".parse()?;
+        let bucket = Bucket::new("my-first-bucket", region, fake_credentials())?;
+        let path = "/my-first/path";
+        let request = SurfRequest::new(&bucket, path, Command::GetObject);
+
+        assert_eq!(request.url().scheme(), "https");
+
+        let headers = request.headers().unwrap();
+        let host = headers.get("Host").unwrap();
+
+        assert_eq!(*host, "my-first-bucket.custom-region".to_string());
         Ok(())
     }
 
-    fn get_bucket(parsed_address: &ParsedAddress) -> String {
-        let bucket: String = match parsed_address.path_segments.len() {
-            0 => parsed_address.file.to_string(),
-            _ => parsed_address.path_segments[0].to_string(),
-        };
-        bucket
-    }
+    #[test]
+    fn url_uses_https_by_default_path_style() -> Result<()> {
+        let region = "custom-region".parse()?;
+        let bucket = Bucket::new_with_path_style("my-first-bucket", region, fake_credentials())?;
+        let path = "/my-first/path";
+        let request = SurfRequest::new(&bucket, path, Command::GetObject);
 
-    async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
-        let client = reqwest::Client::new();
-        let res = client.post(server).send().await.unwrap();
+        assert_eq!(request.url().scheme(), "https");
 
-        let result = res
-            .headers()
-            .get(header)
-            .ok_or(HTTPHeaderError::NotPresent)?;
+        let headers = request.headers().unwrap();
+        let host = headers.get("Host").unwrap();
 
-        Ok(result.to_str().unwrap().to_lowercase().to_string())
-    }
-
-    fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
-        let parts: Vec<&str> = server.split(":").collect();
-        let host = parts[0];
-        let port = parts[1];
-        if T::has_tls(host, port) {
-            return "https://";
-        } else {
-            if Q::yes_no() {
-                return "http://";
-            } else {
-                return "";
-            }
-        }
-    }
-
-    async fn put_string(
-        bucket: &Bucket,
-        destination_file: &str,
-        string: &str,
-    ) -> Result<(), S3Error> {
-        let (_, _) = bucket.delete_object(destination_file).await?;
-        let (_, _) = bucket
-            .put_object(destination_file, string.as_bytes())
-            .await?;
-
+        assert_eq!(*host, "custom-region".to_string());
         Ok(())
     }
 
-    async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
-        let (data, _) = bucket.get_object("test_file").await?;
-        let string = str::from_utf8(&data)?;
-        Ok(string.to_string())
+    #[test]
+    fn url_uses_scheme_from_custom_region_if_defined() -> Result<()> {
+        let region = "http://custom-region".parse()?;
+        let bucket = Bucket::new("my-second-bucket", region, fake_credentials())?;
+        let path = "/my-second/path";
+        let request = SurfRequest::new(&bucket, path, Command::GetObject);
+
+        assert_eq!(request.url().scheme(), "http");
+
+        let headers = request.headers().unwrap();
+        let host = headers.get("Host").unwrap();
+        assert_eq!(*host, "my-second-bucket.custom-region".to_string());
+        Ok(())
     }
 
-    fn new(
-        kind: &str,
-        access_key: &str,
-        secret_key: &str,
-        bucket: &str,
-        endpoint: &str,
-    ) -> Storage {
-        let storage = match kind {
-            "minio" => Storage {
-                _name: "minio".into(),
-                region: Region::Custom {
-                    region: "".into(),
-                    endpoint: endpoint.into(),
-                },
-                credentials: Credentials {
-                    access_key: Some(access_key.to_owned()),
-                    secret_key: Some(secret_key.to_owned()),
-                    security_token: None,
-                    session_token: None,
-                },
-                bucket: bucket.to_string(),
-                _location_supported: false,
-            },
-            "aws" => Storage {
-                _name: "aws".into(),
-                region: "eu-central-1".parse().unwrap(),
-                credentials: Credentials {
-                    access_key: Some(access_key.to_owned()),
-                    secret_key: Some(secret_key.to_owned()),
-                    security_token: None,
-                    session_token: None,
-                },
-                bucket: bucket.to_string(),
-                _location_supported: true,
-            },
-            _ => Storage {
-                _name: "".into(),
-                region: "".parse().unwrap(),
-                credentials: Credentials {
-                    access_key: Some(access_key.to_owned()),
-                    secret_key: Some(secret_key.to_owned()),
-                    security_token: None,
-                    session_token: None,
-                },
-                bucket: bucket.to_string(),
-                _location_supported: false,
-            },
-        };
-        return storage;
+    #[test]
+    fn url_uses_scheme_from_custom_region_if_defined_with_path_style() -> Result<()> {
+        let region = "http://custom-region".parse()?;
+        let bucket = Bucket::new_with_path_style("my-second-bucket", region, fake_credentials())?;
+        let path = "/my-second/path";
+        let request = SurfRequest::new(&bucket, path, Command::GetObject);
+
+        assert_eq!(request.url().scheme(), "http");
+
+        let headers = request.headers().unwrap();
+        let host = headers.get("Host").unwrap();
+        assert_eq!(*host, "custom-region".to_string());
+
+        Ok(())
     }
-}
-#[test]
-fn test_get_bucket_works_when_typical() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string()],
-        file: "".to_string(),
-    };
-    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
-}
-
-#[test]
-fn test_get_bucket_works_when_multiple_segments() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
-        file: "".to_string(),
-    };
-    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
-}
-
-#[test]
-fn test_get_transport_returns_http_transport_when_no_tls() {
-    use crate::question::*;
-    pub struct TlsMockNoTLS;
-    impl TLSTrait for TlsMockNoTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            false
-        }
-    }
-    assert_eq!(
-        S3::_get_transport::<TlsMockNoTLS, QuestionWrapped>("dummyhost:9000"),
-        "http://"
-    );
-}
-
-#[test]
-fn test_get_transport_returns_https_transport_when_has_tls() {
-    use crate::question::*;
-    pub struct TlsMockHasTLS;
-    impl TLSTrait for TlsMockHasTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            true
-        }
-    }
-    assert_eq!(
-        S3::_get_transport::<TlsMockHasTLS, QuestionWrapped>("dummyhost:9000"),
-        "https://"
-    );
-}
-
-#[test]
-fn test_get_transport_returns_no_transport_when_no_tls() {
-    use crate::question::*;
-    pub struct TlsMockHasTLS;
-    impl TLSTrait for TlsMockHasTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            false
-        }
-    }
-    struct QuestionWrappedMock;
-    impl QuestionTrait for QuestionWrappedMock {
-        fn yes_no() -> bool {
-            false
-        }
-    }
-    assert_eq!(
-        S3::_get_transport::<TlsMockHasTLS, QuestionWrappedMock>("dummyhost:9000"),
-        ""
-    );
-}
-
-#[test]
-fn test_storage_new_minio() {
-    let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
-}
-
-#[test]
-fn test_storage_new_aws() {
-    let storage = S3::new("aws", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, true);
-}
-
-#[test]
-fn test_storage_new_default() {
-    let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
 }
