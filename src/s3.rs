@@ -89,6 +89,7 @@ impl S3 {
         }
         Ok(())
     }
+
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
         let client = reqwest::Client::new();
         let res = client.post(server).send().await.unwrap();
@@ -103,6 +104,7 @@ impl S3 {
 
     fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
+        assert_eq!(parts.len(), 2, "No port in URL. Stopping.");
         let host = parts[0];
         let port = parts[1];
         if T::has_tls(host, port) {
@@ -187,33 +189,76 @@ impl S3 {
     }
 }
 
-#[tokio::test]
-async fn test_list_bucket_works_when_typical() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string()],
-        file: "".to_string(),
-    };
-    let bucket = S3::get_bucket(&parsed_address);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test::serial;
 
-    let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-    let fqdn = transport.to_string() + &parsed_address.server;
-    let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-    let backend = S3::new(
-        &bucket_kind,
-        &parsed_address.username,
-        &parsed_address.password,
-        &bucket,
-        &fqdn,
-    );
+    fn just_start(justfile: &str) {
+        use std::env;
+        use std::io::{self, Write};
+        use std::process::Command;
+        let output = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_start",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output()
+            .expect("failed to just _start");
 
-    let bucket = Bucket::new(bucket, backend.region, backend.credentials)
-        .unwrap()
-        .with_path_style();
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+    }
 
-    assert!(S3::_list(&bucket).await.is_ok());
+    fn just_stop(justfile: &str) {
+        use std::env;
+        use std::process::Command;
+        let _ = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_stop",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_list_bucket_works_when_typical() {
+        just_start("test/s3/Justfile");
+
+        let parsed_address = ParsedAddress {
+            server: "localhost:9000".to_string(),
+            username: "minioadmin".to_string(),
+            password: "minioadmin".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        let bucket = S3::get_bucket(&parsed_address);
+
+        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+        let fqdn = transport.to_string() + &parsed_address.server;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+        let backend = S3::new(
+            &bucket_kind,
+            &parsed_address.username,
+            &parsed_address.password,
+            &bucket,
+            &fqdn,
+        );
+
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+
+        assert!(S3::_list(&bucket).await.is_ok());
+
+        just_stop("test/s3/Justfile");
+    }
 }
 
 #[test]
@@ -289,6 +334,19 @@ fn test_get_transport_returns_no_transport_when_no_tls() {
         S3::_get_transport::<TlsMockHasTLS, QuestionWrappedMock>("dummyhost:9000"),
         ""
     );
+}
+
+#[should_panic]
+#[tokio::test]
+async fn test_get_transport_bucket_panics_when_no_port() {
+    let parsed_address = ParsedAddress {
+        server: "localhost".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "".to_string(),
+    };
+    let _ = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
 }
 
 #[test]
