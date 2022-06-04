@@ -69,8 +69,7 @@ impl S3 {
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
         let mut _input: Vec<String> = parsed_address.path_segments[1..].to_vec();
-        _input.push("/".to_string() + &parsed_address.file);
-        _input.join("/")
+        return "/".to_string() + &_input.join("/");
     }
 
     fn get_bucket(parsed_address: &ParsedAddress) -> &str {
