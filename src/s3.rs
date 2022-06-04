@@ -22,11 +22,9 @@ struct Storage {
     _name: String,
     region: Region,
     credentials: Credentials,
-    bucket: String,
+    _bucket: String,
     _location_supported: bool,
 }
-
-const MESSAGE: &str = "I want to go to S3";
 
 pub struct S3;
 impl S3 {
@@ -49,35 +47,32 @@ impl S3 {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
-        for backend in vec![S3::new(
+        let backend = S3::new(
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
             &bucket,
             &fqdn,
-        )] {
-            let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
-                .unwrap()
-                .with_path_style();
+        );
 
-            let buckets = bucket.list("".to_string(), None).await.unwrap();
-            for bucket in buckets {
-                for content in bucket.contents {
-                    println!("{}", content.key);
-                }
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+
+        let buckets = bucket.list("".to_string(), None).await.unwrap();
+        for bucket in buckets {
+            for content in bucket.contents {
+                println!("{}", content.key);
             }
-
-            let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
-            let _ = S3::get_string(&bucket).await;
         }
 
         Ok(())
     }
 
-    fn get_bucket(parsed_address: &ParsedAddress) -> String {
-        let bucket: String = match parsed_address.path_segments.len() {
-            0 => parsed_address.file.to_string(),
-            _ => parsed_address.path_segments[0].to_string(),
+    fn get_bucket(parsed_address: &ParsedAddress) -> &str {
+        let bucket: &str = match parsed_address.path_segments.len() {
+            0 => &parsed_address.file,
+            _ => &parsed_address.path_segments[0],
         };
         bucket
     }
@@ -109,7 +104,7 @@ impl S3 {
         }
     }
 
-    async fn put_string(
+    async fn _put_string(
         bucket: &Bucket,
         destination_file: &str,
         string: &str,
@@ -122,7 +117,7 @@ impl S3 {
         Ok(())
     }
 
-    async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
+    async fn _get_string(bucket: &Bucket) -> Result<String, S3Error> {
         let (data, _) = bucket.get_object("test_file").await?;
         let string = str::from_utf8(&data)?;
         Ok(string.to_string())
@@ -148,7 +143,7 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: false,
             },
             "aws" => Storage {
@@ -160,7 +155,7 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: true,
             },
             _ => Storage {
@@ -172,7 +167,7 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: false,
             },
         };
