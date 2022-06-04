@@ -14,7 +14,6 @@ use crate::consts::*;
 use crate::error::HTTPHeaderError;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
-use crate::io;
 use crate::question::*;
 use crate::tls::*;
 
@@ -40,8 +39,10 @@ impl S3 {
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let (_, _) = io::get_output(output, bar.silent);
-
+        let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
+            .await
+            .expect("Unable to output file");
+        let input = S3::get_path_in_bucket(&parsed_address);
         let bucket = S3::get_bucket(&parsed_address);
 
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
@@ -58,7 +59,18 @@ impl S3 {
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
+
+        let _ = bucket
+            .get_object_stream(input, &mut async_output_file)
+            .await
+            .unwrap();
         Ok(())
+    }
+
+    fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
+        let mut _input: Vec<String> = parsed_address.path_segments[1..].to_vec();
+        _input.push("/".to_string() + &parsed_address.file);
+        _input.join("/")
     }
 
     fn get_bucket(parsed_address: &ParsedAddress) -> &str {
@@ -296,4 +308,34 @@ fn test_storage_new_aws() {
 fn test_storage_new_default() {
     let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
     assert_eq!(storage._location_supported, false);
+}
+
+#[test]
+fn test_get_path_in_bucket_works_when_typical() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
+        file: "".to_string(),
+    };
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/test-file");
+}
+
+#[test]
+fn test_get_path_in_bucket_works_when_in_subfolder() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec![
+            "test-bucket".to_string(),
+            "subfolder".to_string(),
+            "test-file".to_string(),
+        ],
+        file: "".to_string(),
+    };
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/subfolder/test-file");
 }
