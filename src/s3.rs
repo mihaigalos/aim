@@ -58,14 +58,6 @@ impl S3 {
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
-
-        let buckets = bucket.list("".to_string(), None).await.unwrap();
-        for bucket in buckets {
-            for content in bucket.contents {
-                println!("{}", content.key);
-            }
-        }
-
         Ok(())
     }
 
@@ -77,6 +69,15 @@ impl S3 {
         bucket
     }
 
+    async fn _list(bucket: &Bucket) -> Result<(), S3Error> {
+        let buckets = bucket.list("".to_string(), None).await?;
+        for bucket in buckets {
+            for content in bucket.contents {
+                println!("{}", content.key);
+            }
+        }
+        Ok(())
+    }
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
         let client = reqwest::Client::new();
         let res = client.post(server).send().await.unwrap();
@@ -174,6 +175,36 @@ impl S3 {
         return storage;
     }
 }
+
+#[tokio::test]
+async fn test_list_bucket_works_when_typical() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "".to_string(),
+    };
+    let bucket = S3::get_bucket(&parsed_address);
+
+    let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+    let fqdn = transport.to_string() + &parsed_address.server;
+    let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+    let backend = S3::new(
+        &bucket_kind,
+        &parsed_address.username,
+        &parsed_address.password,
+        &bucket,
+        &fqdn,
+    );
+
+    let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+        .unwrap()
+        .with_path_style();
+
+    assert!(S3::_list(&bucket).await.is_ok());
+}
+
 #[test]
 fn test_get_bucket_works_when_typical() {
     let parsed_address = ParsedAddress {
