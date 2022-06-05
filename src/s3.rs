@@ -299,9 +299,10 @@ mod tests {
 
         just_stop("test/s3/Justfile");
     }
+
     #[tokio::test]
     #[serial]
-    async fn test_put_string_works_when_typical() {
+    async fn test_get_string_works_when_typical() {
         just_start("test/s3/Justfile");
 
         let parsed_address = ParsedAddress {
