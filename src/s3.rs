@@ -329,6 +329,14 @@ mod tests {
             .unwrap()
             .with_path_style();
 
+        let _ = S3::_put_string(
+            &bucket,
+            "test_put_string_works_when_typical",
+            "This is the string from test_put_string_works_when_typical.",
+        )
+        .await
+        .is_ok();
+
         assert_eq!(
             S3::_get_string(&bucket, "test_put_string_works_when_typical")
                 .await
