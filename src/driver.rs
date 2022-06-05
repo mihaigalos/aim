@@ -321,12 +321,13 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_s3_list_works_when_typical() {
+    async fn test_s3_get_works_when_typical() {
+        let out_file = "test_s3_get_works_when_typical";
         just_start("test/s3/Justfile");
 
         let result = Driver::drive(
-            "s3://minioadmin:minioadmin@localhost:9000/test-bucket",
-            "stdout",
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/binary_file.tar.gz.part1",
+            out_file,
             true,
             "",
         )
@@ -335,6 +336,7 @@ mod tests {
         assert!(result.is_ok());
 
         just_stop("test/s3/Justfile");
+        std::fs::remove_file(out_file).unwrap();
     }
 }
 
