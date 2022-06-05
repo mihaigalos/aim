@@ -171,39 +171,3 @@ impl FTPHandler {
         Ok(ftp_stream)
     }
 }
-
-#[tokio::test]
-async fn get_ftp_works() {
-    let out_file = "demo_README";
-    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
-
-    let result = FTPHandler::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        out_file,
-        &mut WrappedBar::new_empty(),
-        expected_hash,
-    )
-    .await;
-    std::fs::remove_file(out_file).unwrap();
-
-    assert!(result.is_ok());
-}
-
-#[tokio::test]
-async fn get_ftp_resume_works() {
-    let expected_size = 163806;
-    let out_file = "test/get_ftp_resume_works";
-
-    std::fs::copy("test/incomplete_resumable_file", out_file).unwrap();
-    let _ = FTPHandler::get(
-        "ftp://ftp.fau.de:21/debian/dists/unstable/Release",
-        out_file,
-        &mut WrappedBar::new_empty(),
-        "",
-    )
-    .await;
-
-    let actual_size = std::fs::metadata(out_file).unwrap().len();
-    assert_eq!(actual_size, expected_size);
-    std::fs::remove_file(out_file).unwrap();
-}

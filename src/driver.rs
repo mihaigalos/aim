@@ -271,6 +271,34 @@ mod tests {
         assert!(result.is_ok());
         just_stop("test/ftp/Justfile");
     }
+
+    #[tokio::test]
+    async fn test_get_ftp_resume_works() {
+        just_start("test/ftp/Justfile");
+        let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
+        let out_file = "test_get_ftp_resume_works";
+
+        let _ = Driver::put(
+            "test/ftp/binary_file.tar.gz",
+            "ftp://127.0.0.1:21/binary_file.tar.gz",
+            WrappedBar::new(0, "", true),
+        )
+        .await;
+        std::fs::copy("test/ftp/binary_file.tar.gz.part1", out_file).unwrap();
+        let result = Driver::get(
+            "ftp://127.0.0.1:21/binary_file.tar.gz",
+            out_file,
+            expected_hash,
+            &mut WrappedBar::new(0, "", true),
+        )
+        .await;
+
+        println!("out file: {}", out_file);
+        assert!(result.is_ok());
+        std::fs::remove_file(out_file).unwrap();
+        just_stop("test/ftp/Justfile");
+    }
+
     #[tokio::test]
     #[serial]
     async fn test_ssh_get_works_when_typical() {
