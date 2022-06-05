@@ -38,6 +38,7 @@ impl Driver {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
             "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
+            "s3:/" => crate::s3::S3::put(input, output, bar).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output

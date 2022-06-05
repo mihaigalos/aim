@@ -37,11 +37,23 @@ impl S3 {
         HashChecker::check(output, expected_sha256)
     }
 
+    pub async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
+        let (output, bucket) = S3::setup(output, bar.silent).await;
+        let mut async_input_file = tokio::fs::File::create(input) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
+            .await
+            .expect("Unable to open input file");
+        let _ = bucket
+            .put_object_stream(&mut async_input_file, output)
+            .await
+            .unwrap();
+        Ok(())
+    }
+
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
         let (input, bucket) = S3::setup(input, bar.silent).await;
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
-            .expect("Unable to output file");
+            .expect("Unable to open output file");
         let _ = bucket
             .get_object_stream(input, &mut async_output_file)
             .await
@@ -49,9 +61,9 @@ impl S3 {
         Ok(())
     }
 
-    async fn setup(input: &str, silent: bool) -> (String, s3::bucket::Bucket) {
-        let parsed_address = ParsedAddress::parse_address(input, silent);
-        let input = S3::get_path_in_bucket(&parsed_address);
+    async fn setup(io: &str, silent: bool) -> (String, s3::bucket::Bucket) {
+        let parsed_address = ParsedAddress::parse_address(io, silent);
+        let io = S3::get_path_in_bucket(&parsed_address);
         let bucket = S3::get_bucket(&parsed_address);
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
@@ -66,7 +78,7 @@ impl S3 {
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
-        (input, bucket)
+        (io, bucket)
     }
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
