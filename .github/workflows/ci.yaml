@@ -12,7 +12,7 @@ on:
       - 'screenshots/**'
     branches: [ main ]
 
-  workflow_dispatch:
+  workflow_dispatch: # Run with Run Workflow button in GitHub Action Job, set debug_enabled=true for interactive ssh session.
       inputs:
         debug_enabled:
           description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
@@ -28,10 +28,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
     - uses: extractions/setup-just@v1
       with:
@@ -54,6 +50,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
           ${{ runner.os }}-cargo-target
+
+    - name: Setup tmate session
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
     - name: Run tests
       run: |
