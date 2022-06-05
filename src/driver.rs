@@ -124,21 +124,6 @@ async fn test_https_get_works_when_typical() {
     std::fs::remove_file("downloaded_https_LICENSE.md").unwrap();
 }
 
-#[tokio::test]
-async fn test_ftp_get_works_when_typical() {
-    let result = Driver::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        "downloaded_ftp_README.md",
-        "",
-        &mut WrappedBar::new(0, "", true),
-    )
-    .await;
-
-    assert!(result.is_ok());
-
-    std::fs::remove_file("downloaded_ftp_README.md").unwrap();
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
