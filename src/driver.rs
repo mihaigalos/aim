@@ -318,6 +318,24 @@ mod tests {
 
         just_stop("test/ssh/Justfile");
     }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_s3_list_works_when_typical() {
+        just_start("test/s3/Justfile");
+
+        let result = Driver::drive(
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket",
+            "stdout",
+            true,
+            "",
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/s3/Justfile");
+    }
 }
 
 #[tokio::test]

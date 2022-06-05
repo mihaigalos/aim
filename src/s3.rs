@@ -330,7 +330,9 @@ mod tests {
             .with_path_style();
 
         assert_eq!(
-            S3::_get_string(&bucket, "test_put_string_works_when_typical").await,
+            S3::_get_string(&bucket, "test_put_string_works_when_typical")
+                .await
+                .unwrap(),
             "This is the string from test_put_string_works_when_typical."
         );
 
