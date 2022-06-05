@@ -237,7 +237,6 @@ mod tests {
         just_start("test/ftp/Justfile");
         let out_file = ".";
         let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
-
         let _ = Driver::put(
             "test/ftp/binary_file.tar.gz",
             "ftp://127.0.0.1:21/test_ftp_get_works_same_filename",
@@ -252,12 +251,12 @@ mod tests {
         )
         .await;
         std::fs::remove_file("test_ftp_get_works_same_filename").unwrap();
-
         assert!(result.is_ok());
         just_stop("test/ftp/Justfile");
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_ftp_get_resume_works() {
         just_start("test/ftp/Justfile");
         let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
