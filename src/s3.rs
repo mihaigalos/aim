@@ -38,16 +38,24 @@ impl S3 {
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
-        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
+        let (input, bucket) = S3::setup(input, bar.silent).await;
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to output file");
+        let _ = bucket
+            .get_object_stream(input, &mut async_output_file)
+            .await
+            .unwrap();
+        Ok(())
+    }
+
+    async fn setup(input: &str, silent: bool) -> (String, s3::bucket::Bucket) {
+        let parsed_address = ParsedAddress::parse_address(input, silent);
         let input = S3::get_path_in_bucket(&parsed_address);
         let bucket = S3::get_bucket(&parsed_address);
-
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
-        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let backend = S3::new(
             &bucket_kind,
             &parsed_address.username,
@@ -55,16 +63,10 @@ impl S3 {
             &bucket,
             &fqdn,
         );
-
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
-
-        let _ = bucket
-            .get_object_stream(input, &mut async_output_file)
-            .await
-            .unwrap();
-        Ok(())
+        (input, bucket)
     }
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
