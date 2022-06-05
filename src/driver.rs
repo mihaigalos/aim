@@ -258,7 +258,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_get_ftp_resume_works() {
+    async fn test_ftp_get_resume_works() {
         just_start("test/ftp/Justfile");
         let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
         let out_file = "test_get_ftp_resume_works";
