@@ -38,11 +38,12 @@ impl S3 {
     }
 
     pub async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
-        let (_, bucket) = S3::setup(output, bar.silent).await;
-        let mut async_input_file = tokio::fs::File::create(input) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
+        let (output, bucket) = S3::setup(output, bar.silent).await;
+
+        let mut async_input_file = tokio::fs::File::open(input) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open input file");
-        println!("{} {}", input, output);
+
         let _ = bucket
             .put_object_stream(&mut async_input_file, output)
             .await
@@ -481,8 +482,8 @@ fn test_get_path_in_bucket_works_when_typical() {
         server: "".to_string(),
         username: "".to_string(),
         password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
-        file: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "test-file".to_string(),
     };
     let path = S3::get_path_in_bucket(&parsed_address);
     assert_eq!(path, "/test-file");
