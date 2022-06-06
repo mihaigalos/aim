@@ -83,6 +83,41 @@ impl S3 {
         (io, bucket)
     }
 
+    fn get_credentials(parsed_address: &ParsedAddress) -> (String, String) {
+        let result = (
+            parsed_address.username.to_owned(),
+            parsed_address.password.to_owned(),
+        );
+
+        let result = S3::mixin_aws_profile_credentials(result.0, result.1);
+        let result = S3::mixin_aws_profile_credentials_from_env(result.0, result.1);
+        (result.0, result.1)
+    }
+
+    fn mixin_aws_profile_credentials(username: String, password: String) -> (String, String) {
+        let mut result = (username, password);
+        if let Ok(creds_from_profile) = Credentials::from_profile(None) {
+            result = (
+                creds_from_profile.access_key.unwrap(),
+                creds_from_profile.secret_key.unwrap(),
+            );
+        }
+        return result;
+    }
+    fn mixin_aws_profile_credentials_from_env(
+        username: String,
+        password: String,
+    ) -> (String, String) {
+        let mut result = (username, password);
+        if let Ok(creds_from_profile) = Credentials::from_env() {
+            result = (
+                creds_from_profile.access_key.unwrap(),
+                creds_from_profile.secret_key.unwrap(),
+            );
+        }
+        return result;
+    }
+
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
         let mut result = "/".to_string();
         if parsed_address.path_segments.len() > 1 {
@@ -506,3 +541,12 @@ fn test_get_path_in_bucket_works_when_in_subfolder() {
     let path = S3::get_path_in_bucket(&parsed_address);
     assert_eq!(path, "/subfolder/test.file");
 }
+
+#[test]
+fn test_mixin_aws_from_aws_folder_works_when_typical() {}
+
+#[test]
+fn test_mixin_aws_from_environment_variables_works_when_typical() {}
+
+#[test]
+fn test_get_credentials_works_when_tyipical() {}
