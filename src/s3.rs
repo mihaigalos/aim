@@ -70,13 +70,8 @@ impl S3 {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-        let backend = S3::new(
-            &bucket_kind,
-            &parsed_address.username,
-            &parsed_address.password,
-            &bucket,
-            &fqdn,
-        );
+        let (username, password) = S3::get_credentials(&parsed_address);
+        let backend = S3::new(&bucket_kind, &username, &password, &bucket, &fqdn);
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
