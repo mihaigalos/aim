@@ -12,6 +12,11 @@ Simplicity: download or upload files depending on parameter order with default s
 
 Download a release for Linux or MacOS from [releases](https://github.com/mihaigalos/aim/releases). See the [Docker](https://github.com/mihaigalos/aim#docker) section on how to run it platform-independently.
 
+If you want to build from source, use:
+```bash
+cargo install aim
+```
+
 ## 💡 Features
 
 ### Download / Upload
