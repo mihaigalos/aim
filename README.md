@@ -83,7 +83,7 @@ aim https://www.rust-lang.org/ | htmlq --attribute href a
 
 ### Basicauth in url
 
-Just use the syntax `protocol://user:pass@server:port`. This can be used for all `http(s)`, `ftp` and `ssh`.
+Just use the syntax `protocol://user:pass@server:port`. This can be used for all `http(s)`, `ftp`, `ssh` and `s3`.
 
 Example for downloading:
 
