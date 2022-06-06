@@ -5,14 +5,14 @@ A command line download/upload tool with resume.
 
 ![resume example](screenshots/aim.gif)
 
-## Why?
+## ❓ Why
 Simplicity: download or upload files depending on parameter order with default settings.
 
-## Installation
+## 💿︎ Installation
 
 Download a release for Linux or MacOS from [releases](https://github.com/mihaigalos/aim/releases). See the [Docker](https://github.com/mihaigalos/aim#docker) section on how to run it platform-independently.
 
-## Features
+## 💡 Features
 
 ### Download / Upload
 * default action implied from parameter order.
@@ -79,7 +79,7 @@ aim https://www.rust-lang.org/ | htmlq --attribute href a
 
 ----------------------------------------
 
-## Authentication
+## 🔑 Authentication
 
 ### Basicauth in url
 
@@ -110,7 +110,7 @@ Keys that match the following patterns are automatically tried:
 
 ----------------------------------------
 
-## Updating
+## 🆕 Updating
 
 `aim` can self update in-place using:
 
@@ -118,7 +118,7 @@ Keys that match the following patterns are automatically tried:
 aim --update
 ```
 
-## Docker
+## 🐳 Docker
 
 For convenience, alpine-based docker images for `aarch64` and `x64` are available, so arguments can be passed directly to them.
 
@@ -140,5 +140,5 @@ Adapt IP to match that of machine `A`.
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8080/myfile /src/myfile
 ```
 ----------------------------------------
-## Similar work
+## 🛠️ Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
