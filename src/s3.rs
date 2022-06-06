@@ -541,7 +541,23 @@ fn test_get_path_in_bucket_works_when_in_subfolder() {
 fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {}
 
 #[test]
-fn test_mixin_aws_credentials_from_env_works_when_typical() {}
+fn test_mixin_aws_credentials_from_env_works_when_typical() {
+    use std::env;
+    let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
+    let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
+    env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
+    env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
+
+    let (username, password) = S3::mixin_aws_credentials_from_env("".to_string(), "".to_string());
+
+    env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
+    env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
+
+    assert_eq!(
+        (username, password),
+        ("myaccesskey".to_string(), "mysecretkey".to_string())
+    );
+}
 
 #[test]
 fn test_get_credentials_works_when_tyipical() {}
