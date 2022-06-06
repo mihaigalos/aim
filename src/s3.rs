@@ -84,12 +84,15 @@ impl S3 {
             parsed_address.password.to_owned(),
         );
 
-        let result = S3::mixin_aws_profile_credentials(result.0, result.1);
-        let result = S3::mixin_aws_profile_credentials_from_env(result.0, result.1);
+        let result = S3::mixin_aws_credentials_from_aws_folder(result.0, result.1);
+        let result = S3::mixin_aws_credentials_from_env(result.0, result.1);
         (result.0, result.1)
     }
 
-    fn mixin_aws_profile_credentials(username: String, password: String) -> (String, String) {
+    fn mixin_aws_credentials_from_aws_folder(
+        username: String,
+        password: String,
+    ) -> (String, String) {
         let mut result = (username, password);
         if let Ok(creds_from_profile) = Credentials::from_profile(None) {
             result = (
@@ -99,10 +102,7 @@ impl S3 {
         }
         return result;
     }
-    fn mixin_aws_profile_credentials_from_env(
-        username: String,
-        password: String,
-    ) -> (String, String) {
+    fn mixin_aws_credentials_from_env(username: String, password: String) -> (String, String) {
         let mut result = (username, password);
         if let Ok(creds_from_profile) = Credentials::from_env() {
             result = (
@@ -538,10 +538,10 @@ fn test_get_path_in_bucket_works_when_in_subfolder() {
 }
 
 #[test]
-fn test_mixin_aws_from_aws_folder_works_when_typical() {}
+fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {}
 
 #[test]
-fn test_mixin_aws_from_environment_variables_works_when_typical() {}
+fn test_mixin_aws_credentials_from_env_works_when_typical() {}
 
 #[test]
 fn test_get_credentials_works_when_tyipical() {}
