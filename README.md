@@ -19,7 +19,7 @@ Download a release for Linux or MacOS from [releases](https://github.com/mihaiga
   * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
   * `aim source.file https://domain.com/destination.file` -> Upload.
-* support for `http(s)`, `ftp`, `ssh`.
+* support for `http(s)`, `ftp`, `ssh`, `s3` (no resume at the moment).
 
 ### Optional check of sha256
 To validate that a download matches a desired checksum, just list it at the end when invoking `aim`. 
