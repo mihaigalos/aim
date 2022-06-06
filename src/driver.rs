@@ -339,6 +339,25 @@ mod tests {
         just_stop("test/s3/Justfile");
         std::fs::remove_file(out_file).unwrap();
     }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_s3_put_works_when_typical() {
+        let in_file = "test/s3/test.file";
+        just_start("test/s3/Justfile");
+
+        let result = Driver::drive(
+            in_file,
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
+            true,
+            "",
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/s3/Justfile");
+    }
 }
 
 #[tokio::test]

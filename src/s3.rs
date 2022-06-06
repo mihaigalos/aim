@@ -38,10 +38,11 @@ impl S3 {
     }
 
     pub async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
-        let (output, bucket) = S3::setup(output, bar.silent).await;
+        let (_, bucket) = S3::setup(output, bar.silent).await;
         let mut async_input_file = tokio::fs::File::create(input) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open input file");
+        println!("{} {}", input, output);
         let _ = bucket
             .put_object_stream(&mut async_input_file, output)
             .await
@@ -82,8 +83,14 @@ impl S3 {
     }
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
-        let mut _input: Vec<String> = parsed_address.path_segments[1..].to_vec();
-        return "/".to_string() + &_input.join("/");
+        let mut result = "/".to_string();
+        println!("{:?}", parsed_address);
+        if parsed_address.path_segments.len() > 1 {
+            result += &parsed_address.path_segments[1..].join("/");
+            result += "/";
+        }
+        result += &parsed_address.file;
+        return result;
     }
 
     fn get_bucket(parsed_address: &ParsedAddress) -> &str {
@@ -480,20 +487,22 @@ fn test_get_path_in_bucket_works_when_typical() {
     let path = S3::get_path_in_bucket(&parsed_address);
     assert_eq!(path, "/test-file");
 }
+#[test]
+fn test_get_path_in_bucket_works_when_full_url() {
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
+        true,
+    );
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/test.file");
+}
 
 #[test]
 fn test_get_path_in_bucket_works_when_in_subfolder() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec![
-            "test-bucket".to_string(),
-            "subfolder".to_string(),
-            "test-file".to_string(),
-        ],
-        file: "".to_string(),
-    };
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/subfolder/test.file",
+        true,
+    );
     let path = S3::get_path_in_bucket(&parsed_address);
-    assert_eq!(path, "/subfolder/test-file");
+    assert_eq!(path, "/subfolder/test.file");
 }
