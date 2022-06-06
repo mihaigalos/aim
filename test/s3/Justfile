@@ -31,5 +31,13 @@ _start dirname="." +args="-d": _stop
 _stop dirname=".":
     @docker rm --force minio > /dev/null 2>&1
 
-_test:
-    true
+_test_aim_put_binary_file:
+    #!/bin/bash
+    test=$(basename $0) && source ../common.sh
+    sha_input=$(sha256sum test.file | cut -d' ' -f1)
+    set -x
+    aim -s test.file s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file
+    # aim -s s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file $test
+    sha_output=$(sha256sum $test | cut -d' ' -f1)
+    [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."
+    rm $test

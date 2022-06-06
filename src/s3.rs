@@ -85,7 +85,6 @@ impl S3 {
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
         let mut result = "/".to_string();
-        println!("{:?}", parsed_address);
         if parsed_address.path_segments.len() > 1 {
             result += &parsed_address.path_segments[1..].join("/");
             result += "/";
