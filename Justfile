@@ -10,6 +10,7 @@ docker_image_dockerhub := docker_user_repo + "/" + tool + ":" + docker_image_ver
 
 build dockers_only="False":
     #!/bin/bash
+    git lfs pull
     [ {{ dockers_only }} = False ] && $(cargo build  --verbose --all || exit 1) || echo "Skipping cargo build and building dockers only."
     for d in $(find test -type d); do
         pushd $d > /dev/null

@@ -74,8 +74,9 @@ _test_curl_login_with_netrc:
 _test_aim_checksum_works:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
-    sha_expected="1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b"
-    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README $test $sha_expected
+    sha_expected="cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d"
+    aim -s binary_file.tar.gz ftp://user:pass@127.0.0.1:21/$test
+    aim -s ftp://user:pass@127.0.0.1:21/$test $test $sha_expected
     [ $? -eq 0 ] && ok || err "ERROR: expected and actual SHA256s don't match."
     rm $test
 
@@ -83,7 +84,8 @@ _test_aim_checksum_fails_when_checksum_mismatch:
     #!/bin/bash
     test=$(basename $0) && source ../common.sh
     sha_expected="AAAA0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b"
-    aim -s ftp://ftp.fau.de:21/gnu/MailingListArchives/README $test $sha_expected
+    aim -s binary_file.tar.gz ftp://user:pass@127.0.0.1:21/$test
+    aim -s ftp://user:pass@127.0.0.1:21/$test $test $sha_expected
     [ $? -ne 0 ] && ok || err "ERROR: expected checksum mismatch, got equal."
     rm $test
 

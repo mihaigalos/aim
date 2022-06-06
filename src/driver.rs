@@ -38,6 +38,7 @@ impl Driver {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
             "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
+            "s3:/" => crate::s3::S3::put(input, output, bar).await,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -122,21 +123,6 @@ async fn test_https_get_works_when_typical() {
     assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_https_LICENSE.md").unwrap();
-}
-
-#[tokio::test]
-async fn test_ftp_get_works_when_typical() {
-    let result = Driver::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        "downloaded_ftp_README.md",
-        "",
-        &mut WrappedBar::new(0, "", true),
-    )
-    .await;
-
-    assert!(result.is_ok());
-
-    std::fs::remove_file("downloaded_ftp_README.md").unwrap();
 }
 
 #[cfg(test)]
@@ -248,6 +234,58 @@ mod tests {
 
     #[tokio::test]
     #[serial]
+    async fn test_ftp_get_works_same_filename() {
+        just_start("test/ftp/Justfile");
+        let out_file = ".";
+        let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
+        let _ = Driver::put(
+            "test/ftp/binary_file.tar.gz",
+            "ftp://127.0.0.1:21/test_ftp_get_works_same_filename",
+            WrappedBar::new(0, "", true),
+        )
+        .await;
+        let result = Driver::get(
+            "ftp://127.0.0.1:21/test_ftp_get_works_same_filename",
+            out_file,
+            expected_hash,
+            &mut WrappedBar::new(0, "", true),
+        )
+        .await;
+        std::fs::remove_file("test_ftp_get_works_same_filename").unwrap();
+        assert!(result.is_ok());
+        just_stop("test/ftp/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_ftp_get_resume_works() {
+        just_start("test/ftp/Justfile");
+        let expected_hash = "cc7e91ef8d68d0c0e06857e0713e490d4cead4164f99c9dc1a59c3e93e217a6d";
+        let out_file = "test_get_ftp_resume_works";
+
+        let _ = Driver::put(
+            "test/ftp/binary_file.tar.gz",
+            "ftp://127.0.0.1:21/binary_file.tar.gz",
+            WrappedBar::new(0, "", true),
+        )
+        .await;
+        std::fs::copy("test/ftp/binary_file.tar.gz.part1", out_file).unwrap();
+        let result = Driver::get(
+            "ftp://127.0.0.1:21/binary_file.tar.gz",
+            out_file,
+            expected_hash,
+            &mut WrappedBar::new(0, "", true),
+        )
+        .await;
+
+        println!("out file: {}", out_file);
+        assert!(result.is_ok());
+        std::fs::remove_file(out_file).unwrap();
+        just_stop("test/ftp/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
     async fn test_ssh_get_works_when_typical() {
         let out_file = "_test_ssh_get_works_when_typical";
         just_start_with_keys("test/ssh/Justfile");
@@ -284,12 +322,33 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_s3_list_works_when_typical() {
+    async fn test_s3_get_works_when_typical() {
+        let out_file = "test_s3_get_works_when_typical";
         just_start("test/s3/Justfile");
 
         let result = Driver::drive(
-            "s3://minioadmin:minioadmin@localhost:9000/test-bucket",
-            "stdout",
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/binary_file.tar.gz.part1",
+            out_file,
+            true,
+            "",
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/s3/Justfile");
+        std::fs::remove_file(out_file).unwrap();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_s3_put_works_when_typical() {
+        let in_file = "test/s3/test.file";
+        just_start("test/s3/Justfile");
+
+        let result = Driver::drive(
+            in_file,
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
             true,
             "",
         )
@@ -320,21 +379,4 @@ async fn test_http_serve_folder_works_when_typical() {
     assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_test_http_serve_folder_works_when_typical").unwrap();
-}
-
-#[tokio::test]
-async fn test_ftp_get_works_same_filename() {
-    let out_file = ".";
-    let expected_hash = "1fda8bdf225ba614ce1e7db8830e4a2e9ee55907699521d500b1b7beff18523b";
-
-    let result = Driver::get(
-        "ftp://ftp.fau.de:21/gnu/MailingListArchives/README",
-        out_file,
-        expected_hash,
-        &mut WrappedBar::new(0, "", true),
-    )
-    .await;
-    std::fs::remove_file("README").unwrap();
-
-    assert!(result.is_ok());
 }

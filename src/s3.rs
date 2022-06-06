@@ -14,7 +14,6 @@ use crate::consts::*;
 use crate::error::HTTPHeaderError;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
-use crate::io;
 use crate::question::*;
 use crate::tls::*;
 
@@ -22,11 +21,9 @@ struct Storage {
     _name: String,
     region: Region,
     credentials: Credentials,
-    bucket: String,
+    _bucket: String,
     _location_supported: bool,
 }
-
-const MESSAGE: &str = "I want to go to S3";
 
 pub struct S3;
 impl S3 {
@@ -40,46 +37,78 @@ impl S3 {
         HashChecker::check(output, expected_sha256)
     }
 
+    pub async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
+        let (output, bucket) = S3::setup(output, bar.silent).await;
+
+        let mut async_input_file = tokio::fs::File::open(input) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
+            .await
+            .expect("Unable to open input file");
+
+        let _ = bucket
+            .put_object_stream(&mut async_input_file, output)
+            .await
+            .unwrap();
+        Ok(())
+    }
+
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
-        let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let (_, _) = io::get_output(output, bar.silent);
+        let (input, bucket) = S3::setup(input, bar.silent).await;
+        let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
+            .await
+            .expect("Unable to open output file");
+        let _ = bucket
+            .get_object_stream(input, &mut async_output_file)
+            .await
+            .unwrap();
+        Ok(())
+    }
 
+    async fn setup(io: &str, silent: bool) -> (String, s3::bucket::Bucket) {
+        let parsed_address = ParsedAddress::parse_address(io, silent);
+        let io = S3::get_path_in_bucket(&parsed_address);
         let bucket = S3::get_bucket(&parsed_address);
-
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
-        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await?;
-        for backend in vec![S3::new(
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+        let backend = S3::new(
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
             &bucket,
             &fqdn,
-        )] {
-            let bucket = Bucket::new(&backend.bucket, backend.region, backend.credentials)
-                .unwrap()
-                .with_path_style();
-
-            let buckets = bucket.list("".to_string(), None).await.unwrap();
-            for bucket in buckets {
-                for content in bucket.contents {
-                    println!("{}", content.key);
-                }
-            }
-
-            let _ = S3::put_string(&bucket, "test_file", MESSAGE).await;
-            let _ = S3::get_string(&bucket).await;
-        }
-
-        Ok(())
+        );
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+        (io, bucket)
     }
 
-    fn get_bucket(parsed_address: &ParsedAddress) -> String {
-        let bucket: String = match parsed_address.path_segments.len() {
-            0 => parsed_address.file.to_string(),
-            _ => parsed_address.path_segments[0].to_string(),
+    fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
+        let mut result = "/".to_string();
+        if parsed_address.path_segments.len() > 1 {
+            result += &parsed_address.path_segments[1..].join("/");
+            result += "/";
+        }
+        result += &parsed_address.file;
+        return result;
+    }
+
+    fn get_bucket(parsed_address: &ParsedAddress) -> &str {
+        let bucket: &str = match parsed_address.path_segments.len() {
+            0 => &parsed_address.file,
+            _ => &parsed_address.path_segments[0],
         };
         bucket
+    }
+
+    async fn _list(bucket: &Bucket) -> Result<(), S3Error> {
+        let buckets = bucket.list("".to_string(), None).await?;
+        for bucket in buckets {
+            for content in bucket.contents {
+                println!("{}", content.key);
+            }
+        }
+        Ok(())
     }
 
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
@@ -96,6 +125,7 @@ impl S3 {
 
     fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
         let parts: Vec<&str> = server.split(":").collect();
+        assert_eq!(parts.len(), 2, "No port in URL. Stopping.");
         let host = parts[0];
         let port = parts[1];
         if T::has_tls(host, port) {
@@ -109,7 +139,7 @@ impl S3 {
         }
     }
 
-    async fn put_string(
+    async fn _put_string(
         bucket: &Bucket,
         destination_file: &str,
         string: &str,
@@ -122,8 +152,8 @@ impl S3 {
         Ok(())
     }
 
-    async fn get_string(bucket: &Bucket) -> Result<String, S3Error> {
-        let (data, _) = bucket.get_object("test_file").await?;
+    async fn _get_string(bucket: &Bucket, source_file: &str) -> Result<String, S3Error> {
+        let (data, _) = bucket.get_object(source_file).await?;
         let string = str::from_utf8(&data)?;
         Ok(string.to_string())
     }
@@ -148,7 +178,7 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: false,
             },
             "aws" => Storage {
@@ -160,7 +190,7 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: true,
             },
             _ => Storage {
@@ -172,13 +202,173 @@ impl S3 {
                     security_token: None,
                     session_token: None,
                 },
-                bucket: bucket.to_string(),
+                _bucket: bucket.to_string(),
                 _location_supported: false,
             },
         };
         return storage;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test::serial;
+
+    fn just_start(justfile: &str) {
+        use std::env;
+        use std::io::{self, Write};
+        use std::process::Command;
+        let output = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_start",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output()
+            .expect("failed to just _start");
+
+        println!("status: {}", output.status);
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+    }
+
+    fn just_stop(justfile: &str) {
+        use std::env;
+        use std::process::Command;
+        let _ = Command::new("just")
+            .args([
+                "--justfile",
+                justfile,
+                "_stop",
+                env::current_dir().unwrap().to_str().unwrap(),
+            ])
+            .output();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_list_bucket_works_when_typical() {
+        just_start("test/s3/Justfile");
+
+        let parsed_address = ParsedAddress {
+            server: "localhost:9000".to_string(),
+            username: "minioadmin".to_string(),
+            password: "minioadmin".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        let bucket = S3::get_bucket(&parsed_address);
+
+        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+        let fqdn = transport.to_string() + &parsed_address.server;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+        let backend = S3::new(
+            &bucket_kind,
+            &parsed_address.username,
+            &parsed_address.password,
+            &bucket,
+            &fqdn,
+        );
+
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+
+        assert!(S3::_list(&bucket).await.is_ok());
+
+        just_stop("test/s3/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_put_string_works_when_typical() {
+        just_start("test/s3/Justfile");
+
+        let parsed_address = ParsedAddress {
+            server: "localhost:9000".to_string(),
+            username: "minioadmin".to_string(),
+            password: "minioadmin".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        let bucket = S3::get_bucket(&parsed_address);
+
+        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+        let fqdn = transport.to_string() + &parsed_address.server;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+        let backend = S3::new(
+            &bucket_kind,
+            &parsed_address.username,
+            &parsed_address.password,
+            &bucket,
+            &fqdn,
+        );
+
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+
+        assert!(S3::_put_string(
+            &bucket,
+            "test_put_string_works_when_typical",
+            "This is the string from test_put_string_works_when_typical."
+        )
+        .await
+        .is_ok());
+
+        just_stop("test/s3/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_get_string_works_when_typical() {
+        just_start("test/s3/Justfile");
+
+        let parsed_address = ParsedAddress {
+            server: "localhost:9000".to_string(),
+            username: "minioadmin".to_string(),
+            password: "minioadmin".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        let bucket = S3::get_bucket(&parsed_address);
+
+        let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+        let fqdn = transport.to_string() + &parsed_address.server;
+        let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
+        let backend = S3::new(
+            &bucket_kind,
+            &parsed_address.username,
+            &parsed_address.password,
+            &bucket,
+            &fqdn,
+        );
+
+        let bucket = Bucket::new(bucket, backend.region, backend.credentials)
+            .unwrap()
+            .with_path_style();
+
+        let _ = S3::_put_string(
+            &bucket,
+            "test_put_string_works_when_typical",
+            "This is the string from test_put_string_works_when_typical.",
+        )
+        .await
+        .is_ok();
+
+        assert_eq!(
+            S3::_get_string(&bucket, "test_put_string_works_when_typical")
+                .await
+                .unwrap(),
+            "This is the string from test_put_string_works_when_typical."
+        );
+
+        just_stop("test/s3/Justfile");
+    }
+}
+
 #[test]
 fn test_get_bucket_works_when_typical() {
     let parsed_address = ParsedAddress {
@@ -254,6 +444,19 @@ fn test_get_transport_returns_no_transport_when_no_tls() {
     );
 }
 
+#[should_panic]
+#[tokio::test]
+async fn test_get_transport_bucket_panics_when_no_port() {
+    let parsed_address = ParsedAddress {
+        server: "localhost".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "".to_string(),
+    };
+    let _ = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+}
+
 #[test]
 fn test_storage_new_minio() {
     let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
@@ -270,4 +473,36 @@ fn test_storage_new_aws() {
 fn test_storage_new_default() {
     let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
     assert_eq!(storage._location_supported, false);
+}
+
+#[test]
+fn test_get_path_in_bucket_works_when_typical() {
+    let parsed_address = ParsedAddress {
+        server: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string(),
+        path_segments: vec!["test-bucket".to_string()],
+        file: "test-file".to_string(),
+    };
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/test-file");
+}
+#[test]
+fn test_get_path_in_bucket_works_when_full_url() {
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
+        true,
+    );
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/test.file");
+}
+
+#[test]
+fn test_get_path_in_bucket_works_when_in_subfolder() {
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/subfolder/test.file",
+        true,
+    );
+    let path = S3::get_path_in_bucket(&parsed_address);
+    assert_eq!(path, "/subfolder/test.file");
 }
