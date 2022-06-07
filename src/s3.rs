@@ -544,11 +544,7 @@ fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
     use std::fs::OpenOptions;
     use std::io::Write;
 
-    let mut renamed = false;
-    if std::path::Path::new(&untildify("~/.aws")).is_dir() {
-        std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing")).unwrap();
-        renamed = true;
-    }
+    let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
 
     std::fs::create_dir(untildify("~/.aws")).unwrap();
 
@@ -568,9 +564,7 @@ fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
         S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string());
 
     std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
-    if renamed {
-        std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws")).unwrap();
-    }
+    let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
     assert_eq!(
         (username, password),
         (
