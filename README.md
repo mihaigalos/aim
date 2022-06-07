@@ -113,6 +113,12 @@ Keys that match the following patterns are automatically tried:
 * ~/.ssh/id_rsa
 * ~/.ssh/keys/id_ed25519
 
+### .aws folder
+
+Credentials for AWS interaction (i.e.: S3) are automatically read from `~/.aws/credentials`.
+
+Alternatively, the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are read.
+
 ----------------------------------------
 
 ## 🆕 Updating
