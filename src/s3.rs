@@ -539,7 +539,46 @@ fn test_get_path_in_bucket_works_when_in_subfolder() {
 }
 
 #[test]
-fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {}
+fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
+    use crate::untildify::untildify;
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let mut renamed = false;
+    if std::path::Path::new(&untildify("~/.aws")).is_dir() {
+        std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing")).unwrap();
+        renamed = true;
+    }
+
+    std::fs::create_dir(untildify("~/.aws")).unwrap();
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open(untildify("~/.aws/credentials"))
+        .unwrap();
+    file.write_all(b"[default]\n").unwrap();
+    file.write_all(b"aws_access_key_id = credentials_user\n")
+        .unwrap();
+    file.write_all(b"aws_secret_access_key = credentials_pass")
+        .unwrap();
+
+    let (username, password) =
+        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string());
+
+    std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
+    if renamed {
+        std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws")).unwrap();
+    }
+    assert_eq!(
+        (username, password),
+        (
+            "credentials_user".to_string(),
+            "credentials_pass".to_string()
+        )
+    );
+}
 
 #[test]
 fn test_mixin_aws_credentials_from_env_works_when_typical() {
