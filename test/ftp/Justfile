@@ -62,7 +62,7 @@ _test_sanity:
 _test_curl_login:
     #!/bin/bash
     source ../common.sh
-    response=$(curl -s -w "%{http_code}" "ftp://localhost:21/" --user "user:pass")
+    response=$(curl -s -w "%{http_code}" "ftp://127.0.0.1:21/" --user "user:pass")
     [ $response = "226" ] && ok || err "ERROR: Response code $response."
 
 _test_curl_login_with_netrc:
