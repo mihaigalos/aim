@@ -102,6 +102,7 @@ impl S3 {
         }
         return result;
     }
+
     fn mixin_aws_credentials_from_env(username: String, password: String) -> (String, String) {
         let mut result = (username, password);
         if let Ok(creds_from_profile) = Credentials::from_env() {
@@ -560,4 +561,16 @@ fn test_mixin_aws_credentials_from_env_works_when_typical() {
 }
 
 #[test]
-fn test_get_credentials_works_when_tyipical() {}
+fn test_get_credentials_works_when_tyipical() {
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
+        true,
+    );
+
+    let (username, password) = S3::get_credentials(&parsed_address);
+
+    assert_eq!(
+        (username, password),
+        ("user".to_string(), "pass".to_string())
+    )
+}
