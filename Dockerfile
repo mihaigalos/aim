@@ -10,6 +10,8 @@ RUN apk update \
 
 COPY . /src
 
+RUN rustup update 1.59 && rustup default 1.59
+
 RUN cd /src && \
     sed -i -e "s/openssl .*//" Cargo.toml && \
     RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
