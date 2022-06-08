@@ -110,8 +110,8 @@ jobs:
     strategy:
       matrix:
         job:
-          - { os: ubuntu-latest , target: x86_64-unknown-linux-gnu,    use-cross: false }
-          - { os: ubuntu-latest,  target: aarch64-unknown-linux-gnu,   use-cross: false }
+          - { os: ubuntu-latest , target: x86_64-unknown-linux-gnu,    use-cross: false, platform:  linux/amd64}
+          - { os: ubuntu-latest,  target: aarch64-unknown-linux-gnu,   use-cross: false, platform:  linux/arm64}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -156,9 +156,15 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
-      - name: Build and push dockers
-        run: |
-          just dockerize_push_hub_simple
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: ${{ matrix.job.platform }}
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
 
   publish-to-cargo:
     name: Publishing to Cargo
