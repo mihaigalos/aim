@@ -68,12 +68,6 @@ _build_docker_with_buildkit platform="linux/amd64" +args="":
     stdout=$(2>&1 docker buildx build --platform {{ platform }} {{ args }} -t {{ docker_image }}  --output "type=oci,dest={{ tool }}_${platform_short}.tar" . | tee /tmp/docker_build_${platform_short}_{{ tool }}.log 2>&1 && gzip {{ tool }}_${platform_short}.tar)
     just _load_docker {{ platform }}
 
-# assumes just setup_dockerize has run at least once
-dockerize_and_push_with_buildkit +args="":
-    docker pull {{ docker_image_dockerhub }}
-    docker buildx build --platform "linux/amd64" --platform "linux/arm64" {{ args }} -t {{ docker_image_dockerhub }} .
-    docker push {{ docker_image_dockerhub }}
-
 _load_docker platform:
     #!/bin/bash
     set -x

@@ -152,15 +152,15 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
       - name: Build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v2
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./Dockerfile
-          platforms: ${{ matrix.job.platform }}
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: ${{ steps.prep.outputs.tags }}
-
+ 
   publish-to-cargo:
     name: Publishing to Cargo
     if: github.event_name == 'push'
