@@ -57,6 +57,7 @@ dockerize_arm64 +args="":
     just _build_docker_with_buildkit "linux/arm64" {{ args }}
 
 dockerize_push_hub_simple +args="":
+    docker pull {{ docker_image_dockerhub }}
     docker build -t {{ docker_image_dockerhub }} {{ args }} .
     docker push {{ docker_image_dockerhub }}
 
@@ -69,6 +70,7 @@ _build_docker_with_buildkit platform="linux/amd64" +args="":
 
 # assumes just setup_dockerize has run at least once
 dockerize_and_push_with_buildkit +args="":
+    docker pull {{ docker_image_dockerhub }}
     docker buildx build --platform "linux/amd64" --platform "linux/arm64" {{ args }} -t {{ docker_image_dockerhub }} .
     docker push {{ docker_image_dockerhub }}
 
