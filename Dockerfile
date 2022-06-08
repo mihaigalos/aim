@@ -1,4 +1,4 @@
-FROM rust:alpine3.14 as base
+FROM rust:alpine3.16 as base
 RUN apk update \
     && apk add \
         git \
@@ -12,12 +12,11 @@ COPY . /src
 
 RUN rustup update 1.59 && rustup default 1.59
 
-RUN cd /src && \
-    sed -i -e "s/openssl.*=.*//" Cargo.toml
+RUN cd /src \
+    && sed -i -e "s/openssl.*=.*//" Cargo.toml \
+    && RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
 
-RUN cd /src && RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
-
-FROM alpine:3.14 as tool
+FROM alpine:3.16 as tool
 
 RUN apk update && apk add libgcc
 
