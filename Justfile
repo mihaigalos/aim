@@ -57,6 +57,7 @@ dockerize_arm64 +args="":
     just _build_docker_with_buildkit "linux/arm64" {{ args }}
 
 dockerize_push_hub_simple +args="":
+    docker pull {{ docker_image_dockerhub }}
     docker build -t {{ docker_image_dockerhub }} {{ args }} .
     docker push {{ docker_image_dockerhub }}
 
