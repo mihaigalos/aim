@@ -154,6 +154,16 @@ jobs:
         run: |
           just dockerize_and_push_with_buildkit
 
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64, linux/arm64
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
+ 
   publish-to-cargo:
     name: Publishing to Cargo
     if: github.event_name == 'push'
