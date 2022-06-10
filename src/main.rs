@@ -75,7 +75,7 @@ async fn main() {
 fn update() -> Result<(), Box<dyn ::std::error::Error>> {
     let _status = self_update::backends::github::Update::configure()
         .repo_owner("mihaigalos")
-        .repo_name("aim")
+        .repo_name(env!("CARGO_PKG_NAME"))
         .bin_name(env!("CARGO_PKG_NAME"))
         .show_download_progress(true)
         .current_version(env!("CARGO_PKG_VERSION"))

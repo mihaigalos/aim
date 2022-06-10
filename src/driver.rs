@@ -2,6 +2,7 @@ use crate::bar::WrappedBar;
 use crate::error::ValidateError;
 pub struct Driver;
 use crate::slicer::Slicer;
+use melt::decompress;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -14,9 +15,10 @@ impl Driver {
         expected_sha256: &str,
         bar: &mut WrappedBar,
     ) -> Result<(), ValidateError> {
-        let output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
+        let (output, is_decompress_requested) = match output {
+            "." => (Slicer::target_with_extension(input), false),
+            "+" => (Slicer::target_with_extension(input), true),
+            _ => (output, false),
         };
 
         let result = match &input[0..4] {
@@ -31,6 +33,10 @@ impl Driver {
                 input, output
             ),
         };
+
+        if is_decompress_requested {
+            decompress(std::path::Path::new(output)).unwrap();
+        }
         result
     }
     async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {

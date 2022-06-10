@@ -34,6 +34,7 @@ futures-util = "0.3.14"
 http = "0.2.7"
 indicatif = "0.16.2"
 log = "0.4.17"
+melt = "0.1.6"
 native-tls = "0.2"
 netrc = "0.4.1"
 openssl = { version = "0.10.40", features = ["vendored"] }
