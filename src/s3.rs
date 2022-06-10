@@ -70,7 +70,7 @@ impl S3 {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-        let (username, password) = S3::get_credentials(&parsed_address);
+        let (username, password) = S3::get_credentials(&parsed_address, silent);
         let backend = S3::new(&bucket_kind, &username, &password, &bucket, &fqdn);
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
@@ -78,23 +78,27 @@ impl S3 {
         (io, bucket)
     }
 
-    fn get_credentials(parsed_address: &ParsedAddress) -> (String, String) {
+    fn get_credentials(parsed_address: &ParsedAddress, silent: bool) -> (String, String) {
         let result = (
             parsed_address.username.to_owned(),
             parsed_address.password.to_owned(),
         );
 
-        let result = S3::mixin_aws_credentials_from_aws_folder(result.0, result.1);
-        let result = S3::mixin_aws_credentials_from_env(result.0, result.1);
+        let result = S3::mixin_aws_credentials_from_aws_folder(result.0, result.1, silent);
+        let result = S3::mixin_aws_credentials_from_env(result.0, result.1, silent);
         (result.0, result.1)
     }
 
     fn mixin_aws_credentials_from_aws_folder(
         username: String,
         password: String,
+        silent: bool,
     ) -> (String, String) {
         let mut result = (username, password);
         if let Ok(creds_from_profile) = Credentials::from_profile(None) {
+            if !silent {
+                println!("🔑 Parsed AWS credentials from ~/.aws/credentials.");
+            }
             result = (
                 creds_from_profile.access_key.unwrap(),
                 creds_from_profile.secret_key.unwrap(),
@@ -103,9 +107,17 @@ impl S3 {
         return result;
     }
 
-    fn mixin_aws_credentials_from_env(username: String, password: String) -> (String, String) {
+    fn mixin_aws_credentials_from_env(
+        username: String,
+        password: String,
+        silent: bool,
+    ) -> (String, String) {
         let mut result = (username, password);
         if let Ok(creds_from_profile) = Credentials::from_env() {
+            if !silent {
+                println!("🔑 Parsed AWS credentials from environment vars AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY.");
+            }
+
             result = (
                 creds_from_profile.access_key.unwrap(),
                 creds_from_profile.secret_key.unwrap(),
@@ -561,7 +573,42 @@ fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
         .unwrap();
 
     let (username, password) =
-        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string());
+        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), true);
+
+    std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
+    let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
+    assert_eq!(
+        (username, password),
+        (
+            "credentials_user".to_string(),
+            "credentials_pass".to_string()
+        )
+    );
+}
+#[test]
+fn test_mixin_aws_credentials_from_aws_folder_works_when_typical_and_not_silent() {
+    use crate::untildify::untildify;
+    use std::fs::OpenOptions;
+    use std::io::Write;
+
+    let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
+
+    std::fs::create_dir(untildify("~/.aws")).unwrap();
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .append(true)
+        .open(untildify("~/.aws/credentials"))
+        .unwrap();
+    file.write_all(b"[default]\n").unwrap();
+    file.write_all(b"aws_access_key_id = credentials_user\n")
+        .unwrap();
+    file.write_all(b"aws_secret_access_key = credentials_pass")
+        .unwrap();
+
+    let (username, password) =
+        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), false);
 
     std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
     let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
@@ -582,7 +629,27 @@ fn test_mixin_aws_credentials_from_env_works_when_typical() {
     env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
     env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
 
-    let (username, password) = S3::mixin_aws_credentials_from_env("".to_string(), "".to_string());
+    let (username, password) =
+        S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), true);
+
+    env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
+    env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
+
+    assert_eq!(
+        (username, password),
+        ("myaccesskey".to_string(), "mysecretkey".to_string())
+    );
+}
+#[test]
+fn test_mixin_aws_credentials_from_env_works_when_typical_and_not_silent() {
+    use std::env;
+    let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
+    let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
+    env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
+    env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
+
+    let (username, password) =
+        S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), false);
 
     env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
     env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
@@ -600,7 +667,22 @@ fn test_get_credentials_works_when_tyipical() {
         true,
     );
 
-    let (username, password) = S3::get_credentials(&parsed_address);
+    let (username, password) = S3::get_credentials(&parsed_address, true);
+
+    assert_eq!(
+        (username, password),
+        ("user".to_string(), "pass".to_string())
+    )
+}
+
+#[test]
+fn test_get_credentials_works_when_tyipical_and_not_silent() {
+    let parsed_address = ParsedAddress::parse_address(
+        "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
+        true,
+    );
+
+    let (username, password) = S3::get_credentials(&parsed_address, false);
 
     assert_eq!(
         (username, password),
