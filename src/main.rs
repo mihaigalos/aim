@@ -9,20 +9,26 @@ async fn main() {
     let mut app: clap::Command = autoclap!()
         .arg(
             Arg::new("INPUT")
-                .help("Input to aim from.\n\
-                If input is a folder, it will be served via http.")
+                .help(
+                    "Input to aim from.\n\
+                If no output provided and input is a folder, it will be served via http.",
+                )
                 .takes_value(true)
                 .required(false),
         )
         .arg(
             Arg::new("OUTPUT")
-            .help("Explicit output to aim to. \n\
-            Can be ommitted during:\n\
-            * Downloading: if filename supplied, writes to file, otherwise stdout (cannot resume).\n\
-            * Uploading: directly uploads file to URL.\n\
-            * if none present, writes to stdout.")
-            .takes_value(true)
-            .required(false),
+                .help(
+                    "Explicit output to aim to. \n\
+            * If no output argument is present, writes to stdout.\n\
+            * Downloading: if file supplied, writes to it.\n\
+              \x20\x20* if output is '.': downloads to the same basename as the source.\n\
+              \x20\x20* if output is '+': downloads to the same basename as the source \n\
+              \x20\x20\x20\x20and attempts to decompress the archive based on the file's extension.\n\
+            * Uploading: directly uploads file to the URL.",
+                )
+                .takes_value(true)
+                .required(false),
         )
         .arg(
             Arg::new("SHA256")
