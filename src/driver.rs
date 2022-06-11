@@ -1,8 +1,9 @@
 use crate::bar::WrappedBar;
-use crate::error::ValidateError;
 pub struct Driver;
 use crate::slicer::Slicer;
+
 use melt::decompress;
+use std::io;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -14,7 +15,7 @@ impl Driver {
         output: &str,
         expected_sha256: &str,
         bar: &mut WrappedBar,
-    ) -> Result<(), ValidateError> {
+    ) -> io::Result<()> {
         let (output, is_decompress_requested) = match output {
             "." => (Slicer::target_with_extension(input), false),
             "+" => (Slicer::target_with_extension(input), true),
@@ -23,11 +24,11 @@ impl Driver {
 
         let result = match &input[0..4] {
             "ftp:" | "ftp." => {
-                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
+                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await?
             }
-            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await,
-            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await,
-            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await,
+            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await?,
+            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await?,
+            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await?,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
@@ -37,20 +38,20 @@ impl Driver {
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
         }
-        result
+        Ok(result)
     }
-    async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
+    async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let result = match &output[0..4] {
-            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
-            "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
-            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
-            "s3:/" => crate::s3::S3::put(input, output, bar).await,
+            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await?,
+            "http" => crate::https::HTTPSHandler::put(input, output, bar).await?,
+            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await?,
+            "s3:/" => crate::s3::S3::put(input, output, bar).await?,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
             ),
         };
-        result
+        Ok(result)
     }
 
     pub async fn drive(
@@ -58,7 +59,7 @@ impl Driver {
         output: &str,
         silent: bool,
         expected_sha256: &str,
-    ) -> Result<(), ValidateError> {
+    ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
 
         if input.contains("http:")
@@ -67,11 +68,13 @@ impl Driver {
             || input.contains("ssh:")
             || input.contains("s3:")
         {
-            return Driver::get(input, output, expected_sha256, &mut bar).await;
+            return Ok(Driver::get(input, output, expected_sha256, &mut bar).await?);
         } else {
             return match output {
-                "stdout" => crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await,
-                _ => Driver::put(input, output, bar).await,
+                "stdout" => {
+                    Ok(crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await?)
+                }
+                _ => Ok(Driver::put(input, output, bar).await?),
             };
         }
     }
