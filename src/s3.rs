@@ -550,114 +550,123 @@ fn test_get_path_in_bucket_works_when_in_subfolder() {
     assert_eq!(path, "/subfolder/test.file");
 }
 
-#[test]
-fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
-    use crate::untildify::untildify;
-    use std::fs::OpenOptions;
-    use std::io::Write;
+#[cfg(test)]
+mod test_mixins {
+    use super::*;
+    use serial_test::serial;
+    #[test]
+    #[serial]
+    fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
+        use crate::untildify::untildify;
+        use std::fs::OpenOptions;
+        use std::io::Write;
 
-    let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
+        let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
 
-    std::fs::create_dir(untildify("~/.aws")).unwrap();
+        std::fs::create_dir(untildify("~/.aws")).unwrap();
 
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(untildify("~/.aws/credentials"))
-        .unwrap();
-    file.write_all(b"[default]\n").unwrap();
-    file.write_all(b"aws_access_key_id = credentials_user\n")
-        .unwrap();
-    file.write_all(b"aws_secret_access_key = credentials_pass")
-        .unwrap();
+        let mut file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .append(true)
+            .open(untildify("~/.aws/credentials"))
+            .unwrap();
+        file.write_all(b"[default]\n").unwrap();
+        file.write_all(b"aws_access_key_id = credentials_user\n")
+            .unwrap();
+        file.write_all(b"aws_secret_access_key = credentials_pass")
+            .unwrap();
 
-    let (username, password) =
-        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), true);
+        let (username, password) =
+            S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), true);
 
-    std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
-    let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
-    assert_eq!(
-        (username, password),
-        (
-            "credentials_user".to_string(),
-            "credentials_pass".to_string()
-        )
-    );
-}
-#[test]
-fn test_mixin_aws_credentials_from_aws_folder_works_when_typical_and_not_silent() {
-    use crate::untildify::untildify;
-    use std::fs::OpenOptions;
-    use std::io::Write;
+        std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
+        let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
+        assert_eq!(
+            (username, password),
+            (
+                "credentials_user".to_string(),
+                "credentials_pass".to_string()
+            )
+        );
+    }
+    #[test]
+    #[serial]
+    fn test_mixin_aws_credentials_from_aws_folder_works_when_typical_and_not_silent() {
+        use crate::untildify::untildify;
+        use std::fs::OpenOptions;
+        use std::io::Write;
 
-    let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
+        let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
 
-    std::fs::create_dir(untildify("~/.aws")).unwrap();
+        std::fs::create_dir(untildify("~/.aws")).unwrap();
 
-    let mut file = OpenOptions::new()
-        .create(true)
-        .write(true)
-        .append(true)
-        .open(untildify("~/.aws/credentials"))
-        .unwrap();
-    file.write_all(b"[default]\n").unwrap();
-    file.write_all(b"aws_access_key_id = credentials_user\n")
-        .unwrap();
-    file.write_all(b"aws_secret_access_key = credentials_pass")
-        .unwrap();
+        let mut file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .append(true)
+            .open(untildify("~/.aws/credentials"))
+            .unwrap();
+        file.write_all(b"[default]\n").unwrap();
+        file.write_all(b"aws_access_key_id = credentials_user\n")
+            .unwrap();
+        file.write_all(b"aws_secret_access_key = credentials_pass")
+            .unwrap();
 
-    let (username, password) =
-        S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), false);
+        let (username, password) =
+            S3::mixin_aws_credentials_from_aws_folder("".to_string(), "".to_string(), false);
 
-    std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
-    let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
-    assert_eq!(
-        (username, password),
-        (
-            "credentials_user".to_string(),
-            "credentials_pass".to_string()
-        )
-    );
-}
+        std::fs::remove_dir_all(untildify("~/.aws")).unwrap();
+        let _ = std::fs::rename(untildify("~/.aws_aim_testing"), untildify("~/.aws"));
+        assert_eq!(
+            (username, password),
+            (
+                "credentials_user".to_string(),
+                "credentials_pass".to_string()
+            )
+        );
+    }
 
-#[test]
-fn test_mixin_aws_credentials_from_env_works_when_typical() {
-    use std::env;
-    let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
-    let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
-    env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
-    env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
+    #[test]
+    #[serial]
+    fn test_mixin_aws_credentials_from_env_works_when_typical() {
+        use std::env;
+        let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
+        let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
+        env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
+        env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
 
-    let (username, password) =
-        S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), true);
+        let (username, password) =
+            S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), true);
 
-    env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
-    env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
+        env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
+        env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
 
-    assert_eq!(
-        (username, password),
-        ("myaccesskey".to_string(), "mysecretkey".to_string())
-    );
-}
-#[test]
-fn test_mixin_aws_credentials_from_env_works_when_typical_and_not_silent() {
-    use std::env;
-    let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
-    let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
-    env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
-    env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
+        assert_eq!(
+            (username, password),
+            ("myaccesskey".to_string(), "mysecretkey".to_string())
+        );
+    }
+    #[test]
+    #[serial]
+    fn test_mixin_aws_credentials_from_env_works_when_typical_and_not_silent() {
+        use std::env;
+        let old_access_key = env::var("AWS_ACCESS_KEY_ID").unwrap_or("".to_string());
+        let old_secret_key = env::var("AWS_SECRET_ACCESS_KEY").unwrap_or("".to_string());
+        env::set_var("AWS_ACCESS_KEY_ID", "myaccesskey");
+        env::set_var("AWS_SECRET_ACCESS_KEY", "mysecretkey");
 
-    let (username, password) =
-        S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), false);
+        let (username, password) =
+            S3::mixin_aws_credentials_from_env("".to_string(), "".to_string(), false);
 
-    env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
-    env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
+        env::set_var("AWS_ACCESS_KEY_ID", old_access_key);
+        env::set_var("AWS_SECRET_ACCESS_KEY", old_secret_key);
 
-    assert_eq!(
-        (username, password),
-        ("myaccesskey".to_string(), "mysecretkey".to_string())
-    );
+        assert_eq!(
+            (username, password),
+            ("myaccesskey".to_string(), "mysecretkey".to_string())
+        );
+    }
 }
 
 #[test]
