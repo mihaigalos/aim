@@ -141,7 +141,7 @@ mod tests {
 
     fn just_start(justfile: &str) {
         use std::env;
-        use std::io::{self, Write};
+        use std::io::Write;
         use std::process::Command;
         let output = Command::new("just")
             .args([
@@ -160,7 +160,7 @@ mod tests {
 
     fn just_start_with_keys(justfile: &str) {
         use std::env;
-        use std::io::{self, Write};
+        use std::io::Write;
         use std::process::Command;
         let output = Command::new("just")
             .args([
