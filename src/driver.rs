@@ -210,6 +210,33 @@ mod tests {
 
     #[tokio::test]
     #[serial]
+    async fn test_driver_https_get_decompress_works_when_typical() {
+        let out_file = "test_driver_https_get_extract_works_when_typical.tar.gz";
+        just_start("test/https/Justfile");
+
+        let _ = Driver::drive(
+            "test/https/compressed_file.tar.gz",
+            &("http://127.0.0.1:8081/".to_string() + out_file),
+            true,
+            "",
+        )
+        .await;
+        let result = Driver::drive(
+            &("http://127.0.0.1:8081/".to_string() + out_file),
+            "+",
+            true,
+            "",
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/https/Justfile");
+        std::fs::remove_file(out_file).unwrap();
+    }
+
+    #[tokio::test]
+    #[serial]
     async fn test_https_put_works_when_typical() {
         just_start("test/https/Justfile");
 
