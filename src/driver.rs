@@ -1,7 +1,9 @@
 use crate::bar::WrappedBar;
-use crate::error::ValidateError;
 pub struct Driver;
 use crate::slicer::Slicer;
+
+use melt::decompress;
+use std::io;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -13,38 +15,43 @@ impl Driver {
         output: &str,
         expected_sha256: &str,
         bar: &mut WrappedBar,
-    ) -> Result<(), ValidateError> {
-        let output = match output {
-            "." => Slicer::target_with_extension(input),
-            _ => output,
+    ) -> io::Result<()> {
+        let (output, is_decompress_requested) = match output {
+            "." => (Slicer::target_with_extension(input), false),
+            "+" => (Slicer::target_with_extension(input), true),
+            _ => (output, false),
         };
 
         let result = match &input[0..4] {
             "ftp:" | "ftp." => {
-                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await
+                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await?
             }
-            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await,
-            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await,
-            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await,
+            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await?,
+            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await?,
+            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await?,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
             ),
         };
-        result
+
+        if is_decompress_requested {
+            decompress(std::path::Path::new(output)).unwrap();
+        }
+        Ok(result)
     }
-    async fn put(input: &str, output: &str, bar: WrappedBar) -> Result<(), ValidateError> {
+    async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let result = match &output[0..4] {
-            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await,
-            "http" => crate::https::HTTPSHandler::put(input, output, bar).await,
-            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await,
-            "s3:/" => crate::s3::S3::put(input, output, bar).await,
+            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await?,
+            "http" => crate::https::HTTPSHandler::put(input, output, bar).await?,
+            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await?,
+            "s3:/" => crate::s3::S3::put(input, output, bar).await?,
             _ => panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
             ),
         };
-        result
+        Ok(result)
     }
 
     pub async fn drive(
@@ -52,7 +59,7 @@ impl Driver {
         output: &str,
         silent: bool,
         expected_sha256: &str,
-    ) -> Result<(), ValidateError> {
+    ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
 
         if input.contains("http:")
@@ -61,11 +68,13 @@ impl Driver {
             || input.contains("ssh:")
             || input.contains("s3:")
         {
-            return Driver::get(input, output, expected_sha256, &mut bar).await;
+            return Ok(Driver::get(input, output, expected_sha256, &mut bar).await?);
         } else {
             return match output {
-                "stdout" => crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await,
-                _ => Driver::put(input, output, bar).await,
+                "stdout" => {
+                    Ok(crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await)
+                }
+                _ => Ok(Driver::put(input, output, bar).await?),
             };
         }
     }
@@ -132,7 +141,7 @@ mod tests {
 
     fn just_start(justfile: &str) {
         use std::env;
-        use std::io::{self, Write};
+        use std::io::Write;
         use std::process::Command;
         let output = Command::new("just")
             .args([
@@ -151,7 +160,7 @@ mod tests {
 
     fn just_start_with_keys(justfile: &str) {
         use std::env;
-        use std::io::{self, Write};
+        use std::io::Write;
         use std::process::Command;
         let output = Command::new("just")
             .args([
@@ -197,6 +206,33 @@ mod tests {
         assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_driver_https_get_decompress_works_when_typical() {
+        let out_file = "test_driver_https_get_extract_works_when_typical.tar.gz";
+        just_start("test/https/Justfile");
+
+        let _ = Driver::drive(
+            "test/https/compressed_file.tar.gz",
+            &("http://127.0.0.1:8081/".to_string() + out_file),
+            true,
+            "",
+        )
+        .await;
+        let result = Driver::drive(
+            &("http://127.0.0.1:8081/".to_string() + out_file),
+            "+",
+            true,
+            "",
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/https/Justfile");
+        std::fs::remove_file(out_file).unwrap();
     }
 
     #[tokio::test]

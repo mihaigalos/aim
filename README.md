@@ -39,6 +39,13 @@ Download and upload support for `ssh`, resume (using `sftp`) under development.
 
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
+### Output during downloading
+
+Several output formats can be specified:
+* `aim source .` - downloads to the same basename as the source.
+* `aim source +` - downloads to the same basename as the source and attempts to decompress. Target extensions are read and the system decompressor is called. Further info [here](https://github.com/moisutsu/melt).
+* `aim source destination` - download to a new or existing file called `destination`.
+
 ----------------------------------------
 
 ### Sharing a folder
