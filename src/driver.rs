@@ -72,7 +72,7 @@ impl Driver {
         } else {
             return match output {
                 "stdout" => {
-                    Ok(crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await?)
+                    Ok(crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await)
                 }
                 _ => Ok(Driver::put(input, output, bar).await?),
             };
