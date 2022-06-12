@@ -37,6 +37,7 @@ impl Driver {
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
+            std::fs::remove_file(output)?;
         }
         Ok(result)
     }
@@ -232,7 +233,6 @@ mod tests {
         assert!(result.is_ok());
 
         just_stop("test/https/Justfile");
-        std::fs::remove_file(out_file).unwrap();
     }
 
     #[tokio::test]
