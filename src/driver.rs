@@ -1,9 +1,16 @@
+extern crate skim;
+use skim::prelude::*;
+
 use crate::bar::WrappedBar;
 pub struct Driver;
 use crate::slicer::Slicer;
 
 use melt::decompress;
 use std::io;
+
+fn fake_create_item(item: &str) {
+    println!("Creating a new item `{}`...", item);
+}
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
@@ -61,6 +68,18 @@ impl Driver {
         silent: bool,
         expected_sha256: &str,
     ) -> io::Result<()> {
+        let options = SkimOptionsBuilder::default()
+            .height(Some("50%"))
+            .multi(true)
+            .bind(vec!["/:accept"])
+            .build()
+            .unwrap();
+
+        Skim::run_with(&options, None).map(|out| match out.final_key {
+            Key::Char('/') => fake_create_item(out.query.as_ref()),
+            _ => (),
+        });
+
         let mut bar = WrappedBar::new(0, input, silent);
 
         if input.contains("http:")
