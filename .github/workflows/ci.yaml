@@ -22,15 +22,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check-labels:
-    name: Check labels
-    runs-on: ubuntu-latest
-    steps:
-      - uses: docker://agilepathway/pull-request-label-checker:latest
-        with:
-          none_of: wip
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-
   build:
     runs-on: ubuntu-latest
     steps:
