@@ -33,10 +33,14 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs:
-      - check-labels
-
     steps:
+
+    - uses: docker://agilepathway/pull-request-label-checker:latest
+      with:
+        none_of: wip
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name == 'pull_request'
+
     - uses: actions/checkout@v2
 
     - uses: extractions/setup-just@v1
