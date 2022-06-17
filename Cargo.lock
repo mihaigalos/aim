@@ -32,6 +32,8 @@ dependencies = [
 name = "aim"
 version = "1.4.0"
 dependencies = [
+ "async-io",
+ "async-ssh2-lite",
  "async-std",
  "async-stream",
  "async_ftp",
@@ -39,6 +41,7 @@ dependencies = [
  "clap 3.1.8",
  "custom_error",
  "dotenv",
+ "futures",
  "futures-util",
  "http",
  "indicatif",
@@ -60,6 +63,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "url 1.7.2",
+ "uuid",
  "warpy",
 ]
 
@@ -144,6 +148,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e97a171d191782fba31bb902b14ad94e24a68145032b7eedf871ab0bc0d077b6"
 dependencies = [
  "event-listener",
+]
+
+[[package]]
+name = "async-ssh2-lite"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4d5eba728a9b28c3923136f11da4d82981996b89b689fe6f18ca5e95d51ed6c4"
+dependencies = [
+ "async-io",
+ "futures-util",
+ "ssh2",
 ]
 
 [[package]]
@@ -710,6 +725,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "futures"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a12aa0eb539080d55c3f2d45a67c3b58b6b0773c1a3ca2dfec66d58c97fd66ca"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-executor",
+ "futures-io",
+ "futures-sink",
+ "futures-task",
+ "futures-util",
+]
+
+[[package]]
 name = "futures-channel"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -724,6 +754,17 @@ name = "futures-core"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88d1c26957f23603395cd326b0ffe64124b818f4449552f960d815cfba83a53d"
+
+[[package]]
+name = "futures-executor"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45025be030969d763025784f7f355043dc6bc74093e4ecc5000ca4dc50d8745c"
+dependencies = [
+ "futures-core",
+ "futures-task",
+ "futures-util",
+]
 
 [[package]]
 name = "futures-io"
@@ -778,6 +819,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36568465210a3a6ee45e1f165136d68671471a501e632e9a98d96872222b5481"
 dependencies = [
  "autocfg",
+ "futures-channel",
  "futures-core",
  "futures-io",
  "futures-macro",
@@ -2491,6 +2533,15 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "uuid"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom",
+]
 
 [[package]]
 name = "value-bag"

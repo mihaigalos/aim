@@ -27,6 +27,7 @@ impl Driver {
                 crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await?
             }
             "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await?,
+            "sftp" => crate::sftp::SFTPHandler::get(input, output, bar, expected_sha256).await?,
             "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await?,
             "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await?,
             _ => panic!(
@@ -66,6 +67,7 @@ impl Driver {
         if input.contains("http:")
             || input.contains("https:")
             || input.contains("ftp:")
+            || input.contains("sftp:")
             || input.contains("ssh:")
             || input.contains("s3:")
         {
