@@ -55,7 +55,7 @@ impl SFTPHandler {
             .unwrap();
         let stream = Async::<TcpStream>::connect(addr).await.unwrap();
         let mut session = AsyncSession::new(stream, None).unwrap();
-        session.handshake().await.unwrap();
+        session.handshake().await.expect("SSH handshake failed");
         if parsed_address.password != "anonymous" {
             session
                 .userauth_password(&parsed_address.username, &parsed_address.password)
