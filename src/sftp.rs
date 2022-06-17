@@ -24,7 +24,7 @@ impl SFTPHandler {
         HashChecker::check(output, expected_sha256)
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
-        let (session, remote_file) = SFTPHandler::setup_session(output, bar.silent).await;
+        let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
 
         let filename = PathBuf::from("/tmp").join(Uuid::new_v4().to_string());
         let filename = filename.as_path();

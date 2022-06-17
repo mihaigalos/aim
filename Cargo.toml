@@ -51,7 +51,7 @@ ssh2 = "0.9.3"
 strfmt = "0.1.6"
 tokio = { version = "1.14.0", features = ["full"] }
 tokio-util = {version="0.6.9", features = ["full"]}
-url = "1.7.2"
+url = { git = "https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0" }
 uuid = { version = "0.8", features = ["v4"] }
 warpy = "0.2.1"
 
