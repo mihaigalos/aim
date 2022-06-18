@@ -2,14 +2,20 @@ extern crate ssh2;
 
 use async_io::Async;
 use async_ssh2_lite::AsyncSession;
+use futures::executor::block_on;
+use futures::AsyncReadExt;
+use futures::AsyncWriteExt;
+use std::cmp::min;
 use std::net::{TcpStream, ToSocketAddrs};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
+use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
+use crate::io::get_output;
 use crate::ssh_auth::get_possible_ssh_keys_path;
 
 pub struct SFTPHandler;
@@ -25,26 +31,46 @@ impl SFTPHandler {
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
+        let (mut out, mut transfered) = get_output(output, bar.silent);
+        println!("Remote file: {}", remote_file);
+        let (mut remote_file, stat) = session.scp_recv(Path::new(&remote_file)).await.unwrap();
+        let total_size = stat.size();
 
-        let filename = PathBuf::from("/tmp").join(Uuid::new_v4().to_string());
-        let filename = filename.as_path();
-
-        session.create(filename).await.unwrap();
-        let file_stat = session.stat(filename).await.unwrap();
-        println!("file_stat: {:?}", file_stat);
-
-        session.unlink(filename).await.unwrap();
-
+        loop {
+            let mut buffer = vec![0; BUFFER_SIZE];
+            let byte_count = remote_file
+                .read(&mut buffer)
+                .await
+                .expect("Cannot read SFTP stream.");
+            buffer.truncate(byte_count);
+            if !buffer.is_empty() {
+                out.write_all(&buffer)
+                    .or(Err(format!("Error while writing to output.")))
+                    .unwrap();
+                let new = min(transfered + (byte_count as u64), total_size);
+                transfered = new;
+                bar.set_position(new);
+            } else {
+                break;
+            }
+        }
         println!("done");
 
         Ok(())
     }
 
-    // pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {}
+    // pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
+    //     let mut remote_file = session
+    //         .scp_send(Path::new(output), 0o644, 10, None)
+    //         .await
+    //         .unwrap();
+    //     remote_file.write(b"1234567890").await.unwrap();
+
+    // }
     async fn setup_session(
         address: &str,
         silent: bool,
-    ) -> (async_ssh2_lite::AsyncSftp<std::net::TcpStream>, String) {
+    ) -> (async_ssh2_lite::AsyncSession<std::net::TcpStream>, String) {
         let parsed_address = ParsedAddress::parse_address(address, silent);
 
         let addr = parsed_address
@@ -81,7 +107,7 @@ impl SFTPHandler {
             }
 
             if !is_ok {
-                println!("SFTP Authentication failed. No password specified. Is passwordless authentication set up?");
+                println!("SFTP Authentication failed. Please specifiy a user: sftp://user@address");
             }
         }
 
@@ -89,6 +115,6 @@ impl SFTPHandler {
             + &parsed_address.path_segments.join("/")
             + "/"
             + &parsed_address.file;
-        (session.sftp().await.unwrap(), remote_file)
+        (session, remote_file)
     }
 }
