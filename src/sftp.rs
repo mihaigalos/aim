@@ -4,8 +4,10 @@ use async_io::Async;
 use async_ssh2_lite::AsyncSession;
 use futures::executor::block_on;
 use futures::AsyncReadExt;
+use futures::AsyncSeekExt;
 use futures::AsyncWriteExt;
 use std::cmp::min;
+use std::io::{Read, Seek, SeekFrom};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::path::{Path, PathBuf};
 use uuid::Uuid;
@@ -32,20 +34,33 @@ impl SFTPHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
         let (mut out, mut transfered) = get_output(output, bar.silent);
-        let (mut remote_file, stat) = session.scp_recv(Path::new(&remote_file)).await.unwrap();
-        let total_size = stat.size();
+        // let (mut remote_file, stat) = session.scp_recv(Path::new(&remote_file)).await.unwrap();
+        let sftp = session.sftp().await.unwrap();
+        let stat = sftp
+            .stat(Path::new(&remote_file))
+            .await
+            .expect("Cannot stat remote SFTP file");
+        let mut remote_file = sftp
+            .open(Path::new(&remote_file))
+            .await
+            .expect("Cannot open remote SFTP file");
+        let total_size = stat.size.expect("Cannot get remote SFTP file size");
         bar.set_length(total_size);
 
+        remote_file
+            .seek(SeekFrom::Current(transfered as i64))
+            .await
+            .expect("Cannot seek in SFTP file");
         loop {
             let mut buffer = vec![0; BUFFER_SIZE];
             let byte_count = remote_file
                 .read(&mut buffer)
                 .await
-                .expect("Cannot read SFTP stream.");
+                .expect("Cannot read SFTP stream");
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
                 out.write_all(&buffer)
-                    .or(Err(format!("Error while writing to output.")))
+                    .or(Err(format!("Error while writing to output")))
                     .unwrap();
                 let new = min(transfered + (byte_count as u64), total_size);
                 transfered = new;
@@ -80,7 +95,7 @@ impl SFTPHandler {
             .unwrap();
         let stream = Async::<TcpStream>::connect(addr).await.unwrap();
         let mut session = AsyncSession::new(stream, None).unwrap();
-        session.handshake().await.expect("SSH handshake failed");
+        session.handshake().await.expect("SFTP handshake failed");
         if parsed_address.password != "anonymous" {
             session
                 .userauth_password(&parsed_address.username, &parsed_address.password)

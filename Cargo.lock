@@ -153,8 +153,7 @@ dependencies = [
 [[package]]
 name = "async-ssh2-lite"
 version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d5eba728a9b28c3923136f11da4d82981996b89b689fe6f18ca5e95d51ed6c4"
+source = "git+https://github.com/mihaigalos/async-ssh2-lite#b6a1af7c64f3dc4039a807e8c32dd0459a772d99"
 dependencies = [
  "async-io",
  "futures-util",
