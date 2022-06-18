@@ -32,9 +32,9 @@ impl SFTPHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
         let (mut out, mut transfered) = get_output(output, bar.silent);
-        println!("Remote file: {}", remote_file);
         let (mut remote_file, stat) = session.scp_recv(Path::new(&remote_file)).await.unwrap();
         let total_size = stat.size();
+        bar.set_length(total_size);
 
         loop {
             let mut buffer = vec![0; BUFFER_SIZE];
@@ -54,8 +54,7 @@ impl SFTPHandler {
                 break;
             }
         }
-        println!("done");
-
+        bar.finish_download(&input, &output);
         Ok(())
     }
 
