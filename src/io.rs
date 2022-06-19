@@ -58,12 +58,12 @@ pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {
 
 pub fn get_input(path: &str) -> (Box<dyn Read>, u64) {
     let (file, transfered) = get_input_file(path);
-    let output: Box<dyn Read> = Box::new(std::io::BufReader::new(match path {
+    let input: Box<dyn Read> = Box::new(std::io::BufReader::new(match path {
         "stdin" => Box::new(std::io::stdin()) as Box<dyn Read>,
         _ => Box::new(file.unwrap()) as Box<dyn Read>,
     }));
 
-    (output, transfered)
+    (input, transfered)
 }
 
 #[test]

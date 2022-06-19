@@ -17,7 +17,7 @@ use crate::bar::WrappedBar;
 use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
-use crate::io::get_output;
+use crate::io::{get_input, get_output};
 use crate::ssh_auth::get_possible_ssh_keys_path;
 
 pub struct SFTPHandler;
@@ -34,7 +34,6 @@ impl SFTPHandler {
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
         let (mut out, mut transfered) = get_output(output, bar.silent);
-        // let (mut remote_file, stat) = session.scp_recv(Path::new(&remote_file)).await.unwrap();
         let sftp = session.sftp().await.unwrap();
         let stat = sftp
             .stat(Path::new(&remote_file))
@@ -73,14 +72,56 @@ impl SFTPHandler {
         Ok(())
     }
 
-    // pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
-    //     let mut remote_file = session
-    //         .scp_send(Path::new(output), 0o644, 10, None)
-    //         .await
-    //         .unwrap();
-    //     remote_file.write(b"1234567890").await.unwrap();
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
+        let file = tokio::fs::File::open(&input)
+            .await
+            .expect("Cannot read input file");
+        let total_size = file
+            .metadata()
+            .await
+            .expect("Cannot determine input file length")
+            .len();
+        let (session, remote_file) = SFTPHandler::setup_session(output, bar.silent).await;
+        let sftp = session.sftp().await.unwrap();
+        let stat = sftp
+            .stat(Path::new(&remote_file))
+            .await
+            .expect("Cannot stat remote SFTP file");
+        let mut remote_file = sftp
+            .open(Path::new(&remote_file))
+            .await
+            .expect("Cannot open remote SFTP file");
+        let mut transfered = stat.size.expect("Cannot determine remote SFTP file size");
+        bar.set_length(transfered);
 
-    // }
+        remote_file
+            .seek(SeekFrom::Current(transfered as i64))
+            .await
+            .expect("Cannot seek in remote SFTP file");
+        let (mut local_file, mut local_file_size) = get_input(input);
+        // local_file
+        //     .seek(SeekFrom::Current(transfered as i64))
+        //     .await
+        //     .expect("Cannot seek in local file");
+        loop {
+            let mut buffer = vec![0; BUFFER_SIZE];
+            let byte_count = local_file
+                .read(&mut buffer)
+                .expect("Cannot read local file stream");
+            buffer.truncate(byte_count);
+            if !buffer.is_empty() {
+                remote_file.write_all(&buffer);
+                let new = min(transfered + (byte_count as u64), total_size);
+                transfered = new;
+                bar.set_position(new);
+            } else {
+                break;
+            }
+        }
+        bar.finish_download(&input, &output);
+
+        Ok(())
+    }
     async fn setup_session(
         address: &str,
         silent: bool,
