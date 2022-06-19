@@ -108,7 +108,7 @@ _test_aim_put_resume_binary_file:
     test=$(basename $0) && source ../common.sh
     sha_input=$(sha256sum binary_file.tar.gz | cut -d' ' -f1)
     curl -s -X PUT --netrc-file .netrc.test_https --data-binary @binary_file.tar.gz.part1  http://127.0.0.1:{{ server_port }}/$test.tar.gz
-    aim -s binary_file.tar.gz.part2 http://127.0.0.1:8081/$test.tar.gz
+    aim -s binary_file.tar.gz http://127.0.0.1:8081/$test.tar.gz
     aim -s http://127.0.0.1:8081/$test.tar.gz $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || ok "ERROR: input and output SHA256s don't match."
