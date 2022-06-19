@@ -1,6 +1,8 @@
 use futures_util::StreamExt;
 use reqwest::Client;
 use std::cmp::min;
+use std::io::SeekFrom;
+use tokio::io::AsyncSeekExt;
 use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
@@ -24,7 +26,7 @@ impl HTTPSHandler {
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let file = tokio::fs::File::open(&input)
+        let mut file = tokio::fs::File::open(&input)
             .await
             .expect("Cannot open input file for HTTPS read");
         let total_size = file
@@ -34,9 +36,12 @@ impl HTTPSHandler {
             .len();
         let input_ = input.to_string();
         let output_ = output.to_string();
+        let mut uploaded = HTTPSHandler::get_already_uploaded(output, bar.silent).await;
+        file.seek(SeekFrom::Current(uploaded as i64))
+            .await
+            .expect("Cannot seek in input file");
         let mut reader_stream = ReaderStream::new(file);
 
-        let mut uploaded = HTTPSHandler::get_already_uploaded(output, bar.silent).await;
         bar.set_length(total_size);
 
         let async_stream = async_stream::stream! {

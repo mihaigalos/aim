@@ -108,14 +108,14 @@ impl FTPHandler {
             .len();
 
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let transfered = 0;
+        let transfered = 0; // TODO: get the remote file size to know where to restart from.
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .expect("Cannot get stream");
         let mut reader_stream = ReaderStream::new(file);
 
         bar.set_length(total_size);
-        let mut uploaded = 0;
+        let mut uploaded = transfered;
 
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
