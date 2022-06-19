@@ -108,14 +108,14 @@ impl FTPHandler {
             .len();
 
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let transfered = 0;
+        let transfered = FTPHandler::get_already_uploaded(output, bar.silent).await;
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .expect("Cannot get stream");
         let mut reader_stream = ReaderStream::new(file);
 
         bar.set_length(total_size);
-        let mut uploaded = 0;
+        let mut uploaded = transfered;
 
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
@@ -141,6 +141,29 @@ impl FTPHandler {
         Ok(())
     }
 
+    async fn get_already_uploaded(output: &str, silent: bool) -> u64 {
+        let parsed_address = ParsedAddress::parse_address(output, silent);
+        let mut ftp_stream = FtpStream::connect((parsed_address).server.clone())
+            .await
+            .expect("Cannot connect to FTP server");
+        let _ = ftp_stream
+            .login(&parsed_address.username, &parsed_address.password)
+            .await
+            .expect("Cannot login to FTP server");
+
+        for path in &parsed_address.path_segments {
+            ftp_stream
+                .cwd(&path)
+                .await
+                .expect("Path in FTP URL does not exist on remote");
+        }
+        let total_size = ftp_stream
+            .size(&parsed_address.file)
+            .await
+            .unwrap_or(Some(0))
+            .unwrap() as u64;
+        total_size
+    }
     async fn get_stream(
         transfered: u64,
         parsed_address: &ParsedAddress,
