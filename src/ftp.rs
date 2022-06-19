@@ -2,7 +2,7 @@ use async_ftp::{types::FileType, FtpStream};
 use futures_util::StreamExt;
 use std::cmp::min;
 use std::io::Write;
-use tokio::io::AsyncReadExt;
+use tokio::io::{AsyncReadExt, AsyncSeekExt, SeekFrom};
 use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
@@ -98,7 +98,7 @@ impl FTPHandler {
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
-        let file = tokio::fs::File::open(&input)
+        let mut file = tokio::fs::File::open(&input)
             .await
             .expect("Cannot read input file");
         let total_size = file
@@ -109,6 +109,9 @@ impl FTPHandler {
 
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let transfered = FTPHandler::get_already_uploaded(output, bar.silent).await;
+        file.seek(SeekFrom::Current(transfered as i64))
+            .await
+            .expect("Cannot seek in SFTP file");
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .expect("Cannot get stream");
