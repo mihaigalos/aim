@@ -167,6 +167,7 @@ impl FTPHandler {
             .unwrap() as u64;
         total_size
     }
+
     async fn get_stream(
         transfered: u64,
         parsed_address: &ParsedAddress,
