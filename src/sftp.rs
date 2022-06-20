@@ -2,25 +2,23 @@ extern crate ssh2;
 
 use async_io::Async;
 use async_ssh2_lite::AsyncSession;
-use futures::executor::block_on;
 use futures::AsyncReadExt;
 use futures::AsyncSeekExt;
 use futures::AsyncWriteExt;
 
 use std::cmp::min;
-use std::io::{Read, Seek, SeekFrom};
+use std::io::SeekFrom;
 use std::net::{TcpStream, ToSocketAddrs};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use tokio::io::AsyncReadExt as OtherAsyncReadExt;
 use tokio::io::AsyncSeekExt as OtherAsyncSeekExt;
-use uuid::Uuid;
 
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
 use crate::error::ValidateError;
 use crate::hash::HashChecker;
-use crate::io::{get_input, get_output};
+use crate::io::get_output;
 use crate::ssh_auth::get_possible_ssh_keys_path;
 
 pub struct SFTPHandler;
