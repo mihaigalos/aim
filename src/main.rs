@@ -1,11 +1,20 @@
 use autoclap::autoclap;
 use clap::Arg;
 use clap::Command;
-use std::env;
+use std::{env, io};
 
 #[tokio::main]
 #[cfg(not(tarpaulin_include))]
 async fn main() {
+    let (input, output, silent, expected_sha256) = parse_args().await.expect("Cannot parse args");
+    match aim::driver::Driver::drive(&input, &output, silent, &expected_sha256).await {
+        Ok(_) => std::process::exit(0),
+        _ => std::process::exit(255),
+    }
+}
+
+#[cfg(not(tarpaulin_include))]
+async fn parse_args() -> io::Result<(String, String, bool, String)> {
     let mut app: clap::Command = autoclap!()
         .arg(
             Arg::new("INPUT")
@@ -71,10 +80,12 @@ async fn main() {
     let silent = args.is_present("silent");
     let expected_sha256 = args.value_of("SHA256").unwrap_or("");
 
-    match aim::driver::Driver::drive(input, output, silent, expected_sha256).await {
-        Ok(_) => std::process::exit(0),
-        _ => std::process::exit(255),
-    }
+    Ok((
+        input.to_string(),
+        output.to_string(),
+        silent,
+        expected_sha256.to_string(),
+    ))
 }
 
 #[cfg(not(tarpaulin_include))]

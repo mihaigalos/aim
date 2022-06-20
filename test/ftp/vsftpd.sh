@@ -3,6 +3,9 @@
 adduser -G ftp -s /bin/sh -D $FTP_USER
 echo "$FTP_USER:$FTP_PASS" | chpasswd
 
+mkdir -p /home/$FTP_USER/subfolder
+chmod -R 777 /home/$FTP_USER
+
 cat <<EOF >> /etc/vsftpd/vsftpd.conf
 allow_writeable_chroot=YES
 anon_root=$ANON_ROOT

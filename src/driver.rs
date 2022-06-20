@@ -272,6 +272,22 @@ mod tests {
 
     #[tokio::test]
     #[serial]
+    async fn test_ftp_put_works_when_subfolder() {
+        just_start("test/ftp/Justfile");
+        let result = Driver::put(
+            "test/ftp/binary_file.tar.gz",
+            "ftp://127.0.0.1:21/subfolder/test_ftp_put_works_when_subfolder",
+            WrappedBar::new(0, "", true),
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/ftp/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
     async fn test_ftp_get_works_same_filename() {
         just_start("test/ftp/Justfile");
         let out_file = ".";

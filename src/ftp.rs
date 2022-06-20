@@ -2,7 +2,7 @@ use async_ftp::{types::FileType, FtpStream};
 use futures_util::StreamExt;
 use std::cmp::min;
 use std::io::Write;
-use tokio::io::AsyncReadExt;
+use tokio::io::{AsyncReadExt, AsyncSeekExt, SeekFrom};
 use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
@@ -98,7 +98,7 @@ impl FTPHandler {
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
-        let file = tokio::fs::File::open(&input)
+        let mut file = tokio::fs::File::open(&input)
             .await
             .expect("Cannot read input file");
         let total_size = file
@@ -108,14 +108,17 @@ impl FTPHandler {
             .len();
 
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let transfered = 0;
+        let transfered = FTPHandler::get_already_uploaded(output, bar.silent).await;
+        file.seek(SeekFrom::Current(transfered as i64))
+            .await
+            .expect("Cannot seek in SFTP file");
         let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
             .await
             .expect("Cannot get stream");
         let mut reader_stream = ReaderStream::new(file);
 
         bar.set_length(total_size);
-        let mut uploaded = 0;
+        let mut uploaded = transfered;
 
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
@@ -139,6 +142,30 @@ impl FTPHandler {
             .expect("Cannot upload file via FTP");
 
         Ok(())
+    }
+
+    async fn get_already_uploaded(output: &str, silent: bool) -> u64 {
+        let parsed_address = ParsedAddress::parse_address(output, silent);
+        let mut ftp_stream = FtpStream::connect((parsed_address).server.clone())
+            .await
+            .expect("Cannot connect to FTP server");
+        let _ = ftp_stream
+            .login(&parsed_address.username, &parsed_address.password)
+            .await
+            .expect("Cannot login to FTP server");
+
+        for path in &parsed_address.path_segments {
+            ftp_stream
+                .cwd(&path)
+                .await
+                .expect("Path in FTP URL does not exist on remote");
+        }
+        let total_size = ftp_stream
+            .size(&parsed_address.file)
+            .await
+            .unwrap_or(Some(0))
+            .unwrap() as u64;
+        total_size
     }
 
     async fn get_stream(
