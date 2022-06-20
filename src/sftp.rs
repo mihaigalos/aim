@@ -6,10 +6,13 @@ use futures::executor::block_on;
 use futures::AsyncReadExt;
 use futures::AsyncSeekExt;
 use futures::AsyncWriteExt;
+
 use std::cmp::min;
 use std::io::{Read, Seek, SeekFrom};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::path::{Path, PathBuf};
+use tokio::io::AsyncReadExt as OtherAsyncReadExt;
+use tokio::io::AsyncSeekExt as OtherAsyncSeekExt;
 use uuid::Uuid;
 
 use crate::address::ParsedAddress;
@@ -73,7 +76,7 @@ impl SFTPHandler {
     }
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
-        let file = tokio::fs::File::open(&input)
+        let mut file = tokio::fs::File::open(&input)
             .await
             .expect("Cannot read input file");
         let total_size = file
@@ -98,19 +101,21 @@ impl SFTPHandler {
             .seek(SeekFrom::Current(transfered as i64))
             .await
             .expect("Cannot seek in remote SFTP file");
-        let (mut local_file, mut local_file_size) = get_input(input);
-        // local_file
-        //     .seek(SeekFrom::Current(transfered as i64))
-        //     .await
-        //     .expect("Cannot seek in local file");
+        file.seek(SeekFrom::Current(transfered as i64))
+            .await
+            .expect("Cannot seek in local file");
         loop {
             let mut buffer = vec![0; BUFFER_SIZE];
-            let byte_count = local_file
+            let byte_count = file
                 .read(&mut buffer)
+                .await
                 .expect("Cannot read local file stream");
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
-                remote_file.write_all(&buffer);
+                remote_file
+                    .write_all(&buffer)
+                    .await
+                    .expect("Cannot write local file stream");
                 let new = min(transfered + (byte_count as u64), total_size);
                 transfered = new;
                 bar.set_position(new);
