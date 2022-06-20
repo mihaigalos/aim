@@ -42,10 +42,12 @@ impl Driver {
         }
         Ok(result)
     }
+
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let result = match &output[0..4] {
             "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await?,
             "http" => crate::https::HTTPSHandler::put(input, output, bar).await?,
+            "sftp" => crate::sftp::SFTPHandler::put(input, output, bar).await?,
             "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await?,
             "s3:/" => crate::s3::S3::put(input, output, bar).await?,
             _ => panic!(
@@ -365,6 +367,42 @@ mod tests {
         let result = Driver::put(
             "test/ssh/binary_file.tar.gz",
             "ssh://user@127.0.0.1:2223/tmp/_test_ssh_put_works_when_typical",
+            WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/ssh/Justfile");
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_sftp_get_works_when_typical() {
+        let out_file = "_test_sftp_get_works_when_typical";
+        just_start_with_keys("test/ssh/Justfile");
+        let result = Driver::get(
+            "sftp://user@127.0.0.1:2223/tmp/foobar_keys",
+            out_file,
+            "364f419c559bd3eb24434b97353cfaa4792cc70c9151f9cd8274bbe16b42a29a",
+            &mut WrappedBar::new(0, "", false),
+        )
+        .await;
+
+        assert!(result.is_ok());
+
+        just_stop("test/ssh/Justfile");
+        std::fs::remove_file(out_file).unwrap();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_sftp_put_works_when_typical() {
+        just_start_with_keys("test/ssh/Justfile");
+
+        let result = Driver::put(
+            "test/ssh/binary_file.tar.gz",
+            "sftp://user@127.0.0.1:2223/tmp/_test_sftp_put_works_when_typical",
             WrappedBar::new(0, "", false),
         )
         .await;
