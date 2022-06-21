@@ -11,6 +11,7 @@ pub mod io;
 pub mod netrc;
 pub mod question;
 pub mod s3;
+pub mod sftp;
 pub mod slicer;
 pub mod ssh;
 pub mod ssh_auth;

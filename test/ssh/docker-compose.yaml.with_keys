@@ -15,7 +15,7 @@ services:
       - USER_NAME=user #optional
     volumes:
       - $PWD/keys/id_ed25519.pub:/root/.ssh/id_ed25519.pub
-      - /tmp/foobar_keys:/tmp/foobar_keys
+      - /tmp:/tmp
       - ~/.history_make_shell:/root/.history_make_shell
     ports:
       - 2223:2222

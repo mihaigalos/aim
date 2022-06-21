@@ -32,6 +32,8 @@ dependencies = [
 name = "aim"
 version = "1.4.0"
 dependencies = [
+ "async-io",
+ "async-ssh2-lite",
  "async-std",
  "async-stream",
  "async_ftp",
@@ -39,6 +41,7 @@ dependencies = [
  "clap 3.1.8",
  "custom_error",
  "dotenv",
+ "futures",
  "futures-util",
  "http",
  "indicatif",
@@ -59,7 +62,8 @@ dependencies = [
  "strfmt",
  "tokio",
  "tokio-util",
- "url 1.7.2",
+ "url 2.2.2 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
+ "uuid",
  "warpy",
 ]
 
@@ -144,6 +148,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e97a171d191782fba31bb902b14ad94e24a68145032b7eedf871ab0bc0d077b6"
 dependencies = [
  "event-listener",
+]
+
+[[package]]
+name = "async-ssh2-lite"
+version = "0.2.1"
+source = "git+https://github.com/mihaigalos/async-ssh2-lite#b6a1af7c64f3dc4039a807e8c32dd0459a772d99"
+dependencies = [
+ "async-io",
+ "futures-util",
+ "ssh2",
 ]
 
 [[package]]
@@ -242,7 +256,7 @@ dependencies = [
  "openssl",
  "serde",
  "serde_json",
- "url 2.2.2",
+ "url 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "wildmatch",
 ]
 
@@ -285,7 +299,7 @@ dependencies = [
  "serde-xml-rs",
  "serde_derive",
  "thiserror",
- "url 2.2.2",
+ "url 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -706,7 +720,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5fc25a87fa4fd2094bffb06925852034d90a17f0d1e05197d4956d3555752191"
 dependencies = [
  "matches",
- "percent-encoding 2.1.0",
+ "percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "form_urlencoded"
+version = "1.0.1"
+source = "git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0"
+dependencies = [
+ "percent-encoding 2.1.0 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
+]
+
+[[package]]
+name = "futures"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a12aa0eb539080d55c3f2d45a67c3b58b6b0773c1a3ca2dfec66d58c97fd66ca"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "futures-executor",
+ "futures-io",
+ "futures-sink",
+ "futures-task",
+ "futures-util",
 ]
 
 [[package]]
@@ -724,6 +761,17 @@ name = "futures-core"
 version = "0.3.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88d1c26957f23603395cd326b0ffe64124b818f4449552f960d815cfba83a53d"
+
+[[package]]
+name = "futures-executor"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45025be030969d763025784f7f355043dc6bc74093e4ecc5000ca4dc50d8745c"
+dependencies = [
+ "futures-core",
+ "futures-task",
+ "futures-util",
+]
 
 [[package]]
 name = "futures-io"
@@ -778,6 +826,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "36568465210a3a6ee45e1f165136d68671471a501e632e9a98d96872222b5481"
 dependencies = [
  "autocfg",
+ "futures-channel",
  "futures-core",
  "futures-io",
  "futures-macro",
@@ -1001,9 +1050,9 @@ dependencies = [
 
 [[package]]
 name = "idna"
-version = "0.1.5"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38f09e0f0b1fb55fdee1f17470ad800da77af5186a1a76c026b679358b7e844e"
+checksum = "418a0a6fab821475f634efe3ccc45c013f742efe03d853e8d3355d5cb850ecf8"
 dependencies = [
  "matches",
  "unicode-bidi",
@@ -1013,10 +1062,8 @@ dependencies = [
 [[package]]
 name = "idna"
 version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "418a0a6fab821475f634efe3ccc45c013f742efe03d853e8d3355d5cb850ecf8"
+source = "git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0"
 dependencies = [
- "matches",
  "unicode-bidi",
  "unicode-normalization",
 ]
@@ -1479,15 +1526,14 @@ dependencies = [
 
 [[package]]
 name = "percent-encoding"
-version = "1.0.1"
+version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "31010dd2e1ac33d5b46a5b413495239882813e0369f8ed8a5e266f173602f831"
+checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 
 [[package]]
 name = "percent-encoding"
 version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
+source = "git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0"
 
 [[package]]
 name = "pin-project"
@@ -1740,14 +1786,14 @@ dependencies = [
  "log",
  "mime",
  "native-tls",
- "percent-encoding 2.1.0",
+ "percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-project-lite",
  "serde",
  "serde_json",
  "serde_urlencoded",
  "tokio",
  "tokio-native-tls",
- "url 2.2.2",
+ "url 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -1798,7 +1844,7 @@ dependencies = [
  "maybe-async",
  "md5",
  "minidom",
- "percent-encoding 2.1.0",
+ "percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "reqwest",
  "serde",
  "serde-xml-rs",
@@ -1808,7 +1854,7 @@ dependencies = [
  "time 0.3.9",
  "tokio",
  "tokio-stream",
- "url 2.2.2",
+ "url 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1963,7 +2009,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "edfa57a7f8d9c1d260a549e7224100f6c43d43f9103e06dd8b4095a9b2b43ce9"
 dependencies = [
- "form_urlencoded",
+ "form_urlencoded 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "itoa 0.4.8",
  "ryu",
  "serde",
@@ -2396,7 +2442,7 @@ dependencies = [
  "rand",
  "sha-1 0.9.8",
  "thiserror",
- "url 2.2.2",
+ "url 2.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "utf-8",
 ]
 
@@ -2465,25 +2511,24 @@ checksum = "a156c684c91ea7d62626509bce3cb4e1d9ed5c4d978f7b4352658f96a4c26b4a"
 
 [[package]]
 name = "url"
-version = "1.7.2"
+version = "2.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd4e7c0d531266369519a4aa4f399d748bd37043b00bde1e4ff1f60a120b355a"
+checksum = "a507c383b2d33b5fc35d1861e77e6b383d158b2da5e14fe51b83dfedf6fd578c"
 dependencies = [
- "idna 0.1.5",
+ "form_urlencoded 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "idna 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "matches",
- "percent-encoding 1.0.1",
+ "percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "url"
 version = "2.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a507c383b2d33b5fc35d1861e77e6b383d158b2da5e14fe51b83dfedf6fd578c"
+source = "git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0"
 dependencies = [
- "form_urlencoded",
- "idna 0.2.3",
- "matches",
- "percent-encoding 2.1.0",
+ "form_urlencoded 1.0.1 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
+ "idna 0.2.3 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
+ "percent-encoding 2.1.0 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
 ]
 
 [[package]]
@@ -2491,6 +2536,15 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "uuid"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom",
+]
 
 [[package]]
 name = "value-bag"
@@ -2552,7 +2606,7 @@ dependencies = [
  "mime",
  "mime_guess",
  "multipart",
- "percent-encoding 2.1.0",
+ "percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "pin-project",
  "scoped-tls",
  "serde",
