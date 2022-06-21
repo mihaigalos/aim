@@ -84,15 +84,16 @@ impl SFTPHandler {
             .len();
         let (session, remote_file) = SFTPHandler::setup_session(output, bar.silent).await;
         let sftp = session.sftp().await.unwrap();
-        let stat = sftp
-            .stat(Path::new(&remote_file))
-            .await
-            .expect("Cannot stat remote SFTP file");
-        let mut remote_file = sftp
-            .open(Path::new(&remote_file))
-            .await
-            .expect("Cannot open remote SFTP file");
-        let mut transfered = stat.size.expect("Cannot determine remote SFTP file size");
+        let stat = sftp.stat(Path::new(&remote_file)).await;
+        let (mut remote_file, mut transfered) = match stat {
+            Ok(v) => (
+                sftp.open(Path::new(&remote_file))
+                    .await
+                    .expect("Cannot open remote SFTP file"),
+                v.size.expect("Cannot determine remote SFTP file size"),
+            ),
+            Err(_) => (sftp.create(Path::new(&remote_file)).await.unwrap(), 0),
+        };
         bar.set_length(transfered);
 
         remote_file
