@@ -33,9 +33,9 @@ aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-u
 ```
 
 ### Resume
-Resume support for both download and upload for `http(s)`, `ftp`.
+Resume support for both download and upload for `http(s)`, `ftp` and `sftp`.
 
-Download and upload support for `ssh`, resume (using `sftp`) under development.
+Download and upload support for `ssh` (no resume).
 
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
