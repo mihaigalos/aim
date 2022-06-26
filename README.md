@@ -24,7 +24,7 @@ cargo install aim
   * `aim https://domain.com/` -> Display contents.
   * `aim https://domain.com/source.file .` -> Download.
   * `aim source.file https://domain.com/destination.file` -> Upload.
-* support for `http(s)`, `ftp`, `ssh`, `s3` (no resume at the moment).
+* support for `http(s)`, `(s)ftp`, `ssh`, `s3` (no resume at the moment).
 
 ### Optional check of sha256
 To validate that a download matches a desired checksum, just list it at the end when invoking `aim`. 
