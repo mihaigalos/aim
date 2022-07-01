@@ -5,6 +5,30 @@ A command line download/upload tool with resume.
 
 ![resume example](screenshots/aim.gif)
 
+
+## Table of Contents
+
+* [❓ Why](#%E2%9D%93-why)
+* [💿︎ Installation](#%F0%9F%92%BF%EF%B8%8E-installation)
+* [💡 Features](#%F0%9F%92%A1-features)
+  * [Download / Upload](#download-/-upload)
+  * [Optional check of sha256](#optional-check-of-sha256)
+  * [Resume](#resume)
+  * [Output during downloading](#output-during-downloading)
+  * [Sharing a folder](#sharing-a-folder)
+  * [Indicators](#indicators)
+  * [Output](#output)
+* [🔑 Authentication](#%F0%9F%94%91-authentication)
+  * [Basicauth in url](#basicauth-in-url)
+  * [Netrc](#netrc)
+  * [SSH keys](#ssh-keys)
+  * [.aws folder](#.aws-folder)
+* [🆕 Updating](#%F0%9F%86%95-updating)
+* [🐳 Docker](#%F0%9F%90%B3-docker)
+  * [Hosting on machine A](#hosting-on-machine-a)
+  * [Downloading on machine B](#downloading-on-machine-b)
+* [🛠️ Similar work](#%F0%9F%9B%A0%EF%B8%8F-similar-work)
+
 ## ❓ Why
 Simplicity: download or upload files depending on parameter order with default settings.
 
