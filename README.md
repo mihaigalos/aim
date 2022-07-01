@@ -7,7 +7,10 @@ A command line download/upload tool with resume.
 
 
 ## Table of Contents
-
+<!--
+Generated with:
+docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --bullet "*" --indent 2 --min-depth 1
+-->
 <table>
     <tr><td width=33% valign=top>
 
