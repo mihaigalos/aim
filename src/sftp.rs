@@ -1,14 +1,13 @@
 extern crate ssh2;
 
-use async_io::Async;
-use async_ssh2_lite::AsyncSession;
+use async_ssh2_lite::{AsyncSession, TokioTcpStream};
 use futures::AsyncReadExt;
 use futures::AsyncSeekExt;
 use futures::AsyncWriteExt;
 
 use std::cmp::min;
 use std::io::SeekFrom;
-use std::net::{TcpStream, ToSocketAddrs};
+use std::net::ToSocketAddrs;
 use std::path::Path;
 use tokio::io::AsyncReadExt as OtherAsyncReadExt;
 use tokio::io::AsyncSeekExt as OtherAsyncSeekExt;
@@ -126,10 +125,7 @@ impl SFTPHandler {
 
         Ok(())
     }
-    async fn setup_session(
-        address: &str,
-        silent: bool,
-    ) -> (async_ssh2_lite::AsyncSession<std::net::TcpStream>, String) {
+    async fn setup_session(address: &str, silent: bool) -> (AsyncSession<TokioTcpStream>, String) {
         let parsed_address = ParsedAddress::parse_address(address, silent);
 
         let addr = parsed_address
@@ -138,7 +134,7 @@ impl SFTPHandler {
             .unwrap()
             .next()
             .unwrap();
-        let stream = Async::<TcpStream>::connect(addr).await.unwrap();
+        let stream = TokioTcpStream::connect(addr).await.unwrap();
         let mut session = AsyncSession::new(stream, None).unwrap();
         session.handshake().await.expect("SFTP handshake failed");
         if parsed_address.password != "anonymous" {
