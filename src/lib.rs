@@ -16,4 +16,3 @@ pub mod slicer;
 pub mod ssh;
 pub mod ssh_auth;
 pub mod tls;
-pub mod untildify;
