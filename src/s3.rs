@@ -557,9 +557,9 @@ mod test_mixins {
     #[test]
     #[serial]
     fn test_mixin_aws_credentials_from_aws_folder_works_when_typical() {
-        use crate::untildify::untildify;
         use std::fs::OpenOptions;
         use std::io::Write;
+        use untildify::untildify;
 
         let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
 
@@ -593,9 +593,9 @@ mod test_mixins {
     #[test]
     #[serial]
     fn test_mixin_aws_credentials_from_aws_folder_works_when_typical_and_not_silent() {
-        use crate::untildify::untildify;
         use std::fs::OpenOptions;
         use std::io::Write;
+        use untildify::untildify;
 
         let _ = std::fs::rename(untildify("~/.aws"), untildify("~/.aws_aim_testing"));
 

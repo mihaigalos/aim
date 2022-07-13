@@ -54,8 +54,7 @@ url = { git = "https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9
 uuid = { version = "0.8", features = ["v4"] }
 warpy = "0.2.1"
 
-regex = "1.5.5" # Remove this dep once this is merged: https://github.com/sathishsoundharajan/untildify/pull/2
-#untildify = "0.1.0" Remove comment once this is merged: https://github.com/sathishsoundharajan/untildify/pull/2
+untildify = "0.1.1"
 
 [dev-dependencies]
 serial_test = "0.5.1"

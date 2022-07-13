@@ -51,7 +51,6 @@ dependencies = [
  "openssl",
  "openssl-src 300.0.8+3.0.4",
  "question",
- "regex",
  "reqwest",
  "rust-s3",
  "self_update",
@@ -61,6 +60,7 @@ dependencies = [
  "strfmt",
  "tokio",
  "tokio-util 0.6.10",
+ "untildify",
  "url 2.2.2 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
  "uuid",
  "warpy",
@@ -2491,6 +2491,15 @@ name = "unicode-width"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
+
+[[package]]
+name = "untildify"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "992d9e1100cf171942054a07eef9a04986cc8acdb1f771be47accaa301a46bb7"
+dependencies = [
+ "regex",
+]
 
 [[package]]
 name = "untrusted"
