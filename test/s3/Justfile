@@ -21,7 +21,7 @@ _start dirname="." +args="-d": _stop
     #!/bin/bash
     function wait_docker() {
         while [ $(docker ps | grep $1 | wc -l) -eq 0 ]; do
-          sleep 0.1
+          sleep 0.5
         done
     }
     docker run -p 9000:9000 --name minio -e MINIO_CI_CD=1 -d minio/minio server /export && wait_docker "minio"
