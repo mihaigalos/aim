@@ -40,7 +40,7 @@ _start dirname="." +args="-d":
         -v $(pwd):/src \
         -p {{ server_port }}:80 \
         {{ docker_image }} > /dev/null \
-    && wait_docker \
+    && wait_docker "aim_tests_https" \
     || true
 
 _stop dirname=".":
