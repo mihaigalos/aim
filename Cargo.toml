@@ -25,7 +25,7 @@ license = "MIT"
 [dependencies]
 async-ssh2-lite = { version = "0.3", features = ["tokio"] }
 async-std = "1.11.0"
-async-stream = "0.3.2"
+async-stream = "0.3.3"
 async_ftp = "6.0.0"
 autoclap = "0.2.2"
 clap = { version = "3.1.8", features = ["cargo"] }
