@@ -31,7 +31,7 @@ _start dirname="." +args="-d":
         -p 20:20 \
         -p 21100-21110:21100-21110 \
         {{ docker_image }} > /dev/null \
-    && wait_docker \
+    && wait_docker "aim_tests_ftp" \
     || true
 
 _stop dirname=".":
