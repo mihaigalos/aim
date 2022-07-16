@@ -32,14 +32,14 @@ jobs:
         repo_token: ${{ secrets.GITHUB_TOKEN }}
       if: github.event_name == 'pull_request'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: extractions/setup-just@v1
       with:
         just-version: 0.10.2  # optional semver specification, otherwise latest
 
     - name: Cargo Cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ~/.cargo
         key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
@@ -48,7 +48,7 @@ jobs:
           ${{ runner.os }}-cargo
 
     - name: Cargo Target Cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: target
         key: ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
@@ -67,7 +67,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 30
 
@@ -92,12 +92,12 @@ jobs:
           args: '-- --test-threads 1'
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1.0.2
+        uses: codecov/codecov-action@v1.5.2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
 
       - name: Archive code coverage results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: code-coverage-report
           path: cobertura.xml 
