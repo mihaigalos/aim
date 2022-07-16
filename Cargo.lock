@@ -2512,9 +2512,9 @@ dependencies = [
 
 [[package]]
 name = "url-parse"
-version = "0.5.0"
+version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fea3e1cd4095548f832ed4645ab28946935135f80051cd03cf86b0e8b3710390"
+checksum = "b890d3c2e80c43241b9369666f2a08ed917b7e86f52dc6909b4769ddb08aca87"
 dependencies = [
  "regex",
 ]

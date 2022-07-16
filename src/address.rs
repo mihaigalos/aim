@@ -59,9 +59,7 @@ impl ParsedAddress {
         let mut path_segments: Vec<String> = url
             .path_segments()
             .ok_or_else(|| panic!("failed to get url path segments: {}", url))
-            .unwrap()
-            .map(|s| s.to_string())
-            .collect();
+            .unwrap();
 
         let file = path_segments
             .pop()
