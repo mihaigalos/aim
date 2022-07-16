@@ -1,6 +1,6 @@
 use crate::netrc::netrc;
 
-use url::Url;
+use url_parse::url::Parser;
 
 #[derive(Debug)]
 pub struct ParsedAddress {
@@ -31,7 +31,7 @@ impl PartialEq for ParsedAddress {
 impl ParsedAddress {
     pub fn parse_address(address: &str, silent: bool) -> ParsedAddress {
         let netrc = netrc(silent);
-        let url = Url::parse(address).unwrap();
+        let url = Parser::new(None).parse(address);
         let server = format!(
             "{}:{}",
             url.host_str()
