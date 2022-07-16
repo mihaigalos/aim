@@ -231,3 +231,18 @@ async fn parse_works_when_ssh_user() {
 
     assert_eq!(actual, expected);
 }
+
+#[tokio::test]
+async fn parse_works_when_not_silent() {
+    let expected = ParsedAddress {
+        server: "localhost:2223".to_string(),
+        username: "user".to_string(),
+        password: "pass".to_string(),
+        path_segments: vec!["".to_string()],
+        file: "file".to_string(),
+    };
+
+    let actual = ParsedAddress::parse_address("ssh://user:pass@localhost:2223/file", false);
+
+    assert_eq!(actual, expected);
+}
