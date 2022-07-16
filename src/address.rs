@@ -47,6 +47,9 @@ impl ParsedAddress {
             url.username().to_string()
         };
         let password = url.password().unwrap_or("anonymous").to_string();
+        if !silent && username != "anonymous" && password != "anonymous" {
+            println!("🔑 Parsed credentials from URL.");
+        }
 
         let (username, password) = ParsedAddress::mixin_netrc(&netrc, &server, username, password);
 
