@@ -1,6 +1,6 @@
 use crate::netrc::netrc;
 
-use url_parse::url::Parser;
+use url_parse::core::Parser;
 
 #[derive(Debug)]
 pub struct ParsedAddress {
@@ -31,7 +31,7 @@ impl PartialEq for ParsedAddress {
 impl ParsedAddress {
     pub fn parse_address(address: &str, silent: bool) -> ParsedAddress {
         let netrc = netrc(silent);
-        let url = Parser::new(None).parse(address);
+        let url = Parser::new(None).parse(address).unwrap();
         let server = format!(
             "{}:{}",
             url.host_str()
@@ -41,12 +41,15 @@ impl ParsedAddress {
                 .ok_or_else(|| panic!("failed to parse port from url: {}", url))
                 .unwrap(),
         );
-        let username = if url.username().is_empty() {
+
+        let url_username = url.username();
+        let username = if url_username.is_none() {
             "anonymous".to_string()
         } else {
-            url.username().to_string()
+            url.username().unwrap()
         };
-        let password = url.password().unwrap_or("anonymous").to_string();
+
+        let password = url.password().unwrap_or("anonymous".to_string());
         if !silent && username != "anonymous" && password != "anonymous" {
             println!("🔑 Parsed credentials from URL.");
         }
