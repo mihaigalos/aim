@@ -59,7 +59,7 @@ dependencies = [
  "ssh2",
  "strfmt",
  "tokio",
- "tokio-util 0.6.10",
+ "tokio-util 0.7.3",
  "untildify",
  "url 2.2.2 (git+https://github.com/mihaigalos/rust-url#a3bd6f3ce67e2ca10312a254e9666c923e3a1fa0)",
  "uuid",
@@ -2372,11 +2372,9 @@ checksum = "36943ee01a6d67977dd3f84a5a1d2efeb4ada3a1ae771cadfaa535d9d9fc6507"
 dependencies = [
  "bytes",
  "futures-core",
- "futures-io",
  "futures-sink",
  "log",
  "pin-project-lite",
- "slab",
  "tokio",
 ]
 
@@ -2388,8 +2386,12 @@ checksum = "cc463cd8deddc3770d20f9852143d50bf6094e640b485cb2e189a2099085ff45"
 dependencies = [
  "bytes",
  "futures-core",
+ "futures-io",
  "futures-sink",
+ "futures-util",
+ "hashbrown",
  "pin-project-lite",
+ "slab",
  "tokio",
  "tracing",
 ]
