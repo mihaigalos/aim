@@ -1,6 +1,6 @@
 [package]
 name = "aim"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "🎯 A command line download/upload tool with resume."
@@ -24,37 +24,37 @@ license = "MIT"
 
 [dependencies]
 async-ssh2-lite = { version = "0.3", features = ["tokio"] }
-async-std = "1.11.0"
+async-std = "1.12.0"
 async-stream = "0.3.3"
 async_ftp = "6.0.0"
 autoclap = "0.2.2"
-clap = { version = "3.1.8", features = ["cargo"] }
+clap = { version = "3.2.12", features = ["cargo"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
 futures = "0.3"
 futures-util = "0.3.21"
-http = "0.2.7"
+http = "0.2.8"
 indicatif = "0.16.2"
 log = "0.4.17"
 melt = "0.1.6"
 native-tls = "0.2"
 netrc = "0.4.1"
-openssl = { version = "0.10.40", features = ["vendored"] }
+openssl = { version = "0.10.41", features = ["vendored"] }
 openssl-src = "300.0.9"
 question = "0.2.2"
-reqwest = { version = "0.11.3", features = ["stream"] }
+reqwest = { version = "0.11.11", features = ["stream"] }
 rust-s3 = { version = "0.31.0", features = ["blocking"] }
 self_update = { version = "0.30.0", features = ["archive-tar", "compression-flate2"] }
-sha2 = "0.10.0"
+sha2 = "0.10.2"
 ssh2 = "0.9.3"
 strfmt = "0.1.6"
-tokio = { version = "1.14.0", features = ["full"] }
-tokio-util = {version="0.6.9", features = ["full"]}
+tokio = { version = "1.20.0", features = ["full"] }
+tokio-util = {version="0.7.3", features = ["full"]}
 url-parse = "0.4.1"
-uuid = { version = "0.8", features = ["v4"] }
+uuid = { version = "1.1", features = ["v4"] }
 warpy = "0.2.1"
 
 untildify = "0.1.1"
 
 [dev-dependencies]
-serial_test = "0.5.1"
+serial_test = "0.8.0"
