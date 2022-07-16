@@ -57,4 +57,4 @@ warpy = "0.2.1"
 untildify = "0.1.1"
 
 [dev-dependencies]
-serial_test = "0.5.1"
+serial_test = "0.8.0"
