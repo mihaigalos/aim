@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.5.1"
+version = "1.5.2"
 dependencies = [
  "async-ssh2-lite",
  "async-std",
@@ -2512,9 +2512,9 @@ dependencies = [
 
 [[package]]
 name = "url-parse"
-version = "0.5.4"
+version = "0.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "107016622feb2dff97bb4554af0162a1db8eb84c5df6bef71b2ace9f13624d31"
+checksum = "e1598b096c923b577b7135da29f4f41dfb61bc2ecff9ea879bd95e56c585e11a"
 dependencies = [
  "regex",
 ]
