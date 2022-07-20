@@ -19,11 +19,7 @@ test: _start && _stop
 
 _start dirname="." +args="-d": _stop
     #!/bin/bash
-    function wait_docker() {
-        while [ $(docker ps | grep $1 | wc -l) -eq 0 ]; do
-          sleep 0.1
-        done
-    }
+    source ../common.sh
     docker run -p 9000:9000 --name minio -e MINIO_CI_CD=1 -d minio/minio server /export && wait_docker "minio"
     docker run --rm --net=host -v $(realpath .mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
     docker run --rm --net=host -v $(realpath .mc):/root/.mc -v $(realpath .):/src --entrypoint=mc minio/mc cp /src/binary_file.tar.gz.part1 myminio/test-bucket/binary_file.tar.gz.part1
@@ -37,6 +33,7 @@ _test_aim_put_binary_file:
     set -x
     sha_input=$(sha256sum test.file | cut -d' ' -f1)
     aim -s test.file s3://minioadmin:minioadmin@localhost:9000/test-bucket/$test
+    sleep 3
     aim -s s3://minioadmin:minioadmin@localhost:9000/test-bucket/$test $test
     sha_output=$(sha256sum $test | cut -d' ' -f1)
     [ "$sha_input" = "$sha_output" ] && ok || err "ERROR: input and output SHA256s don't match."

@@ -1,6 +1,6 @@
 use crate::netrc::netrc;
 
-use url::Url;
+use url_parse::core::Parser;
 
 #[derive(Debug)]
 pub struct ParsedAddress {
@@ -31,7 +31,7 @@ impl PartialEq for ParsedAddress {
 impl ParsedAddress {
     pub fn parse_address(address: &str, silent: bool) -> ParsedAddress {
         let netrc = netrc(silent);
-        let url = Url::parse(address).unwrap();
+        let url = Parser::new(None).parse(address).unwrap();
         let server = format!(
             "{}:{}",
             url.host_str()
@@ -41,21 +41,25 @@ impl ParsedAddress {
                 .ok_or_else(|| panic!("failed to parse port from url: {}", url))
                 .unwrap(),
         );
-        let username = if url.username().is_empty() {
+
+        let url_username = url.username();
+        let username = if url_username.is_none() {
             "anonymous".to_string()
         } else {
-            url.username().to_string()
+            url.username().unwrap()
         };
-        let password = url.password().unwrap_or("anonymous").to_string();
+
+        let password = url.password().unwrap_or("anonymous".to_string());
+        if !silent && username != "anonymous" && password != "anonymous" {
+            println!("🔑 Parsed credentials from URL.");
+        }
 
         let (username, password) = ParsedAddress::mixin_netrc(&netrc, &server, username, password);
 
         let mut path_segments: Vec<String> = url
             .path_segments()
             .ok_or_else(|| panic!("failed to get url path segments: {}", url))
-            .unwrap()
-            .map(|s| s.to_string())
-            .collect();
+            .unwrap();
 
         let file = path_segments
             .pop()
@@ -224,6 +228,21 @@ async fn parse_works_when_ssh_user() {
     };
 
     let actual = ParsedAddress::parse_address("ssh://user@localhost:2223/file", true);
+
+    assert_eq!(actual, expected);
+}
+
+#[tokio::test]
+async fn parse_works_when_not_silent() {
+    let expected = ParsedAddress {
+        server: "localhost:2223".to_string(),
+        username: "user".to_string(),
+        password: "pass".to_string(),
+        path_segments: vec!["".to_string()],
+        file: "file".to_string(),
+    };
+
+    let actual = ParsedAddress::parse_address("ssh://user:pass@localhost:2223/file", false);
 
     assert_eq!(actual, expected);
 }

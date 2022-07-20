@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Write;
 
 fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
     let mut transfered: u64 = 0;
@@ -33,34 +33,11 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
     (file, transfered)
 }
 
-fn get_input_file(path: &str) -> (Option<std::fs::File>, u64) {
-    let mut file_size: u64 = 0;
-    let mut file = None;
-    if path != "stdin" {
-        if std::path::Path::new(path).exists() {
-            file = Some(std::fs::OpenOptions::new().read(true).open(path).unwrap());
-
-            file_size = std::fs::metadata(path).unwrap().len();
-        }
-    }
-    (file, file_size)
-}
-
 pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {
     let (file, transfered) = get_output_file(path, silent);
     let output: Box<dyn Write> = Box::new(std::io::BufWriter::new(match path {
         "stdout" => Box::new(std::io::stdout()) as Box<dyn Write>,
         _ => Box::new(file.unwrap()) as Box<dyn Write>,
-    }));
-
-    (output, transfered)
-}
-
-pub fn get_input(path: &str) -> (Box<dyn Read>, u64) {
-    let (file, transfered) = get_input_file(path);
-    let output: Box<dyn Read> = Box::new(std::io::BufReader::new(match path {
-        "stdin" => Box::new(std::io::stdin()) as Box<dyn Read>,
-        _ => Box::new(file.unwrap()) as Box<dyn Read>,
     }));
 
     (output, transfered)
@@ -115,17 +92,4 @@ fn test_get_output_file_file_is_none_when_existingfile_and_not_silent() {
 
     assert_eq!(position, expected_position_byte);
     std::fs::remove_file(filename).unwrap();
-}
-
-#[test]
-fn test_get_input_file_file_is_none_when_stdin() {
-    let (file, _) = get_input_file("stdin");
-    assert!(file.is_none());
-}
-
-#[test]
-fn test_get_input_file_pos_not_zero_when_file_exists() {
-    let expected_position_byte = 1074;
-    let (_, position) = get_input_file("LICENSE.md");
-    assert_eq!(position, expected_position_byte);
 }
