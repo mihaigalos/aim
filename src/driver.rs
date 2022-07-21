@@ -8,7 +8,7 @@ use crate::slicer::Slicer;
 use melt::decompress;
 use std::io;
 
-fn fake_create_item(item: &str) {
+fn handle_slash(item: &str) {
     println!("Creating a new item `{}`...", item);
 }
 
@@ -79,7 +79,11 @@ impl Driver {
             .unwrap();
 
         Skim::run_with(&options, None).map(|out| match out.final_key {
-            Key::Char('/') => fake_create_item(out.query.as_ref()),
+            Key::Char('/') => out
+                .selected_items
+                .iter()
+                .map(|i| handle_slash(&i.text()))
+                .collect(),
             _ => (),
         });
 
