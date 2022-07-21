@@ -8,7 +8,7 @@ use crate::slicer::Slicer;
 use melt::decompress;
 use std::io;
 
-fn handle_slash(item: &str) {
+fn navigation_handler(item: &str) {
     println!("Creating a new item `{}`...", item);
 }
 
@@ -73,8 +73,8 @@ impl Driver {
     ) -> io::Result<()> {
         let options = SkimOptionsBuilder::default()
             .height(Some("50%"))
-            .multi(true)
-            .bind(vec!["/:accept"])
+            .multi(false)
+            .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
             .build()
             .unwrap();
 
@@ -82,7 +82,7 @@ impl Driver {
             Key::Char('/') => out
                 .selected_items
                 .iter()
-                .map(|i| handle_slash(&i.text()))
+                .map(|i| navigation_handler(&i.text()))
                 .collect(),
             _ => (),
         });
