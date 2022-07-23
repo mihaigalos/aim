@@ -105,6 +105,15 @@ aim http://ip_of_Machine_A:8080/file . # download
 Moreover, since hosting is done over http, the client can even be a browser:
 ![hosting example](screenshots/self_hosting.png)
 
+The server prints logs to the standard output. To colorize them, you can use [pipecolor](https://github.com/dalance/pipecolor) with the provided `.pipecolor.aim.toml` in this repo:
+
+
+```bash
+aim /tmp | pipecolor -c ~/.pipecolor.aim.toml
+```
+![hosting example logs](screenshots/self_hosting_logs.png)
+
+
 ### Indicators
 By default, a progressbar is displayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
 
@@ -198,5 +207,6 @@ Adapt IP to match that of machine `A`.
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8080/myfile /src/myfile
 ```
 ----------------------------------------
+
 ## 🛠️ Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
