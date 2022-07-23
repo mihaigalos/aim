@@ -44,7 +44,7 @@ pub struct WrappedBar {
 }
 
 impl WrappedBar {
-    pub fn new_empty() -> WrappedBar {
+    pub fn new_empty() -> Self {
         WrappedBar {
             silent: true,
             output: None,
@@ -52,7 +52,7 @@ impl WrappedBar {
             uploaded_message: "".to_string(),
         }
     }
-    pub fn new_empty_verbose() -> WrappedBar {
+    pub fn new_empty_verbose() -> Self {
         WrappedBar {
             silent: false,
             output: None,
@@ -60,7 +60,7 @@ impl WrappedBar {
             uploaded_message: "".to_string(),
         }
     }
-    pub fn new(total_size: u64, url: &str, silent: bool) -> WrappedBar {
+    pub fn new(total_size: u64, url: &str, silent: bool) -> Self {
         dotenv().ok();
         let message_format = &env::var("AIM_PROGRESSBAR_MESSAGE_FORMAT")
             .unwrap_or(DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT.to_string());

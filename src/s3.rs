@@ -144,14 +144,16 @@ impl S3 {
         bucket
     }
 
-    async fn _list(bucket: &Bucket) -> Result<(), S3Error> {
-        let buckets = bucket.list("".to_string(), None).await?;
-        for bucket in buckets {
-            for content in bucket.contents {
-                println!("{}", content.key);
+    async fn _list(bucket: &Bucket) -> Result<Vec<String>, S3Error> {
+        let mut result: Vec<String> = Vec::new();
+
+        let pages = bucket.list("".to_string(), None).await?;
+        for page in pages {
+            for content in page.contents {
+                result.push(content.key);
             }
         }
-        Ok(())
+        Ok(result)
     }
 
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
