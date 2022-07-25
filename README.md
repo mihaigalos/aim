@@ -14,9 +14,9 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 <table>
     <tr><td width=33% valign=top>
 
-* [❓ Why](#%E2%9D%93-why)
-* [💿︎ Installation](#%F0%9F%92%BF%EF%B8%8E-installation)
-* [💡 Features](#%F0%9F%92%A1-features)
+* [❓ Why](#-why)
+* [💿︎ Installation](#-installation)
+* [💡 Features](#-features)
   * [Download / Upload](#download-/-upload)
   * [Optional check of sha256](#optional-check-of-sha256)
   * [Resume](#resume)
@@ -27,19 +27,19 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 
 </td><td width=33% valign=top>
 
-* [🔑 Authentication](#%F0%9F%94%91-authentication)
+* [🔑 Authentication](#-authentication)
   * [Basicauth in url](#basicauth-in-url)
   * [Netrc](#netrc)
   * [SSH keys](#ssh-keys)
   * [.aws folder](#.aws-folder)
-* [🆕 Updating](#%F0%9F%86%95-updating)
+* [🆕 Updating](#-updating)
 
 </td><td width=33% valign=top>
 
-* [🐳 Docker](#%F0%9F%90%B3-docker)
+* [🐳 Docker](#-docker)
   * [Hosting on machine A](#hosting-on-machine-a)
   * [Downloading on machine B](#downloading-on-machine-b)
-* [🛠️ Similar work](#%F0%9F%9B%A0%EF%B8%8F-similar-work)
+* [🛠️ Similar work](#-similar-work)
 
 </td>
 </tr>
