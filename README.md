@@ -17,7 +17,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 * [❓ Why](#-why)
 * [💿︎ Installation](#%EF%B8%8E-installation)
 * [💡 Features](#-features)
-  * [Download / Upload](#download-/-upload)
+  * [Download / Upload](#download--upload)
   * [Optional check of sha256](#optional-check-of-sha256)
   * [Resume](#resume)
   * [Output during downloading](#output-during-downloading)
