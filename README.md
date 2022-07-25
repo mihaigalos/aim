@@ -15,7 +15,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
     <tr><td width=33% valign=top>
 
 * [❓ Why](#-why)
-* [💿︎ Installation](#-installation)
+* [💿︎ Installation](#%EF%B8%8E-installation)
 * [💡 Features](#-features)
   * [Download / Upload](#download-/-upload)
   * [Optional check of sha256](#optional-check-of-sha256)
@@ -39,7 +39,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 * [🐳 Docker](#-docker)
   * [Hosting on machine A](#hosting-on-machine-a)
   * [Downloading on machine B](#downloading-on-machine-b)
-* [🛠️ Similar work](#-similar-work)
+* [🛠️ Similar work](#%EF%B8%8F-similar-work)
 
 </td>
 </tr>
