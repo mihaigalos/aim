@@ -31,7 +31,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
   * [Basicauth in url](#basicauth-in-url)
   * [Netrc](#netrc)
   * [SSH keys](#ssh-keys)
-  * [.aws folder](#.aws-folder)
+  * [.aws folder](#aws-folder)
 * [🆕 Updating](#-updating)
 
 </td><td width=33% valign=top>
