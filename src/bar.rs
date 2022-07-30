@@ -31,6 +31,7 @@ fn construct_progress_bar(
     pb.set_style(
         ProgressStyle::default_bar()
             .template(template)
+            .unwrap()
             .progress_chars(progress_chars),
     );
     pb
