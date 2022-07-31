@@ -7,6 +7,7 @@ use crate::slicer::Slicer;
 
 use melt::decompress;
 use std::io;
+use std::io::Cursor;
 
 fn navigation_handler(item: &str) {
     println!("Creating a new item `{}`...", item);
@@ -78,15 +79,22 @@ impl Driver {
             .build()
             .unwrap();
 
-        Skim::run_with(&options, None).map(|out| match out.final_key {
+        let items = "aaaaa\nbbbb\nccc";
+        let item_reader = SkimItemReader::default();
+
+        let items = item_reader.of_bufread(Cursor::new(items));
+        let selected_items = Skim::run_with(&options, Some(items)).map(|out| match out.final_key {
             Key::Char('/') => out
                 .selected_items
                 .iter()
                 .map(|i| navigation_handler(&i.text()))
                 .collect(),
-            _ => (),
+            _ => Vec::new(),
         });
 
+        for item in selected_items.iter() {
+            print!("{:?}{}", item, "\n");
+        }
         let mut bar = WrappedBar::new(0, input, silent);
 
         if input.contains("http:")
