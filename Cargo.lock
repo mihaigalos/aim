@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.5.3"
+version = "1.5.4"
 dependencies = [
  "async-ssh2-lite",
  "async-std",
@@ -378,9 +378,9 @@ dependencies = [
 
 [[package]]
 name = "build_html"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d5156d8363086399959a5c96463cd95ef8846259f356c70d4c57680f6a49e8"
+checksum = "aa8ffb62af7b0911893e2d6126891b2a018e387078fa5d855cb42d0d90d88075"
 
 [[package]]
 name = "bumpalo"
@@ -654,9 +654,9 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.8.4"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
+checksum = "0b2cf0344971ee6c64c31be0d530793fba457d322dfec2810c453d0ef228f9c3"
 dependencies = [
  "atty",
  "humantime",
@@ -1671,9 +1671,9 @@ dependencies = [
 
 [[package]]
 name = "rcgen"
-version = "0.9.2"
+version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7fa2d386df8533b02184941c76ae2e0d0c1d053f5d43339169d80f21275fc5e"
+checksum = "6413f3de1edee53342e6138e75b56d32e7bc6e332b3bd62d497b1929d4cfbcdd"
 dependencies = [
  "pem",
  "ring",
@@ -2624,9 +2624,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.2.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e97f01bec220033f01ca88fc756650e00d774731162dd6f6597e5f23c54bcbf"
+checksum = "6673d465227a4efc0bda4cff2b81ef31a2dfa70b76896815aaa64a22622de045"
 dependencies = [
  "build_html",
  "chrono",
