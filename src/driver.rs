@@ -9,8 +9,9 @@ use melt::decompress;
 use std::io;
 use std::io::Cursor;
 
-fn navigation_handler(item: &str) {
+fn navigation_handler(item: &str) -> String {
     println!("Creating a new item `{}`...", item);
+    item.to_string()
 }
 
 trait RESTVerbs {
@@ -93,7 +94,7 @@ impl Driver {
         });
 
         for item in selected_items.iter() {
-            print!("{:?}{}", item, "\n");
+            println!("--> {:?}", item);
         }
         let mut bar = WrappedBar::new(0, input, silent);
 
