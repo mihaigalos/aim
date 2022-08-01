@@ -78,7 +78,7 @@ impl Driver {
         let options = SkimOptionsBuilder::default()
             .height(Some("50%"))
             .multi(false)
-            .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
+            .bind(vec!["/:accept", "Enter:accept", "Esc:abort", "Tab:accept"])
             .build()
             .unwrap();
         let mut subpath = "/".to_string();
@@ -89,11 +89,17 @@ impl Driver {
                 .await
                 .unwrap()
                 .join("\n");
+
             let item_reader = SkimItemReader::default();
             let items = item_reader.of_bufread(Cursor::new(items));
             let selected_items = Skim::run_with(&options, Some(items))
                 .map(|out| match out.final_key {
                     Key::Char('/') => out
+                        .selected_items
+                        .iter()
+                        .map(|i| Self::navigate(&i.text()))
+                        .collect(),
+                    Key::Tab => out
                         .selected_items
                         .iter()
                         .map(|i| Self::navigate(&i.text()))
@@ -110,7 +116,7 @@ impl Driver {
             if selected_items[0].0 == Navigation::Finished {
                 break;
             }
-            subpath += &selected_items[0].1;
+            subpath = "/".to_string() + &selected_items[0].1;
         }
 
         Driver::drive(input, output, silent, expected_sha256).await
@@ -143,12 +149,12 @@ impl Driver {
     }
 
     fn navigate(item: &str) -> (Navigation, String) {
-        println!("Creating a new item `{}`...", item);
+        println!("/{}", item);
         (Navigation::Running, item.to_string())
     }
 
     fn finish_navigation(item: &str) -> (Navigation, String) {
-        println!("Navigation finished: `{}`...", item);
+        println!("Navigation finished: {}", item);
         (Navigation::Finished, item.to_string())
     }
 }
