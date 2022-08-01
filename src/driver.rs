@@ -9,8 +9,13 @@ use melt::decompress;
 use std::io;
 use std::io::Cursor;
 
-fn navigation_handler(item: &str) -> String {
+fn navigate(item: &str) -> String {
     println!("Creating a new item `{}`...", item);
+    item.to_string()
+}
+
+fn finish_navigation(item: &str) -> String {
+    println!("Navigation finished: `{}`...", item);
     item.to_string()
 }
 
@@ -88,8 +93,14 @@ impl Driver {
             Key::Char('/') => out
                 .selected_items
                 .iter()
-                .map(|i| navigation_handler(&i.text()))
+                .map(|i| navigate(&i.text()))
                 .collect(),
+            Key::Enter => out
+                .selected_items
+                .iter()
+                .map(|i| finish_navigation(&i.text()))
+                .collect(),
+
             _ => Vec::new(),
         });
 
