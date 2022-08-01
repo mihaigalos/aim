@@ -9,18 +9,15 @@ use melt::decompress;
 use std::io;
 use std::io::Cursor;
 
-fn navigate(item: &str) -> String {
-    println!("Creating a new item `{}`...", item);
-    item.to_string()
-}
-
-fn finish_navigation(item: &str) -> String {
-    println!("Navigation finished: `{}`...", item);
-    item.to_string()
-}
-
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
+}
+
+#[derive(Debug)]
+enum Navigation {
+    _Unknown,
+    Running,
+    Finished,
 }
 
 impl Driver {
@@ -91,12 +88,12 @@ impl Driver {
             Key::Char('/') => out
                 .selected_items
                 .iter()
-                .map(|i| navigate(&i.text()))
+                .map(|i| Self::navigate(&i.text()))
                 .collect(),
             Key::Enter => out
                 .selected_items
                 .iter()
-                .map(|i| finish_navigation(&i.text()))
+                .map(|i| Self::finish_navigation(&i.text()))
                 .collect(),
             _ => Vec::new(),
         });
@@ -131,6 +128,16 @@ impl Driver {
                 _ => Ok(Driver::put(input, output, bar).await?),
             };
         }
+    }
+
+    fn navigate(item: &str) -> (Navigation, String) {
+        println!("Creating a new item `{}`...", item);
+        (Navigation::Running, item.to_string())
+    }
+
+    fn finish_navigation(item: &str) -> (Navigation, String) {
+        println!("Navigation finished: `{}`...", item);
+        (Navigation::Finished, item.to_string())
     }
 }
 
