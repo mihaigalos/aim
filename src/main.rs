@@ -7,7 +7,7 @@ use std::{env, io};
 #[cfg(not(tarpaulin_include))]
 async fn main() {
     let (input, output, silent, expected_sha256) = parse_args().await.expect("Cannot parse args");
-    match aim::driver::Driver::drive(&input, &output, silent, &expected_sha256).await {
+    match aim::driver::Driver::dispatch(&input, &output, silent, &expected_sha256).await {
         Ok(_) => std::process::exit(0),
         _ => std::process::exit(255),
     }

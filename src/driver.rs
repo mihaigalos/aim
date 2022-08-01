@@ -72,7 +72,7 @@ impl Driver {
         Ok(result)
     }
 
-    pub async fn drive(
+    pub async fn dispatch(
         input: &str,
         output: &str,
         silent: bool,
@@ -84,10 +84,8 @@ impl Driver {
             .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
             .build()
             .unwrap();
-
         let items = "aaaaa\nbbbb\nccc";
         let item_reader = SkimItemReader::default();
-
         let items = item_reader.of_bufread(Cursor::new(items));
         let selected_items = Skim::run_with(&options, Some(items)).map(|out| match out.final_key {
             Key::Char('/') => out
@@ -100,13 +98,21 @@ impl Driver {
                 .iter()
                 .map(|i| finish_navigation(&i.text()))
                 .collect(),
-
             _ => Vec::new(),
         });
-
         for item in selected_items.iter() {
             println!("--> {:?}", item);
         }
+
+        Driver::drive(input, output, silent, expected_sha256).await
+    }
+
+    async fn drive(
+        input: &str,
+        output: &str,
+        silent: bool,
+        expected_sha256: &str,
+    ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
 
         if input.contains("http:")
