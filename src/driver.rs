@@ -13,7 +13,7 @@ trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum Navigation {
     _Unknown,
     Running,
@@ -75,30 +75,35 @@ impl Driver {
         silent: bool,
         expected_sha256: &str,
     ) -> io::Result<()> {
-        let options = SkimOptionsBuilder::default()
-            .height(Some("50%"))
-            .multi(false)
-            .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
-            .build()
-            .unwrap();
-        let items = "aaaaa\nbbbb\nccc";
-        let item_reader = SkimItemReader::default();
-        let items = item_reader.of_bufread(Cursor::new(items));
-        let selected_items = Skim::run_with(&options, Some(items)).map(|out| match out.final_key {
-            Key::Char('/') => out
-                .selected_items
-                .iter()
-                .map(|i| Self::navigate(&i.text()))
-                .collect(),
-            Key::Enter => out
-                .selected_items
-                .iter()
-                .map(|i| Self::finish_navigation(&i.text()))
-                .collect(),
-            _ => Vec::new(),
-        });
-        for item in selected_items.iter() {
-            println!("--> {:?}", item);
+        loop {
+            let options = SkimOptionsBuilder::default()
+                .height(Some("50%"))
+                .multi(false)
+                .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
+                .build()
+                .unwrap();
+            let items = "aaaaa\nbbbb\nccc";
+            let item_reader = SkimItemReader::default();
+            let items = item_reader.of_bufread(Cursor::new(items));
+            let selected_items = Skim::run_with(&options, Some(items))
+                .map(|out| match out.final_key {
+                    Key::Char('/') => out
+                        .selected_items
+                        .iter()
+                        .map(|i| Self::navigate(&i.text()))
+                        .collect(),
+                    Key::Enter => out
+                        .selected_items
+                        .iter()
+                        .map(|i| Self::finish_navigation(&i.text()))
+                        .collect(),
+                    _ => Vec::new(),
+                })
+                .unwrap();
+
+            if selected_items[0].0 == Navigation::Finished {
+                break;
+            }
         }
 
         Driver::drive(input, output, silent, expected_sha256).await
