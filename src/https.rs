@@ -82,6 +82,7 @@ impl HTTPSHandler {
                 result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
             }
         }
+        result.push("..".to_string());
 
         result.sort();
 

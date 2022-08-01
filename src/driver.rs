@@ -17,6 +17,7 @@ trait RESTVerbs {
 enum Navigation {
     _Unknown,
     Running,
+    OutOf,
     Finished,
 }
 
@@ -97,29 +98,42 @@ impl Driver {
                     Key::Char('/') => out
                         .selected_items
                         .iter()
-                        .map(|i| Self::navigate(&i.text()))
+                        .map(|i| Self::navigate_into(&i.text()))
                         .collect(),
                     Key::Tab => out
                         .selected_items
                         .iter()
-                        .map(|i| Self::navigate(&i.text()))
+                        .map(|i| Self::navigate_into(&i.text()))
                         .collect(),
                     Key::Enter => out
                         .selected_items
                         .iter()
-                        .map(|i| Self::finish_navigation(&i.text()))
+                        .map(|i| Self::navigate_enter(&i.text()))
                         .collect(),
                     _ => Vec::new(),
                 })
                 .unwrap();
 
-            if selected_items[0].0 == Navigation::Finished {
+            let item = &selected_items[0];
+            if item.0 == Navigation::Finished {
                 break;
             }
-            subpath = "/".to_string() + &selected_items[0].1;
+
+            if item.0 == Navigation::OutOf {
+                subpath = Self::up(&subpath).to_string();
+            } else {
+                subpath = "/".to_string() + &item.1;
+            }
         }
 
         Driver::drive(input, output, silent, expected_sha256).await
+    }
+
+    fn up(path: &str) -> &str {
+        if path.matches('/').count() > 0 {
+            return &path[..path.rfind('/').unwrap()];
+        }
+        path
     }
 
     async fn drive(
@@ -148,12 +162,20 @@ impl Driver {
         }
     }
 
-    fn navigate(item: &str) -> (Navigation, String) {
+    fn navigate_outof(item: &str) -> (Navigation, String) {
+        println!("{}", item);
+        (Navigation::OutOf, item.to_string())
+    }
+
+    fn navigate_into(item: &str) -> (Navigation, String) {
         println!("/{}", item);
         (Navigation::Running, item.to_string())
     }
 
-    fn finish_navigation(item: &str) -> (Navigation, String) {
+    fn navigate_enter(item: &str) -> (Navigation, String) {
+        if item == ".." {
+            return Self::navigate_outof(item);
+        }
         println!("Navigation finished: {}", item);
         (Navigation::Finished, item.to_string())
     }
