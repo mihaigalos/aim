@@ -51,6 +51,7 @@ dependencies = [
  "openssl",
  "openssl-src 300.0.9+3.0.5",
  "question",
+ "regex",
  "reqwest",
  "rust-s3",
  "self_update",

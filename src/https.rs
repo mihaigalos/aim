@@ -1,4 +1,5 @@
 use futures_util::StreamExt;
+use regex::Regex;
 use reqwest::Client;
 use std::cmp::min;
 use tokio_util::io::ReaderStream;
@@ -69,7 +70,25 @@ impl HTTPSHandler {
         Ok(())
     }
 
-    pub async fn list(input: &str) -> Result<String, ValidateError> {
+    pub async fn get_links(input: &str) -> Result<Vec<String>, ValidateError> {
+        let mut result = Vec::new();
+        let res = HTTPSHandler::list(input).await.unwrap();
+        let lines: Vec<&str> = res.split('\n').collect();
+
+        for line in lines {
+            let re = Regex::new(r#".*href="/(.+?)".*"#).unwrap();
+            let caps = re.captures(line);
+            if caps.is_some() {
+                result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
+            }
+        }
+
+        result.sort();
+
+        Ok(result)
+    }
+
+    async fn list(input: &str) -> Result<String, ValidateError> {
         let is_silent = true;
         let parsed_address = ParsedAddress::parse_address(input, is_silent);
 
@@ -176,7 +195,7 @@ async fn get_resume_works() {
 }
 
 #[tokio::test]
-async fn list_works() {
+async fn list_works_when_typical() {
     let expected = r#"<!doctype html>
 <html>
 <head>
@@ -225,7 +244,18 @@ async fn list_works() {
 </html>
 "#;
 
-    let result = HTTPSHandler::list("https://example.com").await;
+    let result = HTTPSHandler::list("https://example.com").await.unwrap();
 
-    assert_eq!(result.unwrap(), expected);
+    assert_eq!(result, expected);
+}
+
+#[tokio::test]
+async fn get_links_works_when_typical() {
+    let expected = "apps/github-actions";
+
+    let result = HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases")
+        .await
+        .unwrap();
+
+    assert_eq!(result[0], expected);
 }
