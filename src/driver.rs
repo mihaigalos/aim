@@ -75,14 +75,20 @@ impl Driver {
         silent: bool,
         expected_sha256: &str,
     ) -> io::Result<()> {
+        let options = SkimOptionsBuilder::default()
+            .height(Some("50%"))
+            .multi(false)
+            .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
+            .build()
+            .unwrap();
+        let mut subpath = "/".to_string();
         loop {
-            let options = SkimOptionsBuilder::default()
-                .height(Some("50%"))
-                .multi(false)
-                .bind(vec!["/:accept", "Enter:accept", "Esc:abort"])
-                .build()
-                .unwrap();
-            let items = "aaaaa\nbbbb\nccc";
+            //let items = "aaaaa\nbbbb\nccc";
+            let path = "http://192.168.0.24:8080".to_string() + &subpath;
+            let items = crate::https::HTTPSHandler::get_links(&path)
+                .await
+                .unwrap()
+                .join("\n");
             let item_reader = SkimItemReader::default();
             let items = item_reader.of_bufread(Cursor::new(items));
             let selected_items = Skim::run_with(&options, Some(items))
@@ -104,6 +110,7 @@ impl Driver {
             if selected_items[0].0 == Navigation::Finished {
                 break;
             }
+            subpath += &selected_items[0].1;
         }
 
         Driver::drive(input, output, silent, expected_sha256).await
