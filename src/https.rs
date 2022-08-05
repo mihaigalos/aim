@@ -2,6 +2,7 @@ use futures_util::StreamExt;
 use regex::Regex;
 use reqwest::Client;
 use std::cmp::min;
+use std::io::Error;
 use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
@@ -70,9 +71,9 @@ impl HTTPSHandler {
         Ok(())
     }
 
-    pub async fn get_links(input: &str) -> Result<Vec<String>, ValidateError> {
+    pub async fn get_links(input: String) -> Result<Vec<String>, Error> {
         let mut result = Vec::new();
-        let res = HTTPSHandler::list(input).await.unwrap();
+        let res = HTTPSHandler::list(&input).await.unwrap();
         let lines: Vec<&str> = res.split('\n').collect();
 
         for line in lines {

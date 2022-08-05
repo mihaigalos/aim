@@ -57,7 +57,7 @@ dependencies = [
  "self_update",
  "serial_test",
  "sha2",
- "skim",
+ "skim-navi",
  "ssh2",
  "strfmt",
  "tokio",
@@ -2408,6 +2408,16 @@ dependencies = [
  "tuikit",
  "unicode-width",
  "vte",
+]
+
+[[package]]
+name = "skim-navi"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "17ef59ee5fe946b87895ae1484bcfebd95e6cc09839d7208d10d9c10182c2775"
+dependencies = [
+ "log",
+ "skim",
 ]
 
 [[package]]

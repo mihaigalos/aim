@@ -1,5 +1,4 @@
-extern crate skim;
-use skim::prelude::*;
+use skim_navi::Navi;
 
 use crate::bar::WrappedBar;
 pub struct Driver;
@@ -7,18 +6,9 @@ use crate::slicer::Slicer;
 
 use melt::decompress;
 use std::io;
-use std::io::Cursor;
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
-}
-
-#[derive(Debug, PartialEq)]
-enum Navigation {
-    _Unknown,
-    Running,
-    OutOf,
-    Finished,
 }
 
 impl Driver {
@@ -76,64 +66,13 @@ impl Driver {
         silent: bool,
         expected_sha256: &str,
     ) -> io::Result<()> {
-        let options = SkimOptionsBuilder::default()
-            .height(Some("50%"))
-            .multi(false)
-            .bind(vec!["/:accept", "Enter:accept", "Esc:abort", "Tab:accept"])
-            .build()
-            .unwrap();
-        let mut subpath = "/".to_string();
-        loop {
-            //let items = "aaaaa\nbbbb\nccc";
-            let path = "http://192.168.0.24:8080".to_string() + &subpath;
-            let items = crate::https::HTTPSHandler::get_links(&path)
-                .await
-                .unwrap()
-                .join("\n");
-
-            let item_reader = SkimItemReader::default();
-            let items = item_reader.of_bufread(Cursor::new(items));
-            let selected_items = Skim::run_with(&options, Some(items))
-                .map(|out| match out.final_key {
-                    Key::Char('/') => out
-                        .selected_items
-                        .iter()
-                        .map(|i| Self::navigate_into(&i.text()))
-                        .collect(),
-                    Key::Tab => out
-                        .selected_items
-                        .iter()
-                        .map(|i| Self::navigate_into(&i.text()))
-                        .collect(),
-                    Key::Enter => out
-                        .selected_items
-                        .iter()
-                        .map(|i| Self::navigate_enter(&i.text()))
-                        .collect(),
-                    _ => Vec::new(),
-                })
-                .unwrap();
-
-            let item = &selected_items[0];
-            if item.0 == Navigation::Finished {
-                break;
-            }
-
-            if item.0 == Navigation::OutOf {
-                subpath = Self::up(&subpath).to_string();
-            } else {
-                subpath = "/".to_string() + &item.1;
-            }
-        }
+        Navi::run(
+            "http://localhost:8080",
+            crate::https::HTTPSHandler::get_links,
+        )
+        .await;
 
         Driver::drive(input, output, silent, expected_sha256).await
-    }
-
-    fn up(path: &str) -> &str {
-        if path.matches('/').count() > 0 {
-            return &path[..path.rfind('/').unwrap()];
-        }
-        path
     }
 
     async fn drive(
@@ -160,24 +99,6 @@ impl Driver {
                 _ => Ok(Driver::put(input, output, bar).await?),
             };
         }
-    }
-
-    fn navigate_outof(item: &str) -> (Navigation, String) {
-        println!("{}", item);
-        (Navigation::OutOf, item.to_string())
-    }
-
-    fn navigate_into(item: &str) -> (Navigation, String) {
-        println!("/{}", item);
-        (Navigation::Running, item.to_string())
-    }
-
-    fn navigate_enter(item: &str) -> (Navigation, String) {
-        if item == ".." {
-            return Self::navigate_outof(item);
-        }
-        println!("Navigation finished: {}", item);
-        (Navigation::Finished, item.to_string())
     }
 }
 
