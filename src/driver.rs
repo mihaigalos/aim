@@ -67,17 +67,20 @@ impl Driver {
     }
 
     pub async fn dispatch(input: &str, output: &str, options: &Options) -> io::Result<()> {
-        let input = &match options.interactive {
-            false => input.to_string(),
-            true => Navi::run(
-                "http://localhost:8080",
-                crate::https::HTTPSHandler::get_links,
-            )
-            .await
-            .unwrap_or(input.to_string()),
+        let path = &match options.interactive {
+            false => "".to_string(),
+            true => Navi::run(input, crate::https::HTTPSHandler::get_links)
+                .await
+                .unwrap_or("".to_string()),
         };
 
-        Driver::drive(input, output, options.silent, &options.expected_sha256).await
+        Driver::drive(
+            &(input.to_string() + "/" + path),
+            output,
+            options.silent,
+            &options.expected_sha256,
+        )
+        .await
     }
 
     async fn drive(
