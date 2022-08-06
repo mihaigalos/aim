@@ -7,6 +7,12 @@ use crate::slicer::Slicer;
 use melt::decompress;
 use std::io;
 
+pub struct Options {
+    pub silent: bool,
+    pub interactive: bool,
+    pub expected_sha256: String,
+}
+
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
 }
@@ -60,19 +66,18 @@ impl Driver {
         Ok(result)
     }
 
-    pub async fn dispatch(
-        input: &str,
-        output: &str,
-        silent: bool,
-        expected_sha256: &str,
-    ) -> io::Result<()> {
-        Navi::run(
-            "http://localhost:8080",
-            crate::https::HTTPSHandler::get_links,
-        )
-        .await;
+    pub async fn dispatch(input: &str, output: &str, options: &Options) -> io::Result<()> {
+        let input = &match options.interactive {
+            false => input.to_string(),
+            true => Navi::run(
+                "http://localhost:8080",
+                crate::https::HTTPSHandler::get_links,
+            )
+            .await
+            .unwrap_or(input.to_string()),
+        };
 
-        Driver::drive(input, output, silent, expected_sha256).await
+        Driver::drive(input, output, options.silent, &options.expected_sha256).await
     }
 
     async fn drive(

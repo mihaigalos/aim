@@ -3,18 +3,20 @@ use clap::Arg;
 use clap::Command;
 use std::{env, io};
 
+use aim::driver::Options;
+
 #[tokio::main]
 #[cfg(not(tarpaulin_include))]
 async fn main() {
-    let (input, output, silent, expected_sha256) = parse_args().await.expect("Cannot parse args");
-    match aim::driver::Driver::dispatch(&input, &output, silent, &expected_sha256).await {
+    let (input, output, options) = parse_args().await.expect("Cannot parse args");
+    match aim::driver::Driver::dispatch(&input, &output, &options).await {
         Ok(_) => std::process::exit(0),
         _ => std::process::exit(255),
     }
 }
 
 #[cfg(not(tarpaulin_include))]
-async fn parse_args() -> io::Result<(String, String, bool, String)> {
+async fn parse_args() -> io::Result<(String, String, Options)> {
     let mut app: clap::Command = autoclap!()
         .arg(
             Arg::new("INPUT")
@@ -53,6 +55,14 @@ async fn parse_args() -> io::Result<(String, String, bool, String)> {
                 .required(false),
         )
         .arg(
+            Arg::new("interactive")
+                .long("interactive")
+                .short('i')
+                .help("Navigate folder structure in remote, interactively.\n\
+            Use Tab, / to enter a folder, .. to exit, Enter to accept selection.")
+                .required(false),
+        )
+        .arg(
             Arg::new("update")
                 .long("update")
                 .short('u')
@@ -78,13 +88,17 @@ async fn parse_args() -> io::Result<(String, String, bool, String)> {
     });
     let output = args.value_of("OUTPUT").unwrap_or("stdout");
     let silent = args.is_present("silent");
+    let interactive = args.is_present("interactive");
     let expected_sha256 = args.value_of("SHA256").unwrap_or("");
 
     Ok((
         input.to_string(),
         output.to_string(),
-        silent,
-        expected_sha256.to_string(),
+        Options {
+            silent: silent,
+            interactive: interactive,
+            expected_sha256: expected_sha256.to_string(),
+        },
     ))
 }
 
