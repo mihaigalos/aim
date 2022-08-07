@@ -1,9 +1,40 @@
 use crate::bar::WrappedBar;
 pub struct Driver;
+use crate::error::ValidateError;
 use crate::slicer::Slicer;
 
 use melt::decompress;
+use std::future::Future;
 use std::io;
+
+use std::collections::HashMap;
+
+type BoxedHandlerFut = Box<dyn Future<Output = Result<(), ValidateError>> + Send>;
+type GetHandler<Return> = Box<dyn Fn(&str, &str, &mut WrappedBar, &str) -> Return>;
+type PutHandler<Return> = Box<dyn Fn(&str, &str, &WrappedBar, &str) -> Return>;
+
+pub fn schema_handlers<Fut>(
+    key: &str,
+    get_handler: impl Fn(&str, &str, &mut WrappedBar, &str) -> Fut + 'static,
+    put_handler: impl Fn(&str, &str, &WrappedBar, &str) -> Fut + 'static,
+) -> HashMap<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>
+where
+    Fut: Future<Output = Result<(), ValidateError>> + Send + 'static,
+{
+    let mut m = HashMap::new();
+    m.insert(
+        key,
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                Box::new(get_handler(a, b, c, d)) as BoxedHandlerFut
+            }) as _,
+            Box::new(move |a: &_, b: &_, c: &_, d: &_| {
+                Box::new(put_handler(a, b, c, d)) as BoxedHandlerFut
+            }) as _,
+        ),
+    );
+    m
+}
 
 trait RESTVerbs {
     fn get(url: &str, path: &str, silent: bool);
