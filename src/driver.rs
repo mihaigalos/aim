@@ -6,6 +6,7 @@ use futures::future::BoxFuture;
 use melt::decompress;
 use std::future::Future;
 use std::io;
+use url_parse::core::Parser;
 
 use futures_util::FutureExt;
 
@@ -24,10 +25,19 @@ fn schema_handlers<'a, Fut>() -> HashMap<
     ),
 >
 where
-    Fut: Future<Output = BoxedHandlerFut> + 'a,
+    Fut: Future<Output = BoxedHandlerFut> + 'a + ?Sized,
 {
     let mut m = HashMap::<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>::new();
 
+    m.insert(
+        "ftp",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::ftp::FTPHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
+        ),
+    );
     m.insert(
         "http",
         (
@@ -38,12 +48,12 @@ where
         ),
     );
     m.insert(
-        "ftp",
+        "https",
         (
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
-                crate::ftp::FTPHandler::get(a, b, c, d).boxed()
+                crate::https::HTTPSHandler::get(a, b, c, d).boxed()
             }),
-            Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
+            Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
         ),
     );
     m.insert(
@@ -88,19 +98,16 @@ impl Driver {
             _ => (output, false),
         };
 
-        let result = match &input[0..4] {
-            "ftp:" | "ftp." => {
-                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await?
-            }
-            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await?,
-            "sftp" => crate::sftp::SFTPHandler::get(input, output, bar, expected_sha256).await?,
-            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await?,
-            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await?,
-            _ => panic!(
+        let scheme = Parser::new(None).scheme(input);
+        if scheme.is_none() {
+            panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
-            ),
-        };
+            );
+        }
+        let scheme = scheme.unwrap();
+        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let result = schema_handlers[scheme].0(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
