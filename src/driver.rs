@@ -117,17 +117,16 @@ impl Driver {
     }
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
-        let result = match &output[0..4] {
-            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await?,
-            "http" => crate::https::HTTPSHandler::put(input, output, bar).await?,
-            "sftp" => crate::sftp::SFTPHandler::put(input, output, bar).await?,
-            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await?,
-            "s3:/" => crate::s3::S3::put(input, output, bar).await?,
-            _ => panic!(
+        let scheme = Parser::new(None).scheme(output);
+        if scheme.is_none() {
+            panic!(
                 "Cannot extract handler from args: {} {} Exiting.",
                 input, output
-            ),
-        };
+            );
+        }
+        let scheme = scheme.unwrap();
+        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let result = schema_handlers[scheme].1(input, output, bar).await?;
         Ok(result)
     }
 
