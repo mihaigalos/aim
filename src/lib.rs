@@ -16,6 +16,3 @@ pub mod slicer;
 pub mod ssh;
 pub mod ssh_auth;
 pub mod tls;
-
-#[macro_use]
-extern crate lazy_static;

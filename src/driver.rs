@@ -123,15 +123,8 @@ impl Driver {
         expected_sha256: &str,
     ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
-        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
-
-        if input.contains("http:")
-            || input.contains("https:")
-            || input.contains("ftp:")
-            || input.contains("sftp:")
-            || input.contains("ssh:")
-            || input.contains("s3:")
-        {
+        let scheme = Parser::new(None).scheme(input);
+        if scheme.is_some() {
             return Ok(Driver::get(input, output, expected_sha256, &mut bar).await?);
         } else {
             return match output {
