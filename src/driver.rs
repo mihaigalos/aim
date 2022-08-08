@@ -46,6 +46,15 @@ where
             Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
         ),
     );
+    m.insert(
+        "sftp",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::sftp::SFTPHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::sftp::SFTPHandler::put(a, b, c).boxed()),
+        ),
+    );
     m
 }
 
