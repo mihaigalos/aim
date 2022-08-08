@@ -1,14 +1,90 @@
 use crate::bar::WrappedBar;
-pub struct Driver;
+use crate::error::ValidateError;
 use crate::slicer::Slicer;
 
+use futures::future::BoxFuture;
 use melt::decompress;
+use std::future::Future;
 use std::io;
+use url_parse::core::Parser;
 
-trait RESTVerbs {
-    fn get(url: &str, path: &str, silent: bool);
+use futures_util::FutureExt;
+
+use std::collections::HashMap;
+
+type BoxedHandlerFut = Result<(), ValidateError>;
+type GetHandler<'a, Return> =
+    Box<dyn Fn(&'a str, &'a str, &'a mut WrappedBar, &'a str) -> BoxFuture<'a, Return>>;
+type PutHandler<'a, Return> = Box<dyn Fn(&'a str, &'a str, WrappedBar) -> BoxFuture<'a, Return>>;
+
+fn schema_handlers<'a, Fut>() -> HashMap<
+    &'a str,
+    (
+        GetHandler<'a, BoxedHandlerFut>,
+        PutHandler<'a, BoxedHandlerFut>,
+    ),
+>
+where
+    Fut: Future<Output = BoxedHandlerFut> + 'a + ?Sized,
+{
+    let mut m = HashMap::<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>::new();
+
+    m.insert(
+        "ftp",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::ftp::FTPHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
+        ),
+    );
+    m.insert(
+        "http",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::https::HTTPSHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
+        ),
+    );
+    m.insert(
+        "https",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::https::HTTPSHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
+        ),
+    );
+    m.insert(
+        "sftp",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::sftp::SFTPHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::sftp::SFTPHandler::put(a, b, c).boxed()),
+        ),
+    );
+    m.insert(
+        "ssh",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::ssh::SSHHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::ssh::SSHHandler::put(a, b, c).boxed()),
+        ),
+    );
+    m.insert(
+        "s3",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| crate::s3::S3::get(a, b, c, d).boxed()),
+            Box::new(move |a: &_, b: &_, c: _| crate::s3::S3::put(a, b, c).boxed()),
+        ),
+    );
+    m
 }
 
+pub struct Driver;
 impl Driver {
     async fn get(
         input: &str,
@@ -22,19 +98,9 @@ impl Driver {
             _ => (output, false),
         };
 
-        let result = match &input[0..4] {
-            "ftp:" | "ftp." => {
-                crate::ftp::FTPHandler::get(input, output, bar, expected_sha256).await?
-            }
-            "http" => crate::https::HTTPSHandler::get(input, output, bar, expected_sha256).await?,
-            "sftp" => crate::sftp::SFTPHandler::get(input, output, bar, expected_sha256).await?,
-            "ssh:" => crate::ssh::SSHHandler::get(input, output, bar, expected_sha256).await?,
-            "s3:/" => crate::s3::S3::get(input, output, bar, expected_sha256).await?,
-            _ => panic!(
-                "Cannot extract handler from args: {} {} Exiting.",
-                input, output
-            ),
-        };
+        let scheme = Driver::extract_scheme_or_panic(input);
+        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let result = schema_handlers[scheme].0(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
@@ -44,17 +110,9 @@ impl Driver {
     }
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
-        let result = match &output[0..4] {
-            "ftp:" | "ftp." => crate::ftp::FTPHandler::put(input, output, bar).await?,
-            "http" => crate::https::HTTPSHandler::put(input, output, bar).await?,
-            "sftp" => crate::sftp::SFTPHandler::put(input, output, bar).await?,
-            "ssh:" => crate::ssh::SSHHandler::put(input, output, bar).await?,
-            "s3:/" => crate::s3::S3::put(input, output, bar).await?,
-            _ => panic!(
-                "Cannot extract handler from args: {} {} Exiting.",
-                input, output
-            ),
-        };
+        let scheme = Driver::extract_scheme_or_panic(output);
+        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let result = schema_handlers[scheme].1(input, output, bar).await?;
         Ok(result)
     }
 
@@ -65,14 +123,8 @@ impl Driver {
         expected_sha256: &str,
     ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
-
-        if input.contains("http:")
-            || input.contains("https:")
-            || input.contains("ftp:")
-            || input.contains("sftp:")
-            || input.contains("ssh:")
-            || input.contains("s3:")
-        {
+        let scheme = Parser::new(None).scheme(input);
+        if scheme.is_some() {
             return Ok(Driver::get(input, output, expected_sha256, &mut bar).await?);
         } else {
             return match output {
@@ -83,6 +135,27 @@ impl Driver {
             };
         }
     }
+
+    fn extract_scheme_or_panic(address: &str) -> &str {
+        let scheme = Parser::new(None).scheme(address);
+        if scheme.is_none() {
+            panic!("Cannot extract handler from arg: {} Exiting.", address,);
+        }
+        scheme.unwrap()
+    }
+}
+
+#[test]
+fn test_extract_scheme_or_panic_works_when_typical() {
+    let expected = "https";
+    let result = Driver::extract_scheme_or_panic("https://foo.bar");
+    assert_eq!(result, expected);
+}
+
+#[test]
+#[should_panic]
+fn test_extract_scheme_or_panic_panics_when_no_scheme() {
+    Driver::extract_scheme_or_panic("foo.bar");
 }
 
 #[tokio::test]

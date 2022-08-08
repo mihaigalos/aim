@@ -44,6 +44,7 @@ dependencies = [
  "futures-util",
  "http",
  "indicatif 0.17.0",
+ "lazy_static",
  "log",
  "melt",
  "native-tls",
