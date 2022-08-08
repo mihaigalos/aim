@@ -14,18 +14,28 @@ use std::collections::HashMap;
 type BoxedHandlerFut = Result<(), ValidateError>;
 type GetHandler<'a, Return> =
     Box<dyn Fn(&'a str, &'a str, &'a mut WrappedBar, &'a str) -> BoxFuture<'a, Return>>;
+type PutHandler<'a, Return> = Box<dyn Fn(&'a str, &'a str, WrappedBar) -> BoxFuture<'a, Return>>;
 
-fn schema_handlers<'a, Fut>() -> HashMap<&'a str, GetHandler<'a, BoxedHandlerFut>>
+fn schema_handlers<'a, Fut>() -> HashMap<
+    &'a str,
+    (
+        GetHandler<'a, BoxedHandlerFut>,
+        PutHandler<'a, BoxedHandlerFut>,
+    ),
+>
 where
     Fut: Future<Output = BoxedHandlerFut> + 'a,
 {
-    let mut m = HashMap::<&str, GetHandler<BoxedHandlerFut>>::new();
+    let mut m = HashMap::<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>::new();
 
     m.insert(
         "http",
-        Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
-            crate::https::HTTPSHandler::get(a, b, c, d).boxed()
-        }),
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::https::HTTPSHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
+        ),
     );
     m
 }
