@@ -55,6 +55,15 @@ where
             Box::new(move |a: &_, b: &_, c: _| crate::sftp::SFTPHandler::put(a, b, c).boxed()),
         ),
     );
+    m.insert(
+        "ssh",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::ssh::SSHHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::ssh::SSHHandler::put(a, b, c).boxed()),
+        ),
+    );
     m
 }
 
