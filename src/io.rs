@@ -33,11 +33,11 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
     (file, transfered)
 }
 
-pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write>, u64) {
+pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write + Send>, u64) {
     let (file, transfered) = get_output_file(path, silent);
-    let output: Box<dyn Write> = Box::new(std::io::BufWriter::new(match path {
-        "stdout" => Box::new(std::io::stdout()) as Box<dyn Write>,
-        _ => Box::new(file.unwrap()) as Box<dyn Write>,
+    let output: Box<dyn Write + Send> = Box::new(std::io::BufWriter::new(match path {
+        "stdout" => Box::new(std::io::stdout()) as Box<dyn Write + Send>,
+        _ => Box::new(file.unwrap()) as Box<dyn Write + Send>,
     }));
 
     (output, transfered)

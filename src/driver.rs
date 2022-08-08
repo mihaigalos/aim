@@ -11,22 +11,22 @@ use futures_util::FutureExt;
 
 use std::collections::HashMap;
 
-type BoxedHandlerFut = Box<dyn Future<Output = Result<(), ValidateError>>>;
-// type GetHandler<Return> = Box<dyn Fn(&str, &str, &mut WrappedBar, &str) -> BoxFuture<Return>>;
+type BoxedHandlerFut = Result<(), ValidateError>;
 type GetHandler<'a, Return> =
     Box<dyn Fn(&'a str, &'a str, &'a mut WrappedBar, &'a str) -> BoxFuture<'a, Return>>;
-type PutHandler<Return> = Box<dyn Fn(&str, &str, &WrappedBar) -> Return>;
 
-pub fn schema_handlers<'a, Fut>() -> HashMap<&'a str, GetHandler<'a, BoxedHandlerFut>> {
+fn schema_handlers<'a, Fut>() -> HashMap<&'a str, GetHandler<'a, BoxedHandlerFut>>
+where
+    Fut: Future<Output = BoxedHandlerFut> + 'a,
+{
     let mut m = HashMap::<&str, GetHandler<BoxedHandlerFut>>::new();
+
     m.insert(
         "http",
-        Box::new(|a: &_, b: &_, c: &mut _, d: &_| {
-            (crate::https::HTTPSHandler::get(a, b, c, d)).boxed()
+        Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+            crate::https::HTTPSHandler::get(a, b, c, d).boxed()
         }),
     );
-    // m.insert(key, Box::new(|input| (Handlers::get(input)).boxed()));
-
     m
 }
 
@@ -43,25 +43,13 @@ pub fn schema_handlers<'a, Fut>() -> HashMap<&'a str, GetHandler<'a, BoxedHandle
 //         key,
 //         (
 //             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
-//                 Box::new(get_handler(a, b, c, d)) as BoxedHandlerFut
+//                 Box::new(crate::https::HTTPSHandler::get(a, b, c, d)) as BoxedHandlerFut
 //             }) as _,
 //             Box::new(move |a: &_, b: &_, c: &_| Box::new(put_handler(a, b, c)) as BoxedHandlerFut)
 //                 as _,
 //         ),
 //     );
 //     m
-// }
-
-// pub fn default_schema_handlers<'a>(
-// ) -> HashMap<&'a str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)> {
-//     let result = HashMap::new();
-//     schema_handlers(
-//         "http",
-//         crate::https::HTTPSHandler::get,
-//         crate::https::HTTPSHandler::put,
-//     );
-
-//     result
 // }
 
 pub struct Driver;
