@@ -64,6 +64,13 @@ where
             Box::new(move |a: &_, b: &_, c: _| crate::ssh::SSHHandler::put(a, b, c).boxed()),
         ),
     );
+    m.insert(
+        "s3",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| crate::s3::S3::get(a, b, c, d).boxed()),
+            Box::new(move |a: &_, b: &_, c: _| crate::s3::S3::put(a, b, c).boxed()),
+        ),
+    );
     m
 }
 
