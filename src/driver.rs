@@ -37,30 +37,17 @@ where
             Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
         ),
     );
+    m.insert(
+        "ftp",
+        (
+            Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
+                crate::ftp::FTPHandler::get(a, b, c, d).boxed()
+            }),
+            Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
+        ),
+    );
     m
 }
-
-// pub fn schema_handlers<Fut>(
-//     key: &str,
-//     get_handler: impl Fn(&str, &str, &mut WrappedBar, &str) -> Fut + 'static,
-//     put_handler: impl Fn(&str, &str, &WrappedBar) -> Fut + 'static,
-// ) -> HashMap<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>
-// where
-//     Fut: Future<Output = Result<(), ValidateError>> + 'static,
-// {
-//     let mut m = HashMap::new();
-//     m.insert(
-//         key,
-//         (
-//             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
-//                 Box::new(crate::https::HTTPSHandler::get(a, b, c, d)) as BoxedHandlerFut
-//             }) as _,
-//             Box::new(move |a: &_, b: &_, c: &_| Box::new(put_handler(a, b, c)) as BoxedHandlerFut)
-//                 as _,
-//         ),
-//     );
-//     m
-// }
 
 pub struct Driver;
 impl Driver {
