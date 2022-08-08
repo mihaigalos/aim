@@ -98,14 +98,7 @@ impl Driver {
             _ => (output, false),
         };
 
-        let scheme = Parser::new(None).scheme(input);
-        if scheme.is_none() {
-            panic!(
-                "Cannot extract handler from args: {} {} Exiting.",
-                input, output
-            );
-        }
-        let scheme = scheme.unwrap();
+        let scheme = Driver::extract_scheme_or_panic(input);
         let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
         let result = schema_handlers[scheme].0(input, output, bar, expected_sha256).await?;
 
@@ -117,14 +110,7 @@ impl Driver {
     }
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
-        let scheme = Parser::new(None).scheme(output);
-        if scheme.is_none() {
-            panic!(
-                "Cannot extract handler from args: {} {} Exiting.",
-                input, output
-            );
-        }
-        let scheme = scheme.unwrap();
+        let scheme = Driver::extract_scheme_or_panic(output);
         let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
         let result = schema_handlers[scheme].1(input, output, bar).await?;
         Ok(result)
@@ -137,6 +123,7 @@ impl Driver {
         expected_sha256: &str,
     ) -> io::Result<()> {
         let mut bar = WrappedBar::new(0, input, silent);
+        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
 
         if input.contains("http:")
             || input.contains("https:")
@@ -155,6 +142,27 @@ impl Driver {
             };
         }
     }
+
+    fn extract_scheme_or_panic(address: &str) -> &str {
+        let scheme = Parser::new(None).scheme(address);
+        if scheme.is_none() {
+            panic!("Cannot extract handler from arg: {} Exiting.", address,);
+        }
+        scheme.unwrap()
+    }
+}
+
+#[test]
+fn test_extract_scheme_or_panic_works_when_typical() {
+    let expected = "https";
+    let result = Driver::extract_scheme_or_panic("https://foo.bar");
+    assert_eq!(result, expected);
+}
+
+#[test]
+#[should_panic]
+fn test_extract_scheme_or_panic_panics_when_no_scheme() {
+    Driver::extract_scheme_or_panic("foo.bar");
 }
 
 #[tokio::test]
