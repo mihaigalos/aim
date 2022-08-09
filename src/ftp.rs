@@ -18,7 +18,7 @@ pub struct FTPHandler {
 }
 
 struct FTPGetProperties {
-    out: Box<dyn Write>,
+    out: Box<dyn Write + Send>,
     transfered: u64,
     total_size: u64,
     reader: tokio::io::BufReader<async_ftp::DataStream>,

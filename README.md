@@ -14,10 +14,10 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 <table>
     <tr><td width=33% valign=top>
 
-* [❓ Why](#%E2%9D%93-why)
-* [💿︎ Installation](#%F0%9F%92%BF%EF%B8%8E-installation)
-* [💡 Features](#%F0%9F%92%A1-features)
-  * [Download / Upload](#download-/-upload)
+* [❓ Why](#-why)
+* [💿︎ Installation](#%EF%B8%8E-installation)
+* [💡 Features](#-features)
+  * [Download / Upload](#download--upload)
   * [Optional check of sha256](#optional-check-of-sha256)
   * [Resume](#resume)
   * [Output during downloading](#output-during-downloading)
@@ -27,19 +27,19 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 
 </td><td width=33% valign=top>
 
-* [🔑 Authentication](#%F0%9F%94%91-authentication)
+* [🔑 Authentication](#-authentication)
   * [Basicauth in url](#basicauth-in-url)
   * [Netrc](#netrc)
   * [SSH keys](#ssh-keys)
-  * [.aws folder](#.aws-folder)
-* [🆕 Updating](#%F0%9F%86%95-updating)
+  * [.aws folder](#aws-folder)
+* [🆕 Updating](#-updating)
 
 </td><td width=33% valign=top>
 
-* [🐳 Docker](#%F0%9F%90%B3-docker)
+* [🐳 Docker](#-docker)
   * [Hosting on machine A](#hosting-on-machine-a)
   * [Downloading on machine B](#downloading-on-machine-b)
-* [🛠️ Similar work](#%F0%9F%9B%A0%EF%B8%8F-similar-work)
+* [🛠️ Similar work](#%EF%B8%8F-similar-work)
 
 </td>
 </tr>
@@ -104,6 +104,15 @@ aim http://ip_of_Machine_A:8080/file . # download
 
 Moreover, since hosting is done over http, the client can even be a browser:
 ![hosting example](screenshots/self_hosting.png)
+
+The server prints logs to the standard output. To colorize them, you can use [pipecolor](https://github.com/dalance/pipecolor) with the provided `.pipecolor.aim.toml` in this repo:
+
+
+```bash
+aim /tmp | pipecolor -c ~/.pipecolor.aim.toml
+```
+![hosting example logs](screenshots/self_hosting_logs.png)
+
 
 ### Indicators
 By default, a progressbar is displayed when up/downloading. The indicators can be configured via the internally used [`indicatif`](https://crates.io/crates/indicatif) package.
@@ -198,5 +207,6 @@ Adapt IP to match that of machine `A`.
 docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.168.0.24:8080/myfile /src/myfile
 ```
 ----------------------------------------
+
 ## 🛠️ Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).

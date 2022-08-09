@@ -30,20 +30,21 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.5.2"
+version = "1.6.0"
 dependencies = [
  "async-ssh2-lite",
  "async-std",
  "async-stream",
  "async_ftp",
  "autoclap",
- "clap 3.2.13",
+ "clap 3.2.16",
  "custom_error",
  "dotenv",
  "futures",
  "futures-util",
  "http",
- "indicatif",
+ "indicatif 0.17.0",
+ "lazy_static",
  "log",
  "melt",
  "native-tls",
@@ -292,7 +293,7 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c2f8b7187f03c63cdcffdfaa0e7dbd122b010723ca09c08d1323451490e36c7"
 dependencies = [
- "clap 3.2.13",
+ "clap 3.2.16",
 ]
 
 [[package]]
@@ -398,9 +399,9 @@ dependencies = [
 
 [[package]]
 name = "build_html"
-version = "2.1.0"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5d5156d8363086399959a5c96463cd95ef8846259f356c70d4c57680f6a49e8"
+checksum = "aa8ffb62af7b0911893e2d6126891b2a018e387078fa5d855cb42d0d90d88075"
 
 [[package]]
 name = "bumpalo"
@@ -446,14 +447,15 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chrono"
-version = "0.4.19"
+version = "0.4.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "670ad68c9088c2a963aaa298cb369688cf3f9465ce5e2d4ca10e6e0098a1ce73"
+checksum = "6127248204b9aba09a362f6c930ef6a78f2c1b2215f8a7b398c06e1083f17af0"
 dependencies = [
- "libc",
+ "js-sys",
  "num-integer",
  "num-traits",
  "time 0.1.44",
+ "wasm-bindgen",
  "winapi",
 ]
 
@@ -474,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.13"
+version = "3.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac2bd7a1eb07da9ac757c923f69373deb7bc2ba5efc951b873bcb5e693992dca"
+checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
 dependencies = [
  "atty",
  "bitflags",
@@ -491,9 +493,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.2.7"
+version = "3.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "759bf187376e1afa7b85b959e6a664a3e7a95203415dba952ad19139e798f902"
+checksum = "9ba52acd3b0a5c33aeada5cdaa3267cdc7c594a98731d4268cdc1532f4264cb4"
 dependencies = [
  "heck 0.4.0",
  "proc-macro-error",
@@ -529,7 +531,9 @@ dependencies = [
  "encode_unicode",
  "libc",
  "once_cell",
+ "regex",
  "terminal_size",
+ "unicode-width",
  "winapi",
 ]
 
@@ -864,6 +868,19 @@ name = "env_logger"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
+dependencies = [
+ "atty",
+ "humantime",
+ "log",
+ "regex",
+ "termcolor",
+]
+
+[[package]]
+name = "env_logger"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b2cf0344971ee6c64c31be0d530793fba457d322dfec2810c453d0ef228f9c3"
 dependencies = [
  "atty",
  "humantime",
@@ -1295,6 +1312,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "indicatif"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcc42b206e70d86ec03285b123e65a5458c92027d1fb2ae3555878b8113b3ddf"
+dependencies = [
+ "console",
+ "number_prefix",
+ "unicode-width",
+]
+
+[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1433,7 +1461,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84430eac06413c4a10503a074afa33850fa18695ec48e3f1aca16a634488490b"
 dependencies = [
  "anyhow",
- "clap 3.2.13",
+ "clap 3.2.16",
  "once_cell",
 ]
 
@@ -2206,7 +2234,7 @@ dependencies = [
  "either",
  "flate2",
  "hyper",
- "indicatif",
+ "indicatif 0.16.2",
  "log",
  "quick-xml",
  "regex",
@@ -2395,7 +2423,7 @@ dependencies = [
  "crossbeam",
  "defer-drop",
  "derive_builder",
- "env_logger",
+ "env_logger 0.8.4",
  "fuzzy-matcher",
  "lazy_static",
  "log",
@@ -2523,9 +2551,9 @@ checksum = "213701ba3370744dcd1a12960caa4843b3d68b4d1c0a5d575e0d65b2ee9d16c0"
 
 [[package]]
 name = "strfmt"
-version = "0.1.6"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b278b244ef7aa5852b277f52dd0c6cac3a109919e1f6d699adde63251227a30f"
+checksum = "9076d8267599bf1564cda8ca1660298d67d7f4cd45b17624179a71fcf3e313c2"
 
 [[package]]
 name = "strsim"
@@ -2778,9 +2806,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.20.0"
+version = "1.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57aec3cfa4c296db7255446efb4928a6be304b431a806216105542a67b6ca82e"
+checksum = "7a8325f63a7d4774dd041e363b2409ed1c5cbbd0f867795e661df066b2b0a581"
 dependencies = [
  "autocfg",
  "bytes",
@@ -3163,13 +3191,13 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.2.1"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e97f01bec220033f01ca88fc756650e00d774731162dd6f6597e5f23c54bcbf"
+checksum = "a6ad7b09f74434bfdbb8df47f0477f9dad8899d39d28fd060739e8c33b37808b"
 dependencies = [
  "build_html",
  "chrono",
- "env_logger",
+ "env_logger 0.9.0",
  "local_ipaddress",
  "log",
  "rcgen",
