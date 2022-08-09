@@ -21,22 +21,17 @@ use futures_util::FutureExt;
 
 use std::collections::HashMap;
 
-type BoxedHandlerFut = Result<(), ValidateError>;
+type GetPutResult = Result<(), ValidateError>;
 type GetHandler<'a, Return> =
     Box<dyn Fn(&'a str, &'a str, &'a mut WrappedBar, &'a str) -> BoxFuture<'a, Return>>;
 type PutHandler<'a, Return> = Box<dyn Fn(&'a str, &'a str, WrappedBar) -> BoxFuture<'a, Return>>;
 
-fn schema_handlers<'a, Fut>() -> HashMap<
-    &'a str,
-    (
-        GetHandler<'a, BoxedHandlerFut>,
-        PutHandler<'a, BoxedHandlerFut>,
-    ),
->
+fn schema_handlers<'a, Fut>(
+) -> HashMap<&'a str, (GetHandler<'a, GetPutResult>, PutHandler<'a, GetPutResult>)>
 where
-    Fut: Future<Output = BoxedHandlerFut> + 'a + ?Sized,
+    Fut: Future<Output = GetPutResult> + 'a + ?Sized,
 {
-    let mut m = HashMap::<&str, (GetHandler<BoxedHandlerFut>, PutHandler<BoxedHandlerFut>)>::new();
+    let mut m = HashMap::<&str, (GetHandler<GetPutResult>, PutHandler<GetPutResult>)>::new();
 
     m.insert(
         "ftp",
@@ -108,7 +103,7 @@ impl Driver {
         };
 
         let scheme = Driver::extract_scheme_or_panic(input);
-        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
         let result = schema_handlers[scheme].0(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
@@ -120,7 +115,7 @@ impl Driver {
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let scheme = Driver::extract_scheme_or_panic(output);
-        let schema_handlers = schema_handlers::<dyn Future<Output = BoxedHandlerFut>>();
+        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
         let result = schema_handlers[scheme].1(input, output, bar).await?;
         Ok(result)
     }
