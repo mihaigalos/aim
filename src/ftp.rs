@@ -206,5 +206,5 @@ impl FTPHandler {
 #[tokio::test]
 #[should_panic]
 async fn test_should_panic_when_not_implemented() {
-    FTPHandler::get_links(vec!["dummy"]).await;
+    FTPHandler::get_links("dummy".to_string()).await;
 }

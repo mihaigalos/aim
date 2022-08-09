@@ -113,5 +113,5 @@ impl SSHHandler {
 #[tokio::test]
 #[should_panic]
 async fn test_should_panic_when_not_implemented() {
-    SSHHandler::get_links(vec!["dummy"]).await;
+    SSHHandler::get_links("dummy".to_string()).await;
 }
