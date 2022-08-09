@@ -253,9 +253,9 @@ async fn list_works_when_typical() {
 
 #[tokio::test]
 async fn get_links_works_when_typical() {
-    let expected = "apps/github-actions";
+    let expected = "..";
 
-    let result = HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases")
+    let result = HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases".to_string())
         .await
         .unwrap();
 

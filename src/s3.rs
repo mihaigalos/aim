@@ -709,5 +709,5 @@ fn test_get_credentials_works_when_tyipical_and_not_silent() {
 #[tokio::test]
 #[should_panic]
 async fn test_should_panic_when_not_implemented() {
-    S3::get_links("dummy".to_string()).await;
+    let _ = S3::get_links("dummy".to_string()).await;
 }
