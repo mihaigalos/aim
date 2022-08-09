@@ -1,6 +1,7 @@
 extern crate http;
 extern crate s3;
 
+use std::io::Error;
 use std::str;
 
 use s3::bucket::Bucket;
@@ -252,6 +253,10 @@ impl S3 {
             },
         };
         return storage;
+    }
+
+    pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
+        panic!("Unimplemented");
     }
 }
 
@@ -699,4 +704,10 @@ fn test_get_credentials_works_when_tyipical_and_not_silent() {
         (username, password),
         ("user".to_string(), "pass".to_string())
     )
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_should_panic_when_not_implemented() {
+    S3::get_links(vec!["dummy"]).await;
 }

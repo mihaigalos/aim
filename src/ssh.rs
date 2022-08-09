@@ -2,6 +2,7 @@ extern crate ssh2;
 
 use ssh2::Session;
 use std::fs::File;
+use std::io::Error;
 use std::net::TcpStream;
 use std::path::Path;
 
@@ -103,4 +104,14 @@ impl SSHHandler {
             + &parsed_address.file;
         (session, remote_file)
     }
+
+    pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
+        panic!("Unimplemented");
+    }
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_should_panic_when_not_implemented() {
+    SSHHandler::get_links(vec!["dummy"]).await;
 }

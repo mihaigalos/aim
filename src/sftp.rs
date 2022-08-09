@@ -6,6 +6,7 @@ use futures::AsyncSeekExt;
 use futures::AsyncWriteExt;
 
 use std::cmp::min;
+use std::io::Error;
 use std::io::SeekFrom;
 use std::net::ToSocketAddrs;
 use std::path::Path;
@@ -172,4 +173,14 @@ impl SFTPHandler {
             + &parsed_address.file;
         (session, remote_file)
     }
+
+    pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
+        panic!("Unimplemented");
+    }
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_should_panic_when_not_implemented() {
+    SFTPHandler::get_links(vec!["dummy"]).await;
 }

@@ -8,6 +8,7 @@ use futures::future::BoxFuture;
 use melt::decompress;
 use std::future::Future;
 use std::io;
+use std::io::Error;
 
 pub struct Options {
     pub silent: bool,
@@ -22,16 +23,31 @@ use futures_util::FutureExt;
 use std::collections::HashMap;
 
 type GetPutResult = Result<(), ValidateError>;
+type ListResult = Result<Vec<String>, Error>;
 type GetHandler<'a, Return> =
     Box<dyn Fn(&'a str, &'a str, &'a mut WrappedBar, &'a str) -> BoxFuture<'a, Return>>;
 type PutHandler<'a, Return> = Box<dyn Fn(&'a str, &'a str, WrappedBar) -> BoxFuture<'a, Return>>;
+type ListHandler<'a, Return> = Box<dyn Fn(String) -> BoxFuture<'a, Return>>;
 
-fn schema_handlers<'a, Fut>(
-) -> HashMap<&'a str, (GetHandler<'a, GetPutResult>, PutHandler<'a, GetPutResult>)>
+fn schema_handlers<'a, Fut>() -> HashMap<
+    &'a str,
+    (
+        GetHandler<'a, GetPutResult>,
+        PutHandler<'a, GetPutResult>,
+        ListHandler<'a, ListResult>,
+    ),
+>
 where
     Fut: Future<Output = GetPutResult> + 'a + ?Sized,
 {
-    let mut m = HashMap::<&str, (GetHandler<GetPutResult>, PutHandler<GetPutResult>)>::new();
+    let mut m = HashMap::<
+        &str,
+        (
+            GetHandler<GetPutResult>,
+            PutHandler<GetPutResult>,
+            ListHandler<'a, ListResult>,
+        ),
+    >::new();
 
     m.insert(
         "ftp",
@@ -40,6 +56,7 @@ where
                 crate::ftp::FTPHandler::get(a, b, c, d).boxed()
             }),
             Box::new(move |a: &_, b: &_, c: _| crate::ftp::FTPHandler::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::ftp::FTPHandler::get_links(a).boxed()),
         ),
     );
     m.insert(
@@ -49,6 +66,7 @@ where
                 crate::https::HTTPSHandler::get(a, b, c, d).boxed()
             }),
             Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::https::HTTPSHandler::get_links(a).boxed()),
         ),
     );
     m.insert(
@@ -58,6 +76,7 @@ where
                 crate::https::HTTPSHandler::get(a, b, c, d).boxed()
             }),
             Box::new(move |a: &_, b: &_, c: _| crate::https::HTTPSHandler::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::https::HTTPSHandler::get_links(a).boxed()),
         ),
     );
     m.insert(
@@ -67,6 +86,7 @@ where
                 crate::sftp::SFTPHandler::get(a, b, c, d).boxed()
             }),
             Box::new(move |a: &_, b: &_, c: _| crate::sftp::SFTPHandler::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::sftp::SFTPHandler::get_links(a).boxed()),
         ),
     );
     m.insert(
@@ -76,6 +96,7 @@ where
                 crate::ssh::SSHHandler::get(a, b, c, d).boxed()
             }),
             Box::new(move |a: &_, b: &_, c: _| crate::ssh::SSHHandler::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::ssh::SSHHandler::get_links(a).boxed()),
         ),
     );
     m.insert(
@@ -83,6 +104,7 @@ where
         (
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| crate::s3::S3::get(a, b, c, d).boxed()),
             Box::new(move |a: &_, b: &_, c: _| crate::s3::S3::put(a, b, c).boxed()),
+            Box::new(move |a: _| crate::s3::S3::get_links(a).boxed()),
         ),
     );
     m
