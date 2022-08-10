@@ -1,7 +1,7 @@
 use async_ftp::{types::FileType, FtpStream};
 use futures_util::StreamExt;
 use std::cmp::min;
-use std::io::Write;
+use std::io::{Error, Write};
 use tokio::io::{AsyncReadExt, AsyncSeekExt, SeekFrom};
 use tokio_util::io::ReaderStream;
 
@@ -197,4 +197,14 @@ impl FTPHandler {
             .expect("Cannot restart transfer from already transfered byte count");
         Ok(ftp_stream)
     }
+
+    pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
+        panic!("Unimplemented");
+    }
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_should_panic_when_not_implemented() {
+    let _ = FTPHandler::get_links("dummy".to_string()).await;
 }

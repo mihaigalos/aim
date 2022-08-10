@@ -1,6 +1,7 @@
 extern crate http;
 extern crate s3;
 
+use std::io::Error;
 use std::str;
 
 use s3::bucket::Bucket;
@@ -144,14 +145,16 @@ impl S3 {
         bucket
     }
 
-    async fn _list(bucket: &Bucket) -> Result<(), S3Error> {
-        let buckets = bucket.list("".to_string(), None).await?;
-        for bucket in buckets {
-            for content in bucket.contents {
-                println!("{}", content.key);
+    async fn _list(bucket: &Bucket) -> Result<Vec<String>, S3Error> {
+        let mut result: Vec<String> = Vec::new();
+
+        let pages = bucket.list("".to_string(), None).await?;
+        for page in pages {
+            for content in page.contents {
+                result.push(content.key);
             }
         }
-        Ok(())
+        Ok(result)
     }
 
     async fn _get_header(server: &str, header: &str) -> Result<String, HTTPHeaderError> {
@@ -250,6 +253,10 @@ impl S3 {
             },
         };
         return storage;
+    }
+
+    pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
+        panic!("Unimplemented");
     }
 }
 
@@ -697,4 +704,10 @@ fn test_get_credentials_works_when_tyipical_and_not_silent() {
         (username, password),
         ("user".to_string(), "pass".to_string())
     )
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_should_panic_when_not_implemented() {
+    let _ = S3::get_links("dummy".to_string()).await;
 }

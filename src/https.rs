@@ -1,6 +1,8 @@
 use futures_util::StreamExt;
+use regex::Regex;
 use reqwest::Client;
 use std::cmp::min;
+use std::io::Error;
 use tokio_util::io::ReaderStream;
 
 use crate::address::ParsedAddress;
@@ -67,6 +69,47 @@ impl HTTPSHandler {
             .await
             .unwrap();
         Ok(())
+    }
+
+    pub async fn get_links(input: String) -> Result<Vec<String>, Error> {
+        let mut result = Vec::new();
+        let res = HTTPSHandler::list(&input).await.unwrap();
+        let lines: Vec<&str> = res.split('\n').collect();
+
+        for line in lines {
+            let re = Regex::new(r#".*href="/(.+?)".*"#).unwrap();
+            let caps = re.captures(line);
+            if caps.is_some() {
+                result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
+            }
+        }
+        result.push("..".to_string());
+
+        result.sort();
+
+        Ok(result)
+    }
+
+    async fn list(input: &str) -> Result<String, ValidateError> {
+        let is_silent = true;
+        let parsed_address = ParsedAddress::parse_address(input, is_silent);
+
+        let res = Client::new()
+            .get(input)
+            .header(
+                reqwest::header::USER_AGENT,
+                reqwest::header::HeaderValue::from_static(CLIENT_ID),
+            )
+            .basic_auth(parsed_address.username, Some(parsed_address.password))
+            .send()
+            .await
+            .or(Err(format!("Failed to GET from {}", &input)))
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+
+        Ok(res)
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
@@ -151,4 +194,70 @@ async fn get_resume_works() {
     let actual_size = std::fs::metadata(out_file).unwrap().len();
     assert_eq!(actual_size, expected_size);
     std::fs::remove_file(out_file).unwrap();
+}
+
+#[tokio::test]
+async fn list_works_when_typical() {
+    let expected = r#"<!doctype html>
+<html>
+<head>
+    <title>Example Domain</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type="text/css">
+    body {
+        background-color: #f0f0f2;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        
+    }
+    div {
+        width: 600px;
+        margin: 5em auto;
+        padding: 2em;
+        background-color: #fdfdff;
+        border-radius: 0.5em;
+        box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
+    }
+    a:link, a:visited {
+        color: #38488f;
+        text-decoration: none;
+    }
+    @media (max-width: 700px) {
+        div {
+            margin: 0 auto;
+            width: auto;
+        }
+    }
+    </style>    
+</head>
+
+<body>
+<div>
+    <h1>Example Domain</h1>
+    <p>This domain is for use in illustrative examples in documents. You may use this
+    domain in literature without prior coordination or asking for permission.</p>
+    <p><a href="https://www.iana.org/domains/example">More information...</a></p>
+</div>
+</body>
+</html>
+"#;
+
+    let result = HTTPSHandler::list("https://example.com").await.unwrap();
+
+    assert_eq!(result, expected);
+}
+
+#[tokio::test]
+async fn get_links_works_when_typical() {
+    let expected = "..";
+
+    let result = HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases".to_string())
+        .await
+        .unwrap();
+
+    assert_eq!(result[0], expected);
 }
