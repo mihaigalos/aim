@@ -182,5 +182,5 @@ impl SFTPHandler {
 #[tokio::test]
 #[should_panic]
 async fn test_should_panic_when_not_implemented() {
-    SFTPHandler::get_links("dummy".to_string()).await;
+    let _ = SFTPHandler::get_links("dummy".to_string()).await;
 }

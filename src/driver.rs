@@ -143,13 +143,7 @@ impl Driver {
     }
 
     pub async fn dispatch(input: &str, output: &str, options: &Options) -> io::Result<()> {
-        let path = &match options.interactive {
-            false => "".to_string(),
-            true => Navi::run(input, crate::https::HTTPSHandler::get_links)
-                .await
-                .unwrap_or("".to_string()),
-        };
-
+        let path = &Self::navigate(input, options).await;
         Driver::drive(
             &(input.to_string() + "/" + path),
             output,
@@ -185,6 +179,17 @@ impl Driver {
             panic!("Cannot extract handler from arg: {} Exiting.", address,);
         }
         scheme.unwrap()
+    }
+
+    #[cfg(not(tarpaulin_include))]
+    async fn navigate(input: &str, options: &Options) -> String {
+        let path = match options.interactive {
+            false => "".to_string(),
+            true => Navi::run(input, crate::https::HTTPSHandler::get_links)
+                .await
+                .unwrap_or("".to_string()),
+        };
+        path
     }
 }
 
@@ -238,6 +243,24 @@ async fn test_driver_works_when_typical() {
     assert!(result.is_ok());
 
     std::fs::remove_file("downloaded_driver_https_LICENSE.md").unwrap();
+}
+
+#[tokio::test]
+async fn test_dispatch_works_when_typical() {
+    let result = Driver::dispatch(
+        "https://github.com/mihaigalos/aim/blob/main/LICENSE.md",
+        "downloaded_driver_https_dispatch_LICENSE.md",
+        &Options {
+            silent: true,
+            interactive: false,
+            expected_sha256: "".to_string(),
+        },
+    )
+    .await;
+
+    assert!(result.is_ok());
+
+    std::fs::remove_file("downloaded_driver_https_dispatch_LICENSE.md").unwrap();
 }
 
 #[tokio::test]
