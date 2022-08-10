@@ -17,8 +17,10 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 * [❓ Why](#-why)
 * [💿︎ Installation](#%EF%B8%8E-installation)
 * [💡 Features](#-features)
+  * [Feature matrix](#feature-matrix)
   * [Download / Upload](#download--upload)
   * [Optional check of sha256](#optional-check-of-sha256)
+  * [Interactive mode](#interactive-mode)
   * [Resume](#resume)
   * [Output during downloading](#output-during-downloading)
   * [Sharing a folder](#sharing-a-folder)
@@ -59,6 +61,16 @@ cargo install aim
 
 ## 💡 Features
 
+### Feature matrix
+
+ Protocol | Download | Upload | Resume | Interactive mode |
+----------|----------|--------|--------|------------------|
+  http(s) |    ✅    |   ✅   |   ✅   |       ✅         |
+  ftp     |    ✅    |   ✅   |   ✅   |       ❌         |
+  sftp    |    ✅    |   ✅   |   ✅   |       ❌         |
+  ssh     |    ✅    |   ✅   |   ❌   |       ❌         |
+  s3      |    ✅    |   ✅   |   ❌   |       ❌         |
+
 ### Download / Upload
 * default action implied from parameter order.
   * `aim https://domain.com/` -> Display contents.
@@ -73,11 +85,23 @@ aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-u
 ```
 
 ### Resume
-Resume support for both download and upload for `http(s)`, `ftp` and `sftp`.
-
-Download and upload support for `ssh` (no resume).
 
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
+
+### Interactive mode
+
+This feature can be activated by passing the `-i` or `--interactive` flag to the invocation.
+
+It allows you to specify an initial URL and then navigate through links found in it using fuzzy search.
+
+Controls:
+* Start typing, partial matches are listed.
+* `Tab` expands the path and goes into it, lists contents.
+* `/` goes into path without expanding, lists contents.
+* `..` goes one level up.
+* `Enter` finalizes the interaction and takes the result, performs the required operation on it.
+
+This feature can be used in conjunction with [`Sharing a folder`](#sharing-a-folder).
 
 ### Output during downloading
 
