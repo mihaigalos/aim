@@ -611,3 +611,12 @@ async fn test_http_serve_folder_works_when_typical() {
 
     std::fs::remove_file("downloaded_test_http_serve_folder_works_when_typical").unwrap();
 }
+
+#[tokio::test]
+async fn test_hashed_handlers_created_correctly_when_typical() {
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    for item in ["http", "https", "ftp", "sftp", "ssh", "s3"] {
+        assert!(schema_handlers.contains_key(item));
+    }
+}
