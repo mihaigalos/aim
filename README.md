@@ -17,6 +17,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 * [❓ Why](#-why)
 * [💿︎ Installation](#%EF%B8%8E-installation)
 * [💡 Features](#-features)
+  * [Feature matrix](#feature-matrix)
   * [Download / Upload](#download--upload)
   * [Optional check of sha256](#optional-check-of-sha256)
   * [Resume](#resume)
@@ -59,6 +60,16 @@ cargo install aim
 
 ## 💡 Features
 
+### Feature matrix
+
+ Protocol | Download | Upload | Resume | Interactive mode |
+----------|----------|--------|--------|------------------|
+  http(s) |    ✅    |   ✅   |   ✅   |       ✅         |
+  ftp     |    ✅    |   ✅   |   ✅   |       ❌         |
+  sftp    |    ✅    |   ✅   |   ✅   |       ❌         |
+  ssh     |    ✅    |   ✅   |   ❌   |       ❌         |
+  s3      |    ✅    |   ✅   |   ❌   |       ❌         |
+
 ### Download / Upload
 * default action implied from parameter order.
   * `aim https://domain.com/` -> Display contents.
@@ -73,9 +84,6 @@ aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-u
 ```
 
 ### Resume
-Resume support for both download and upload for `http(s)`, `ftp` and `sftp`.
-
-Download and upload support for `ssh` (no resume).
 
 If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
