@@ -17,6 +17,7 @@ pub struct Options {
 }
 
 use url_parse::core::Parser;
+use url_parse::utils::Utils;
 
 use futures_util::FutureExt;
 
@@ -143,14 +144,8 @@ impl Driver {
     }
 
     pub async fn dispatch(input: &str, output: &str, options: &Options) -> io::Result<()> {
-        let path = &Self::navigate(input, options).await;
-        Driver::drive(
-            &(input.to_string() + "/" + path),
-            output,
-            options.silent,
-            &options.expected_sha256,
-        )
-        .await
+        let input = &Self::navigate(input, options).await;
+        Driver::drive(input, output, options.silent, &options.expected_sha256).await
     }
 
     async fn drive(
@@ -187,9 +182,14 @@ impl Driver {
             false => "".to_string(),
             true => Navi::run(input, crate::https::HTTPSHandler::get_links)
                 .await
-                .unwrap_or("".to_string()),
+                .unwrap_or("".to_string() + "/"),
         };
-        path
+
+        if path != "" {
+            let parser = Parser::new(None);
+            return Utils::canonicalize(&parser, input, &path);
+        }
+        input.to_string()
     }
 }
 
