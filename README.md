@@ -101,7 +101,7 @@ Controls:
 * `..` goes one level up.
 * `Enter` finalizes the interaction and takes the result, performs the required operation on it.
 
-This feature can be used in conjunction with [`Output during downloading`](#output-during-downloading) or [`Sharing a folder`](#sharing-a-folder).
+This feature can be used in conjunction with [`Output during downloading`](#output-during-downloading) and/or [`Sharing a folder`](#sharing-a-folder).
 
 ### Output during downloading
 
