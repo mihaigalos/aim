@@ -5,7 +5,6 @@ A command line download/upload tool with resume.
 
 ![resume example](screenshots/aim.gif)
 
-
 ## Table of Contents
 <!--
 Generated with:
@@ -90,6 +89,7 @@ If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [pa
 
 ### Interactive mode
 
+![resume example](screenshots/aim_interactive.gif)
 This feature can be activated by passing the `-i` or `--interactive` flag to the invocation.
 
 It allows you to specify an initial URL and then navigate through links found in it using fuzzy search.
@@ -101,7 +101,7 @@ Controls:
 * `..` goes one level up.
 * `Enter` finalizes the interaction and takes the result, performs the required operation on it.
 
-This feature can be used in conjunction with [`Sharing a folder`](#sharing-a-folder).
+This feature can be used in conjunction with [`Output during downloading`](#output-during-downloading) or [`Sharing a folder`](#sharing-a-folder).
 
 ### Output during downloading
 
