@@ -17,13 +17,17 @@ impl From<ValidateError> for std::io::Error {
     }
 }
 
-#[test]
-fn test_from_validate_error_to_std_io_error_works_when_typical() {
-    let _ = match Err(ValidateError::Sha256Mismatch) {
-        Ok(v) => v,
-        Err(e) => {
-            let error: std::io::Error = e.into();
-            error
-        }
-    };
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_from_validate_error_to_std_io_error_works_when_typical_error() {
+        let _ = match Err(ValidateError::Sha256Mismatch) {
+            Ok(v) => v,
+            Err(e) => {
+                let error: std::io::Error = e.into();
+                error
+            }
+        };
+    }
 }

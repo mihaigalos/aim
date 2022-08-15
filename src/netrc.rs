@@ -36,15 +36,19 @@ pub fn netrc(silent: bool) -> Option<netrc::Netrc> {
     result
 }
 
-#[test]
-fn test_netrc_with_file_works_when_typical() {
-    use std::io::Write;
-    let mut file = std::fs::File::create(".netrc.test_unit").unwrap();
-    file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
-        .unwrap();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_netrc_with_file_works_when_typical() {
+        use std::io::Write;
+        let mut file = std::fs::File::create(".netrc.test_unit").unwrap();
+        file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
+            .unwrap();
 
-    let netrc = netrc(true);
+        let netrc = netrc(true);
 
-    assert!(netrc.is_some());
-    std::fs::remove_file(".netrc.test_unit").unwrap();
+        assert!(netrc.is_some());
+        std::fs::remove_file(".netrc.test_unit").unwrap();
+    }
 }

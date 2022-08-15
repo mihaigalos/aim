@@ -9,6 +9,7 @@ pub trait QuestionTrait {
 pub struct QuestionWrapped;
 
 #[cfg(not(debug_assertions))]
+#[cfg(not(tarpaulin_include))]
 impl QuestionTrait for QuestionWrapped {
     fn yes_no() -> bool {
         Question::new("Unsecure HTTP host. Continue? [Y/n]")
@@ -19,6 +20,7 @@ impl QuestionTrait for QuestionWrapped {
 }
 
 #[cfg(debug_assertions)]
+#[cfg(not(tarpaulin_include))]
 impl QuestionTrait for QuestionWrapped {
     fn yes_no() -> bool {
         true

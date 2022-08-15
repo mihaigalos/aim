@@ -16,7 +16,12 @@ impl TLSTrait for TLS {
         stream.is_some()
     }
 }
-#[test]
-fn test_has_tls_when_typical() {
-    assert_eq!(TLS::has_tls("google.com", "443"), true);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_has_tls_when_typical() {
+        assert_eq!(TLS::has_tls("google.com", "443"), true);
+    }
 }

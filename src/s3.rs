@@ -417,144 +417,180 @@ mod tests {
 
         just_stop("test/s3/Justfile");
     }
-}
 
-#[test]
-fn test_get_bucket_works_when_typical() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string()],
-        file: "".to_string(),
-    };
-    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
-}
-
-#[test]
-fn test_get_bucket_works_when_multiple_segments() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
-        file: "".to_string(),
-    };
-    assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
-}
-
-#[test]
-fn test_get_transport_returns_http_transport_when_no_tls() {
-    use crate::question::*;
-    pub struct TlsMockNoTLS;
-    impl TLSTrait for TlsMockNoTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            false
-        }
+    #[test]
+    fn test_get_bucket_works_when_typical() {
+        let parsed_address = ParsedAddress {
+            server: "".to_string(),
+            username: "".to_string(),
+            password: "".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
     }
-    assert_eq!(
-        S3::_get_transport::<TlsMockNoTLS, QuestionWrapped>("dummyhost:9000"),
-        "http://"
-    );
-}
 
-#[test]
-fn test_get_transport_returns_https_transport_when_has_tls() {
-    use crate::question::*;
-    pub struct TlsMockHasTLS;
-    impl TLSTrait for TlsMockHasTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            true
-        }
+    #[test]
+    fn test_get_bucket_works_when_multiple_segments() {
+        let parsed_address = ParsedAddress {
+            server: "".to_string(),
+            username: "".to_string(),
+            password: "".to_string(),
+            path_segments: vec!["test-bucket".to_string(), "test-file".to_string()],
+            file: "".to_string(),
+        };
+        assert_eq!(S3::get_bucket(&parsed_address), "test-bucket");
     }
-    assert_eq!(
-        S3::_get_transport::<TlsMockHasTLS, QuestionWrapped>("dummyhost:9000"),
-        "https://"
-    );
-}
 
-#[test]
-fn test_get_transport_returns_no_transport_when_no_tls() {
-    use crate::question::*;
-    pub struct TlsMockHasTLS;
-    impl TLSTrait for TlsMockHasTLS {
-        fn has_tls(_host: &str, _port: &str) -> bool {
-            false
+    #[test]
+    fn test_get_transport_returns_http_transport_when_no_tls() {
+        use crate::question::*;
+        pub struct TlsMockNoTLS;
+        impl TLSTrait for TlsMockNoTLS {
+            fn has_tls(_host: &str, _port: &str) -> bool {
+                false
+            }
         }
+        assert_eq!(
+            S3::_get_transport::<TlsMockNoTLS, QuestionWrapped>("dummyhost:9000"),
+            "http://"
+        );
     }
-    struct QuestionWrappedMock;
-    impl QuestionTrait for QuestionWrappedMock {
-        fn yes_no() -> bool {
-            false
+
+    #[test]
+    fn test_get_transport_returns_https_transport_when_has_tls() {
+        use crate::question::*;
+        pub struct TlsMockHasTLS;
+        impl TLSTrait for TlsMockHasTLS {
+            fn has_tls(_host: &str, _port: &str) -> bool {
+                true
+            }
         }
+        assert_eq!(
+            S3::_get_transport::<TlsMockHasTLS, QuestionWrapped>("dummyhost:9000"),
+            "https://"
+        );
     }
-    assert_eq!(
-        S3::_get_transport::<TlsMockHasTLS, QuestionWrappedMock>("dummyhost:9000"),
-        ""
-    );
-}
 
-#[should_panic]
-#[tokio::test]
-async fn test_get_transport_bucket_panics_when_no_port() {
-    let parsed_address = ParsedAddress {
-        server: "localhost".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string()],
-        file: "".to_string(),
-    };
-    let _ = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-}
+    #[test]
+    fn test_get_transport_returns_no_transport_when_no_tls() {
+        use crate::question::*;
+        pub struct TlsMockHasTLS;
+        impl TLSTrait for TlsMockHasTLS {
+            fn has_tls(_host: &str, _port: &str) -> bool {
+                false
+            }
+        }
+        struct QuestionWrappedMock;
+        impl QuestionTrait for QuestionWrappedMock {
+            fn yes_no() -> bool {
+                false
+            }
+        }
+        assert_eq!(
+            S3::_get_transport::<TlsMockHasTLS, QuestionWrappedMock>("dummyhost:9000"),
+            ""
+        );
+    }
 
-#[test]
-fn test_storage_new_minio() {
-    let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
-}
+    #[should_panic]
+    #[tokio::test]
+    async fn test_get_transport_bucket_panics_when_no_port() {
+        let parsed_address = ParsedAddress {
+            server: "localhost".to_string(),
+            username: "".to_string(),
+            password: "".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "".to_string(),
+        };
+        let _ = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
+    }
 
-#[test]
-fn test_storage_new_aws() {
-    let storage = S3::new("aws", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, true);
-}
+    #[test]
+    fn test_storage_new_minio() {
+        let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
+        assert_eq!(storage._location_supported, false);
+    }
 
-#[test]
-fn test_storage_new_default() {
-    let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
-}
+    #[test]
+    fn test_storage_new_aws() {
+        let storage = S3::new("aws", "user", "pass", "bucket", "fqdn");
+        assert_eq!(storage._location_supported, true);
+    }
 
-#[test]
-fn test_get_path_in_bucket_works_when_typical() {
-    let parsed_address = ParsedAddress {
-        server: "".to_string(),
-        username: "".to_string(),
-        password: "".to_string(),
-        path_segments: vec!["test-bucket".to_string()],
-        file: "test-file".to_string(),
-    };
-    let path = S3::get_path_in_bucket(&parsed_address);
-    assert_eq!(path, "/test-file");
-}
-#[test]
-fn test_get_path_in_bucket_works_when_full_url() {
-    let parsed_address = ParsedAddress::parse_address(
-        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
-        true,
-    );
-    let path = S3::get_path_in_bucket(&parsed_address);
-    assert_eq!(path, "/test.file");
-}
+    #[test]
+    fn test_storage_new_default() {
+        let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
+        assert_eq!(storage._location_supported, false);
+    }
 
-#[test]
-fn test_get_path_in_bucket_works_when_in_subfolder() {
-    let parsed_address = ParsedAddress::parse_address(
-        "s3://minioadmin:minioadmin@localhost:9000/test-bucket/subfolder/test.file",
-        true,
-    );
-    let path = S3::get_path_in_bucket(&parsed_address);
-    assert_eq!(path, "/subfolder/test.file");
+    #[test]
+    fn test_get_path_in_bucket_works_when_typical() {
+        let parsed_address = ParsedAddress {
+            server: "".to_string(),
+            username: "".to_string(),
+            password: "".to_string(),
+            path_segments: vec!["test-bucket".to_string()],
+            file: "test-file".to_string(),
+        };
+        let path = S3::get_path_in_bucket(&parsed_address);
+        assert_eq!(path, "/test-file");
+    }
+    #[test]
+    fn test_get_path_in_bucket_works_when_full_url() {
+        let parsed_address = ParsedAddress::parse_address(
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/test.file",
+            true,
+        );
+        let path = S3::get_path_in_bucket(&parsed_address);
+        assert_eq!(path, "/test.file");
+    }
+
+    #[test]
+    fn test_get_path_in_bucket_works_when_in_subfolder() {
+        let parsed_address = ParsedAddress::parse_address(
+            "s3://minioadmin:minioadmin@localhost:9000/test-bucket/subfolder/test.file",
+            true,
+        );
+        let path = S3::get_path_in_bucket(&parsed_address);
+        assert_eq!(path, "/subfolder/test.file");
+    }
+
+    #[test]
+    fn test_get_credentials_works_when_tyipical() {
+        let parsed_address = ParsedAddress::parse_address(
+            "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
+            true,
+        );
+
+        let (username, password) = S3::get_credentials(&parsed_address, true);
+
+        assert_eq!(
+            (username, password),
+            ("user".to_string(), "pass".to_string())
+        )
+    }
+
+    #[test]
+    fn test_get_credentials_works_when_tyipical_and_not_silent() {
+        let parsed_address = ParsedAddress::parse_address(
+            "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
+            true,
+        );
+
+        let (username, password) = S3::get_credentials(&parsed_address, false);
+
+        assert_eq!(
+            (username, password),
+            ("user".to_string(), "pass".to_string())
+        )
+    }
+
+    #[tokio::test]
+    #[should_panic]
+    async fn test_should_panic_when_not_implemented() {
+        let _ = S3::get_links("dummy".to_string()).await;
+    }
 }
 
 #[cfg(test)]
@@ -674,40 +710,4 @@ mod test_mixins {
             ("myaccesskey".to_string(), "mysecretkey".to_string())
         );
     }
-}
-
-#[test]
-fn test_get_credentials_works_when_tyipical() {
-    let parsed_address = ParsedAddress::parse_address(
-        "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
-        true,
-    );
-
-    let (username, password) = S3::get_credentials(&parsed_address, true);
-
-    assert_eq!(
-        (username, password),
-        ("user".to_string(), "pass".to_string())
-    )
-}
-
-#[test]
-fn test_get_credentials_works_when_tyipical_and_not_silent() {
-    let parsed_address = ParsedAddress::parse_address(
-        "s3://user:pass@localhost:9000/test-bucket/subfolder/test.file",
-        true,
-    );
-
-    let (username, password) = S3::get_credentials(&parsed_address, false);
-
-    assert_eq!(
-        (username, password),
-        ("user".to_string(), "pass".to_string())
-    )
-}
-
-#[tokio::test]
-#[should_panic]
-async fn test_should_panic_when_not_implemented() {
-    let _ = S3::get_links("dummy".to_string()).await;
 }

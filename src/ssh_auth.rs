@@ -26,9 +26,13 @@ pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
     result
 }
 
-#[test]
-fn test_get_possible_ssh_keys_path_when_typical() {
-    let actual = get_possible_ssh_keys_path(false);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_possible_ssh_keys_path_when_typical() {
+        let actual = get_possible_ssh_keys_path(false);
 
-    assert!(actual.len() > 0);
+        assert!(actual.len() > 0);
+    }
 }

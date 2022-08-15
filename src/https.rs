@@ -168,37 +168,40 @@ impl HTTPSHandler {
     }
 }
 
-#[tokio::test]
-async fn get_https_works() {
-    let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
-    let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[tokio::test]
+    async fn get_https_works() {
+        let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
+        let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
 
-    let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
+        let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
 
-    assert!(result.is_ok());
-    std::fs::remove_file(out_file).unwrap();
-}
+        assert!(result.is_ok());
+        std::fs::remove_file(out_file).unwrap();
+    }
 
-#[tokio::test]
-async fn get_resume_works() {
-    let expected_size = 561553;
-    let out_file = "test/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz";
-    std::fs::copy(
-        "test/incomplete_dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz",
-        out_file,
-    )
-    .unwrap();
+    #[tokio::test]
+    async fn get_resume_works() {
+        let expected_size = 561553;
+        let out_file = "test/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz";
+        std::fs::copy(
+            "test/incomplete_dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz",
+            out_file,
+        )
+        .unwrap();
 
-    let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
+        let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
 
-    let actual_size = std::fs::metadata(out_file).unwrap().len();
-    assert_eq!(actual_size, expected_size);
-    std::fs::remove_file(out_file).unwrap();
-}
+        let actual_size = std::fs::metadata(out_file).unwrap().len();
+        assert_eq!(actual_size, expected_size);
+        std::fs::remove_file(out_file).unwrap();
+    }
 
-#[tokio::test]
-async fn list_works_when_typical() {
-    let expected = r#"<!doctype html>
+    #[tokio::test]
+    async fn list_works_when_typical() {
+        let expected = r#"<!doctype html>
 <html>
 <head>
     <title>Example Domain</title>
@@ -246,18 +249,20 @@ async fn list_works_when_typical() {
 </html>
 "#;
 
-    let result = HTTPSHandler::list("https://example.com").await.unwrap();
+        let result = HTTPSHandler::list("https://example.com").await.unwrap();
 
-    assert_eq!(result, expected);
-}
+        assert_eq!(result, expected);
+    }
 
-#[tokio::test]
-async fn get_links_works_when_typical() {
-    let expected = "..";
+    #[tokio::test]
+    async fn get_links_works_when_typical() {
+        let expected = "..";
 
-    let result = HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases".to_string())
-        .await
-        .unwrap();
+        let result =
+            HTTPSHandler::get_links("https://github.com/mihaigalos/aim/releases".to_string())
+                .await
+                .unwrap();
 
-    assert_eq!(result[0], expected);
+        assert_eq!(result[0], expected);
+    }
 }

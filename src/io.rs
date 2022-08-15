@@ -43,53 +43,57 @@ pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write + Send>, u64) {
     (output, transfered)
 }
 
-#[test]
-fn test_get_output_file_file_is_none_when_stdout() {
-    let is_silet = true;
-    let (file, _) = get_output_file("stdout", is_silet);
-    assert!(file.is_none());
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_get_output_file_file_is_none_when_stdout() {
+        let is_silet = true;
+        let (file, _) = get_output_file("stdout", is_silet);
+        assert!(file.is_none());
+    }
 
-#[test]
-fn test_get_output_file_pos_is_zero_when_stdout() {
-    let is_silet = true;
-    let (_, position) = get_output_file("stdout", is_silet);
-    assert_eq!(position, 0);
-}
+    #[test]
+    fn test_get_output_file_pos_is_zero_when_stdout() {
+        let is_silet = true;
+        let (_, position) = get_output_file("stdout", is_silet);
+        assert_eq!(position, 0);
+    }
 
-#[test]
-fn test_get_output_file_file_is_none_when_newfile() {
-    let is_silet = true;
-    let filename = "test_get_output_file_file_is_none_when_newfile";
+    #[test]
+    fn test_get_output_file_file_is_none_when_newfile() {
+        let is_silet = true;
+        let filename = "test_get_output_file_file_is_none_when_newfile";
 
-    let (file, _) = get_output_file(filename, is_silet);
+        let (file, _) = get_output_file(filename, is_silet);
 
-    assert!(file.is_some());
-    std::fs::remove_file(filename).unwrap();
-}
+        assert!(file.is_some());
+        std::fs::remove_file(filename).unwrap();
+    }
 
-#[test]
-fn test_get_output_file_file_is_none_when_newfile_and_not_silent() {
-    let is_silet = false;
-    let filename = "test_get_output_file_file_is_none_when_newfile_and_not_silent";
+    #[test]
+    fn test_get_output_file_file_is_none_when_newfile_and_not_silent() {
+        let is_silet = false;
+        let filename = "test_get_output_file_file_is_none_when_newfile_and_not_silent";
 
-    let (file, _) = get_output_file(filename, is_silet);
+        let (file, _) = get_output_file(filename, is_silet);
 
-    assert!(file.is_some());
-    std::fs::remove_file(filename).unwrap();
-}
+        assert!(file.is_some());
+        std::fs::remove_file(filename).unwrap();
+    }
 
-#[test]
-fn test_get_output_file_file_is_none_when_existingfile_and_not_silent() {
-    use std::io::Write;
-    let is_silet = false;
-    let filename = "test_get_output_file_file_is_none_when_existingfile_and_not_silent";
-    let expected_position_byte = 4;
-    let mut file = File::create(filename).unwrap();
-    file.write_all(b"1234").unwrap();
+    #[test]
+    fn test_get_output_file_file_is_none_when_existingfile_and_not_silent() {
+        use std::io::Write;
+        let is_silet = false;
+        let filename = "test_get_output_file_file_is_none_when_existingfile_and_not_silent";
+        let expected_position_byte = 4;
+        let mut file = File::create(filename).unwrap();
+        file.write_all(b"1234").unwrap();
 
-    let (_, position) = get_output_file(filename, is_silet);
+        let (_, position) = get_output_file(filename, is_silet);
 
-    assert_eq!(position, expected_position_byte);
-    std::fs::remove_file(filename).unwrap();
+        assert_eq!(position, expected_position_byte);
+        std::fs::remove_file(filename).unwrap();
+    }
 }
