@@ -629,3 +629,67 @@ async fn test_hashed_handlers_created_correctly_when_typical() {
         assert!(schema_handlers.contains_key(item));
     }
 }
+
+#[tokio::test]
+async fn test_hashed_handlers_https_list_works_when_typical() {
+    let input = "https://github.com/XAMPPRocky/tokei/releases/";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+async fn test_hashed_handlers_http_list_works_when_typical() {
+    let input = "http://github.com/XAMPPRocky/tokei/releases/";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_hashed_handlers_ftp_list_works_when_typical() {
+    let input = "ftp://unimplemented";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_hashed_handlers_sftp_list_works_when_typical() {
+    let input = "sftp://unimplemented";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_hashed_handlers_ssh_list_works_when_typical() {
+    let input = "ssh://unimplemented";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}
+
+#[tokio::test]
+#[should_panic]
+async fn test_hashed_handlers_s3_list_works_when_typical() {
+    let input = "s3://unimplemented";
+    let scheme = Driver::extract_scheme_or_panic(input);
+    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+
+    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    assert!(result.is_ok());
+}

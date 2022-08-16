@@ -145,3 +145,21 @@ impl WrappedBar {
         }
     }
 }
+
+#[test]
+fn test_bar_finish_download_works_when_typical() {
+    let bar = WrappedBar::new(42, "url", false);
+    let _ = bar.finish_download("", "");
+}
+
+#[test]
+fn test_bar_finish_upload_works_when_typical() {
+    let bar = WrappedBar::new(42, "url", false);
+    let _ = bar.finish_upload("", "");
+}
+
+#[test]
+fn test_bar_set_length_works_when_typical() {
+    let mut bar = WrappedBar::new(42, "url", false);
+    let _ = bar.set_length(42);
+}
