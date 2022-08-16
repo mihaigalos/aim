@@ -175,6 +175,10 @@ impl Driver {
         }
     }
 
+    fn extract_scheme(address: &str) -> &str {
+        Parser::new(None).scheme(address).unwrap_or("")
+    }
+
     fn extract_scheme_or_panic(address: &str) -> &str {
         let scheme = Parser::new(None).scheme(address);
         if scheme.is_none() {
@@ -185,7 +189,7 @@ impl Driver {
 
     #[cfg(not(tarpaulin_include))]
     async fn navigate(input: &str, options: &Options) -> String {
-        let scheme = Driver::extract_scheme_or_panic(input);
+        let scheme = Driver::extract_scheme(input);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
         let path = match options.interactive {
             false => "".to_string(),
