@@ -30,29 +30,35 @@ type GetHandler<'a, Return> =
 type PutHandler<'a, Return> = Box<dyn Fn(&'a str, &'a str, WrappedBar) -> BoxFuture<'a, Return>>;
 type ListHandler<'a, Return> = Box<dyn Fn(String) -> BoxFuture<'a, Return>>;
 
-fn schema_handlers<'a, Fut>() -> HashMap<
-    &'a str,
-    (
-        GetHandler<'a, GetPutResult>,
-        PutHandler<'a, GetPutResult>,
-        ListHandler<'a, ListResult>,
-    ),
->
+struct Handlers<'a> {
+    get_handler: GetHandler<'a, GetPutResult>,
+    put_handler: PutHandler<'a, GetPutResult>,
+    list_handler: ListHandler<'a, ListResult>,
+}
+
+impl<'a> Handlers<'a> {
+    pub fn new(
+        get_handler: GetHandler<'a, GetPutResult>,
+        put_handler: PutHandler<'a, GetPutResult>,
+        list_handler: ListHandler<'a, ListResult>,
+    ) -> Self {
+        Self {
+            get_handler: get_handler,
+            put_handler: put_handler,
+            list_handler: list_handler,
+        }
+    }
+}
+
+fn schema_handlers<'a, Fut>() -> HashMap<&'a str, Handlers<'a>>
 where
     Fut: Future<Output = GetPutResult> + 'a + ?Sized,
 {
-    let mut m = HashMap::<
-        &str,
-        (
-            GetHandler<GetPutResult>,
-            PutHandler<GetPutResult>,
-            ListHandler<'a, ListResult>,
-        ),
-    >::new();
+    let mut m = HashMap::<&str, Handlers>::new();
 
     m.insert(
         "ftp",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
                 crate::ftp::FTPHandler::get(a, b, c, d).boxed()
             }),
@@ -62,7 +68,7 @@ where
     );
     m.insert(
         "http",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
                 crate::https::HTTPSHandler::get(a, b, c, d).boxed()
             }),
@@ -72,7 +78,7 @@ where
     );
     m.insert(
         "https",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
                 crate::https::HTTPSHandler::get(a, b, c, d).boxed()
             }),
@@ -82,7 +88,7 @@ where
     );
     m.insert(
         "sftp",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
                 crate::sftp::SFTPHandler::get(a, b, c, d).boxed()
             }),
@@ -92,7 +98,7 @@ where
     );
     m.insert(
         "ssh",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| {
                 crate::ssh::SSHHandler::get(a, b, c, d).boxed()
             }),
@@ -102,7 +108,7 @@ where
     );
     m.insert(
         "s3",
-        (
+        Handlers::new(
             Box::new(move |a: &_, b: &_, c: &mut _, d: &_| crate::s3::S3::get(a, b, c, d).boxed()),
             Box::new(move |a: &_, b: &_, c: _| crate::s3::S3::put(a, b, c).boxed()),
             Box::new(move |a: _| crate::s3::S3::get_links(a).boxed()),
@@ -127,7 +133,8 @@ impl Driver {
 
         let scheme = Driver::extract_scheme_or_panic(input);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        let result = schema_handlers[scheme].0(input, output, bar, expected_sha256).await?;
+        let result =
+            (schema_handlers[scheme].get_handler)(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
@@ -139,7 +146,7 @@ impl Driver {
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let scheme = Driver::extract_scheme_or_panic(output);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        let result = schema_handlers[scheme].1(input, output, bar).await?;
+        let result = (schema_handlers[scheme].put_handler)(input, output, bar).await?;
         Ok(result)
     }
 
@@ -178,9 +185,11 @@ impl Driver {
 
     #[cfg(not(tarpaulin_include))]
     async fn navigate(input: &str, options: &Options) -> String {
+        let scheme = Driver::extract_scheme_or_panic(input);
+        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
         let path = match options.interactive {
             false => "".to_string(),
-            true => Navi::run(input, crate::https::HTTPSHandler::get_links)
+            true => Navi::run(input, &schema_handlers[scheme].list_handler)
                 .await
                 .unwrap_or("".to_string() + "/"),
         };
