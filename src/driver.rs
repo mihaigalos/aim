@@ -207,6 +207,12 @@ impl Driver {
 }
 
 #[test]
+fn test_extract_scheme_works_when_typical() {
+    let expected = "";
+    let result = Driver::extract_scheme(".");
+    assert_eq!(result, expected);
+}
+#[test]
 fn test_extract_scheme_or_panic_works_when_typical() {
     let expected = "https";
     let result = Driver::extract_scheme_or_panic("https://foo.bar");
