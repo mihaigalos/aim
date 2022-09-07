@@ -28,7 +28,7 @@ async-std = "1.12.0"
 async-stream = "0.3.3"
 async_ftp = "6.0.0"
 autoclap = "0.2.2"
-clap = { version = "3.2.17", features = ["cargo"] }
+clap = { version = "3.2.20", features = ["cargo"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
 futures = "0.3"
