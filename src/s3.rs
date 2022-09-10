@@ -176,12 +176,10 @@ impl S3 {
         let port = parts[1];
         if T::has_tls(host, port) {
             "https://"
+        } else if Q::yes_no() {
+            "http://"
         } else {
-            if Q::yes_no() {
-                "http://"
-            } else {
-                ""
-            }
+            ""
         }
     }
 
