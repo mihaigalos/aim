@@ -133,14 +133,13 @@ impl Driver {
 
         let scheme = Driver::extract_scheme_or_panic(input);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        let result =
-            (schema_handlers[scheme].get_handler)(input, output, bar, expected_sha256).await?;
+        (schema_handlers[scheme].get_handler)(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
             std::fs::remove_file(output)?;
         }
-        Ok(result)
+        Ok(())
     }
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
