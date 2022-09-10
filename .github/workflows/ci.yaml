@@ -64,6 +64,40 @@ jobs:
       run: |
         just test
 
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: docker://agilepathway/pull-request-label-checker:latest
+      with:
+        none_of: wip
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name == 'pull_request'
+
+    - uses: actions/checkout@v3
+
+    - name: Cargo Cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo
+        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml') }}
+          ${{ runner.os }}-cargo
+
+    - name: Cargo Target Cache
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-target-${{ hashFiles('Cargo.toml') }}
+          ${{ runner.os }}-cargo-target
+
+    - name: Run cargo-clippy
+      run: |
+        cargo clippy
+
   coverage:
     runs-on: ubuntu-latest
     steps:
