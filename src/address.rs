@@ -67,11 +67,11 @@ impl ParsedAddress {
             .unwrap();
 
         ParsedAddress {
-            server: server,
-            username: username,
-            password: password,
-            path_segments: path_segments,
-            file: file,
+            server,
+            username,
+            password,
+            path_segments,
+            file,
         }
     }
 
