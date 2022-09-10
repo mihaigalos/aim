@@ -84,8 +84,8 @@ impl WrappedBar {
             true => None,
         };
         WrappedBar {
-            silent: silent,
-            output: output,
+            silent,
+            output,
             downloaded_message: downloaded_message.to_string(),
             uploaded_message: uploaded_message.to_string(),
         }
