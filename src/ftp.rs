@@ -80,7 +80,7 @@ impl FTPHandler {
                 properties
                     .out
                     .write_all(&buffer)
-                    .or(Err(format!("Error while writing to output.")))
+                    .map_err(|_| "Error while writing to output.")
                     .unwrap();
                 let new = min(
                     properties.transfered + (byte_count as u64),
@@ -93,7 +93,7 @@ impl FTPHandler {
             }
         }
 
-        bar.finish_download(&input, &output);
+        bar.finish_download(input, output);
         Ok(())
     }
 
@@ -127,7 +127,7 @@ impl FTPHandler {
                     uploaded = new;
                     bar.set_position(new);
                     if(uploaded >= total_size){
-                        bar.finish_upload(&input, &output);
+                        bar.finish_upload(input, output);
                     }
                 }
                 yield chunk;
@@ -149,23 +149,22 @@ impl FTPHandler {
         let mut ftp_stream = FtpStream::connect((parsed_address).server.clone())
             .await
             .expect("Cannot connect to FTP server");
-        let _ = ftp_stream
+        ftp_stream
             .login(&parsed_address.username, &parsed_address.password)
             .await
             .expect("Cannot login to FTP server");
 
         for path in &parsed_address.path_segments {
             ftp_stream
-                .cwd(&path)
+                .cwd(path)
                 .await
                 .expect("Path in FTP URL does not exist on remote");
         }
-        let total_size = ftp_stream
+        ftp_stream
             .size(&parsed_address.file)
             .await
             .unwrap_or(Some(0))
-            .unwrap() as u64;
-        total_size
+            .unwrap() as u64
     }
 
     async fn get_stream(
@@ -175,14 +174,14 @@ impl FTPHandler {
         let mut ftp_stream = FtpStream::connect((*parsed_address).server.clone())
             .await
             .expect("Cannot connect to FTP server");
-        let _ = ftp_stream
+        ftp_stream
             .login(&parsed_address.username, &parsed_address.password)
             .await
             .expect("Cannot login to FTP server");
 
         for path in &parsed_address.path_segments {
             ftp_stream
-                .cwd(&path)
+                .cwd(path)
                 .await
                 .expect("Path in FTP URL does not exist on remote");
         }
