@@ -146,8 +146,8 @@ impl Driver {
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let scheme = Driver::extract_scheme_or_panic(output);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        let result = (schema_handlers[scheme].put_handler)(input, output, bar).await?;
-        Ok(result)
+        (schema_handlers[scheme].put_handler)(input, output, bar).await?;
+        Ok(())
     }
 
     pub async fn dispatch(input: &str, output: &str, options: &Options) -> io::Result<()> {
@@ -164,14 +164,16 @@ impl Driver {
         let mut bar = WrappedBar::new(0, input, silent);
         let scheme = Parser::new(None).scheme(input);
         if scheme.is_some() {
-            return Ok(Driver::get(input, output, expected_sha256, &mut bar).await?);
+            Driver::get(input, output, expected_sha256, &mut bar).await?;
+            Ok(())
         } else {
-            return match output {
+            match output {
                 "stdout" => {
-                    Ok(crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await)
+                    crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await;
+                    Ok(())
                 }
                 _ => Ok(Driver::put(input, output, bar).await?),
-            };
+            }
         }
     }
 
@@ -198,7 +200,7 @@ impl Driver {
                 .unwrap_or("".to_string() + "/"),
         };
 
-        if path != "" {
+        if !path.is_empty() {
             let parser = Parser::new(None);
             return Utils::canonicalize(&parser, input, &path);
         }
@@ -212,6 +214,7 @@ fn test_extract_scheme_works_when_typical() {
     let result = Driver::extract_scheme(".");
     assert_eq!(result, expected);
 }
+
 #[test]
 fn test_extract_scheme_or_panic_works_when_typical() {
     let expected = "https";
