@@ -96,7 +96,7 @@ jobs:
 
     - name: Run cargo-clippy
       run: |
-        cargo clippy
+        cargo clippy -- -D warnings
 
   coverage:
     runs-on: ubuntu-latest
