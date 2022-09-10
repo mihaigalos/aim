@@ -60,7 +60,7 @@ impl SFTPHandler {
             buffer.truncate(byte_count);
             if !buffer.is_empty() {
                 out.write_all(&buffer)
-                    .or(Err(format!("Error while writing to output")))
+                    .map_err(|_| "Error while writing to output")
                     .unwrap();
                 let new = min(transfered + (byte_count as u64), total_size);
                 transfered = new;
@@ -69,7 +69,7 @@ impl SFTPHandler {
                 break;
             }
         }
-        bar.finish_download(&input, &output);
+        bar.finish_download(input, output);
         Ok(())
     }
 
@@ -122,7 +122,7 @@ impl SFTPHandler {
                 break;
             }
         }
-        bar.finish_download(&input, &output);
+        bar.finish_download(input, output);
 
         Ok(())
     }
