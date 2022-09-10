@@ -43,9 +43,9 @@ impl<'a> Handlers<'a> {
         list_handler: ListHandler<'a, ListResult>,
     ) -> Self {
         Self {
-            get_handler: get_handler,
-            put_handler: put_handler,
-            list_handler: list_handler,
+            get_handler,
+            put_handler,
+            list_handler,
         }
     }
 }
