@@ -211,7 +211,7 @@ impl S3 {
         bucket: &str,
         endpoint: &str,
     ) -> Storage {
-        let storage = match kind {
+        match kind {
             "minio" => Storage {
                 _name: "minio".into(),
                 region: Region::Custom {
@@ -251,8 +251,7 @@ impl S3 {
                 _bucket: bucket.to_string(),
                 _location_supported: false,
             },
-        };
-        storage
+        }
     }
 
     pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
