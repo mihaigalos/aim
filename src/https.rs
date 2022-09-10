@@ -103,7 +103,7 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .or_else(|_| Err(format!("Failed to GET from {}", &input)))
+            .map_err(|_| format!("Failed to GET from {}", &input))
             .unwrap()
             .text()
             .await
