@@ -72,7 +72,7 @@ impl S3 {
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let (username, password) = S3::get_credentials(&parsed_address, silent);
-        let backend = S3::new(&bucket_kind, &username, &password, &bucket, &fqdn);
+        let backend = S3::new(&bucket_kind, &username, &password, bucket, &fqdn);
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
@@ -134,7 +134,7 @@ impl S3 {
             result += "/";
         }
         result += &parsed_address.file;
-        return result;
+        result
     }
 
     fn get_bucket(parsed_address: &ParsedAddress) -> &str {
@@ -166,11 +166,11 @@ impl S3 {
             .get(header)
             .ok_or(HTTPHeaderError::NotPresent)?;
 
-        Ok(result.to_str().unwrap().to_lowercase().to_string())
+        Ok(result.to_str().unwrap().to_lowercase())
     }
 
     fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
-        let parts: Vec<&str> = server.split(":").collect();
+        let parts: Vec<&str> = server.split(':').collect();
         assert_eq!(parts.len(), 2, "No port in URL. Stopping.");
         let host = parts[0];
         let port = parts[1];
@@ -178,9 +178,9 @@ impl S3 {
             return "https://";
         } else {
             if Q::yes_no() {
-                return "http://";
+                "http://"
             } else {
-                return "";
+                ""
             }
         }
     }
@@ -252,7 +252,7 @@ impl S3 {
                 _location_supported: false,
             },
         };
-        return storage;
+        storage
     }
 
     pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
