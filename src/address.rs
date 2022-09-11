@@ -49,7 +49,7 @@ impl ParsedAddress {
             url.username().unwrap()
         };
 
-        let password = url.password().unwrap_or("anonymous".to_string());
+        let password = url.password().unwrap_or_else(|| "anonymous".to_string());
         if !silent && username != "anonymous" && password != "anonymous" {
             println!("🔑 Parsed credentials from URL.");
         }
@@ -67,11 +67,11 @@ impl ParsedAddress {
             .unwrap();
 
         ParsedAddress {
-            server: server,
-            username: username,
-            password: password,
-            path_segments: path_segments,
-            file: file.to_string(),
+            server,
+            username,
+            password,
+            path_segments,
+            file,
         }
     }
 

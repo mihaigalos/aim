@@ -72,7 +72,7 @@ impl S3 {
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let (username, password) = S3::get_credentials(&parsed_address, silent);
-        let backend = S3::new(&bucket_kind, &username, &password, &bucket, &fqdn);
+        let backend = S3::new_storage(&bucket_kind, &username, &password, bucket, &fqdn);
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
@@ -105,7 +105,7 @@ impl S3 {
                 creds_from_profile.secret_key.unwrap(),
             );
         }
-        return result;
+        result
     }
 
     fn mixin_aws_credentials_from_env(
@@ -124,7 +124,7 @@ impl S3 {
                 creds_from_profile.secret_key.unwrap(),
             );
         }
-        return result;
+        result
     }
 
     fn get_path_in_bucket(parsed_address: &ParsedAddress) -> String {
@@ -134,7 +134,7 @@ impl S3 {
             result += "/";
         }
         result += &parsed_address.file;
-        return result;
+        result
     }
 
     fn get_bucket(parsed_address: &ParsedAddress) -> &str {
@@ -166,22 +166,20 @@ impl S3 {
             .get(header)
             .ok_or(HTTPHeaderError::NotPresent)?;
 
-        Ok(result.to_str().unwrap().to_lowercase().to_string())
+        Ok(result.to_str().unwrap().to_lowercase())
     }
 
     fn _get_transport<T: TLSTrait, Q: QuestionTrait>(server: &str) -> &str {
-        let parts: Vec<&str> = server.split(":").collect();
+        let parts: Vec<&str> = server.split(':').collect();
         assert_eq!(parts.len(), 2, "No port in URL. Stopping.");
         let host = parts[0];
         let port = parts[1];
         if T::has_tls(host, port) {
-            return "https://";
+            "https://"
+        } else if Q::yes_no() {
+            "http://"
         } else {
-            if Q::yes_no() {
-                return "http://";
-            } else {
-                return "";
-            }
+            ""
         }
     }
 
@@ -204,14 +202,14 @@ impl S3 {
         Ok(string.to_string())
     }
 
-    fn new(
+    fn new_storage(
         kind: &str,
         access_key: &str,
         secret_key: &str,
         bucket: &str,
         endpoint: &str,
     ) -> Storage {
-        let storage = match kind {
+        match kind {
             "minio" => Storage {
                 _name: "minio".into(),
                 region: Region::Custom {
@@ -251,8 +249,7 @@ impl S3 {
                 _bucket: bucket.to_string(),
                 _location_supported: false,
             },
-        };
-        return storage;
+        }
     }
 
     pub async fn get_links(_input: String) -> Result<Vec<String>, Error> {
@@ -314,7 +311,7 @@ mod tests {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-        let backend = S3::new(
+        let backend = S3::new_storage(
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
@@ -348,7 +345,7 @@ mod tests {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-        let backend = S3::new(
+        let backend = S3::new_storage(
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
@@ -388,7 +385,7 @@ mod tests {
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
         let fqdn = transport.to_string() + &parsed_address.server;
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
-        let backend = S3::new(
+        let backend = S3::new_storage(
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
@@ -509,19 +506,19 @@ async fn test_get_transport_bucket_panics_when_no_port() {
 
 #[test]
 fn test_storage_new_minio() {
-    let storage = S3::new("minio", "user", "pass", "bucket", "fqdn");
+    let storage = S3::new_storage("minio", "user", "pass", "bucket", "fqdn");
     assert_eq!(storage._location_supported, false);
 }
 
 #[test]
 fn test_storage_new_aws() {
-    let storage = S3::new("aws", "user", "pass", "bucket", "fqdn");
+    let storage = S3::new_storage("aws", "user", "pass", "bucket", "fqdn");
     assert_eq!(storage._location_supported, true);
 }
 
 #[test]
 fn test_storage_new_default() {
-    let storage = S3::new("unknown", "user", "pass", "bucket", "fqdn");
+    let storage = S3::new_storage("unknown", "user", "pass", "bucket", "fqdn");
     assert_eq!(storage._location_supported, false);
 }
 

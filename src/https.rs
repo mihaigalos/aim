@@ -103,7 +103,7 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .or(Err(format!("Failed to GET from {}", &input)))
+            .map_err(|_| format!("Failed to GET from {}", &input))
             .unwrap()
             .text()
             .await
@@ -126,24 +126,24 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .or(Err(format!("Failed to GET from {} to {}", &input, &output)))
+            .map_err(|_| format!("Failed to GET from {} to {}", &input, &output))
             .unwrap();
-        let total_size = downloaded + res.content_length().or(Some(0)).unwrap();
+        let total_size = downloaded + res.content_length().unwrap_or(0);
 
         bar.set_length(total_size);
 
         let mut stream = res.bytes_stream();
         while let Some(item) = stream.next().await {
-            let chunk = item.or(Err(format!("Error while downloading."))).unwrap();
+            let chunk = item.map_err(|_| "Error while downloading.").unwrap();
             out.write_all(&chunk)
-                .or(Err(format!("Error while writing to output.")))
+                .map_err(|_| "Error while writing to output.")
                 .unwrap();
             let new = min(downloaded + (chunk.len() as u64), total_size);
             downloaded = new;
             bar.set_position(new);
         }
 
-        bar.finish_download(&input, &output);
+        bar.finish_download(input, output);
         Ok(())
     }
 
@@ -158,13 +158,9 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .or(Err(format!(
-                "Failed to GET already uploaded size from {}",
-                &output
-            )))
+            .map_err(|_| format!("Failed to GET already uploaded size from {}", &output))
             .unwrap();
-        let uploaded = res.content_length().or(Some(0)).unwrap();
-        uploaded
+        res.content_length().unwrap_or(0)
     }
 }
 

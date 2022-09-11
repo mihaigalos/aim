@@ -95,8 +95,8 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
         input.to_string(),
         output.to_string(),
         Options {
-            silent: silent,
-            interactive: interactive,
+            silent,
+            interactive,
             expected_sha256: expected_sha256.to_string(),
         },
     ))

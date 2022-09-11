@@ -8,7 +8,7 @@ pub struct HashChecker;
 impl HashChecker {
     pub fn check(filename: &str, expected_hash: &str) -> Result<(), ValidateError> {
         let mut result = Ok(());
-        if filename != "stdout" && (expected_hash != "") {
+        if filename != "stdout" && (!expected_hash.is_empty()) {
             let actual_hash = HashChecker::sha256sum(filename);
             if actual_hash != expected_hash {
                 result = Err(ValidateError::Sha256Mismatch);

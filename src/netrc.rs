@@ -14,21 +14,21 @@ fn get_possible_netrc_path(silent: bool) -> String {
         "~/.netrc",
     ];
     for candidate in candidates {
-        let candidate = untildify(&candidate);
+        let candidate = untildify(candidate);
         if Path::new(&candidate).exists() {
             if !silent {
                 println!("🔑 Parsed .netrc from: {}", candidate);
             }
-            return candidate.to_string();
+            return candidate;
         }
     }
-    return "".to_string();
+    "".to_string()
 }
 
 pub fn netrc(silent: bool) -> Option<netrc::Netrc> {
     let mut result = None;
     let path = get_possible_netrc_path(silent);
-    if path != "" {
+    if !path.is_empty() {
         let file = std::fs::File::open(path).unwrap();
         let parsed = Netrc::parse(BufReader::new(file));
         result = Some(parsed.unwrap());

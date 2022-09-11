@@ -10,7 +10,7 @@ const DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  
 const DEFAULT_AIM_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 const DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE: &str = "🎯 Uploaded {input} to {output}";
 
-const THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE: u64 = 1 * 1024 * 1024;
+const THRESHOLD_IF_TOTALBYTES_BELOW_THEN_AUTO_SILENT_MODE: u64 = 1024 * 1024;
 
 fn construct_progress_bar(
     total_size: u64,
@@ -64,15 +64,15 @@ impl WrappedBar {
     pub fn new(total_size: u64, url: &str, silent: bool) -> Self {
         dotenv().ok();
         let message_format = &env::var("AIM_PROGRESSBAR_MESSAGE_FORMAT")
-            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT.to_string());
+            .unwrap_or_else(|_| DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT.to_string());
         let progress_chars = &env::var("AIM_PROGRESSBAR_PROGRESS_CHARS")
-            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS.to_string());
+            .unwrap_or_else(|_| DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS.to_string());
         let template = &env::var("AIM_PROGRESSBAR_TEMPLATE")
-            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_TEMPLATE.to_string());
+            .unwrap_or_else(|_| DEFAULT_AIM_PROGRESSBAR_TEMPLATE.to_string());
         let downloaded_message = &env::var("AIM_PROGRESSBAR_DOWNLOADED_MESSAGE")
-            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_DOWNLOADED_MESSAGE.to_string());
+            .unwrap_or_else(|_| DEFAULT_AIM_PROGRESSBAR_DOWNLOADED_MESSAGE.to_string());
         let uploaded_message = &env::var("AIM_PROGRESSBAR_UPLOADED_MESSAGE")
-            .unwrap_or(DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE.to_string());
+            .unwrap_or_else(|_| DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE.to_string());
         let output = match silent {
             false => Some(construct_progress_bar(
                 total_size,
@@ -84,8 +84,8 @@ impl WrappedBar {
             true => None,
         };
         WrappedBar {
-            silent: silent,
-            output: output,
+            silent,
+            output,
             downloaded_message: downloaded_message.to_string(),
             uploaded_message: uploaded_message.to_string(),
         }
