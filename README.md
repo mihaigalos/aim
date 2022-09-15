@@ -64,11 +64,11 @@ cargo install aim
 
  Protocol | Download | Upload | Resume | Interactive mode |
 ----------|----------|--------|--------|------------------|
-  http(s) |    ✅    |   ✅   |   ✅   |       ✅          |
-  ftp     |    ✅    |   ✅   |   ✅   |       ❌          |
-  sftp    |    ✅    |   ✅   |   ✅   |       ❌          |
-  ssh     |    ✅    |   ✅   |   ❌   |       ❌          |
-  s3      |    ✅    |   ✅   |   ❌   |       ❌          |
+  http(s) |    ✅    |   ✅   |   ✅   |       ✅         |
+  ftp     |    ✅    |   ✅   |   ✅   |       ❌         |
+  sftp    |    ✅    |   ✅   |   ✅   |       ❌         |
+  ssh     |    ✅    |   ✅   |   ❌   |       ❌         |
+  s3      |    ✅    |   ✅   |   ❌   |       ❌         |
 
 ### Download / Upload
 * default action implied from parameter order.
