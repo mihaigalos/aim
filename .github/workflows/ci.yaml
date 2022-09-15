@@ -26,5 +26,5 @@ env:
 
 jobs:
   ci:
-    uses: mihaigalos/github-settings/.github/workflows/ci.yaml@main
+    uses: mihaigalos/github-settings/.github/workflows/rust-ci.yaml@main
     if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
