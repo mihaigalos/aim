@@ -2,15 +2,6 @@ use crate::netrc::netrc;
 
 use url_parse::core::Parser;
 
-#[derive(Debug)]
-pub struct ParsedAddress {
-    pub server: String,
-    pub username: String,
-    pub password: String,
-    pub path_segments: Vec<String>,
-    pub file: String,
-}
-
 impl PartialEq for ParsedAddress {
     fn eq(&self, other: &Self) -> bool {
         let result = self.server == other.server
