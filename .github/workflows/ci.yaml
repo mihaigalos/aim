@@ -27,6 +27,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  ci:
+  CI:
     uses: mihaigalos/github-settings/.github/workflows/rust/ci.yaml@main
     if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
