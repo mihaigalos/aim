@@ -47,7 +47,7 @@ regex = "1.6.0"
 reqwest = { version = "0.11.11", features = ["stream"] }
 rust-s3 = { version = "0.31.0", features = ["blocking"] }
 self_update = { version = "0.32.0", features = ["archive-tar", "compression-flate2"] }
-sha2 = "0.10.5"
+sha2 = "0.10.6"
 skim-navi = "0.1.1"
 ssh2 = "0.9.3"
 strfmt = "0.2.2"
