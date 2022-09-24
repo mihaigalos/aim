@@ -15,3 +15,8 @@ on:
 jobs:
   cd:
     uses: mihaigalos/config/.github/workflows/rust-cd.yaml@main
+    secrets:
+      CARGO_API_KEY: ${{ secrets.CARGO_API_KEY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
