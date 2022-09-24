@@ -55,7 +55,7 @@ impl HTTPSHandler {
             }
         };
 
-        let _ = reqwest::Client::new()
+        let response = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
             .header("Range", "bytes=".to_owned() + &uploaded.to_string() + "-")
@@ -68,6 +68,7 @@ impl HTTPSHandler {
             .send()
             .await
             .unwrap();
+        println!("{:?}", response);
         Ok(())
     }
 
