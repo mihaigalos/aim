@@ -1,5 +1,5 @@
 # aim
-[![.github/workflows/ci.yaml](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
+[![CI](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/ci.yaml)
 [![CD](https://github.com/mihaigalos/aim/actions/workflows/cd.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/cd.yaml)
 [![Security Audit](https://github.com/mihaigalos/aim/actions/workflows/audit.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/audit.yaml)
 [![codecov](https://codecov.io/gh/mihaigalos/aim/branch/main/graph/badge.svg?token=CYCF96JIOH)](https://codecov.io/gh/mihaigalos/aim)
