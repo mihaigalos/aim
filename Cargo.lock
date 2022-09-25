@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.7.0"
+version = "1.7.1"
 dependencies = [
  "async-ssh2-lite",
  "async-std",
