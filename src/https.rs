@@ -68,7 +68,7 @@ impl HTTPSHandler {
             .send()
             .await
             .unwrap();
-        println!("{:?}", response);
+        println!("{:?}", response.text().await.unwrap());
         Ok(())
     }
 
