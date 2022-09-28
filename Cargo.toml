@@ -40,7 +40,7 @@ log = "0.4.17"
 melt = "0.1.6"
 native-tls = "0.2"
 netrc = "0.4.1"
-openssl = { version = "0.10.41", features = ["vendored"] }
+openssl = { version = "0.10.42", features = ["vendored"] }
 openssl-src = "300.0.9"
 question = "0.2.2"
 regex = "1.6.0"
