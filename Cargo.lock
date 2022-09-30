@@ -37,7 +37,7 @@ dependencies = [
  "async-stream",
  "async_ftp",
  "autoclap",
- "clap 3.2.22",
+ "clap 4.0.7",
  "custom_error",
  "dotenv",
  "futures",
@@ -302,7 +302,7 @@ version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "015e025a7a0e76c07fdf728d87516c0a36163227213e95fe0b24e838a86f57bf"
 dependencies = [
- "clap 4.0.4",
+ "clap 4.0.7",
 ]
 
 [[package]]
@@ -503,13 +503,14 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.0.4"
+version = "4.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f78ad8e84aa8e8aa3e821857be40eb4b925ff232de430d4dd2ae6aa058cbd92"
+checksum = "0a1af219c3e254a8b4649d6ddaef886b2015089f35f2ac5e1db31410c0566ab8"
 dependencies = [
  "atty",
  "bitflags",
  "clap_lex 0.3.0",
+ "once_cell",
  "strsim 0.10.0",
  "termcolor",
 ]
