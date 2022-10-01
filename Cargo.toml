@@ -1,6 +1,6 @@
 [package]
 name = "aim"
-version = "1.7.1"
+version = "1.7.2"
 edition = "2021"
 authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "🎯 A command line download/upload tool with resume."
@@ -28,7 +28,7 @@ async-std = "1.12.0"
 async-stream = "0.3.3"
 async_ftp = "6.0.0"
 autoclap = "0.2.5"
-clap = { version = "3.2.22", features = ["cargo"] }
+clap = { version = "4.0.7", features = ["cargo", "string"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
 futures = "0.3"

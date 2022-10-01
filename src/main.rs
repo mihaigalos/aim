@@ -1,5 +1,5 @@
 use autoclap::autoclap;
-use clap::Arg;
+use clap::{Arg, ArgAction};
 use clap::Command;
 use std::{env, io};
 
@@ -24,7 +24,6 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
                     "Input to aim from.\n\
                 If no output provided and input is a folder, it will be served via http.",
                 )
-                .takes_value(true)
                 .required(false),
         )
         .arg(
@@ -38,19 +37,18 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
               \x20\x20\x20\x20and attempts to decompress the archive based on the file's extension.\n\
             * Uploading: directly uploads file to the URL.",
                 )
-                .takes_value(true)
                 .required(false),
         )
         .arg(
             Arg::new("SHA256")
                 .help("Expected sha256 for verification. Will return a non-zero if mismatch.")
-                .takes_value(true)
                 .required(false),
         )
         .arg(
             Arg::new("silent")
                 .long("silent")
                 .short('s')
+                .action(ArgAction::SetTrue)
                 .help("Silent or quiet mode. Don't show progress meter or error messages.")
                 .required(false),
         )
@@ -58,6 +56,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             Arg::new("interactive")
                 .long("interactive")
                 .short('i')
+                .action(ArgAction::SetTrue)
                 .help("Navigate folder structure in remote, interactively.\n\
             Use Tab, / to enter a folder, .. to exit, Enter to accept selection.")
                 .required(false),
@@ -66,12 +65,13 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             Arg::new("update")
                 .long("update")
                 .short('u')
+                .action(ArgAction::SetTrue)
                 .help("Update the executable in-place.")
                 .required(false),
         );
     let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
-    if args.is_present("update") {
+    if args.contains_id("update") {
         tokio::task::spawn_blocking(move || match update() {
             Err(e) => {
                 println!("ERROR: {}", e);
@@ -82,14 +82,23 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
         .await
         .unwrap();
     }
-    let input = args.value_of("INPUT").unwrap_or_else(|| {
+
+    let input = args.get_one::<String>("INPUT").unwrap_or_else(|| {
         app.print_help().unwrap();
         ::std::process::exit(0)
     });
-    let output = args.value_of("OUTPUT").unwrap_or("stdout");
-    let silent = args.is_present("silent");
-    let interactive = args.is_present("interactive");
-    let expected_sha256 = args.value_of("SHA256").unwrap_or("");
+
+    let output = args
+        .get_one::<String>("OUTPUT")
+        .map(|s| s.as_str())
+        .unwrap_or("stdout");
+
+    let silent = args.contains_id("silent");
+    let interactive = args.contains_id("interactive");
+    let expected_sha256 = args
+        .get_one::<String>("SHA256")
+        .map(|s| s.as_str())
+        .unwrap_or("");
 
     Ok((
         input.to_string(),
