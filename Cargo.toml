@@ -1,6 +1,6 @@
 [package]
 name = "aim"
-version = "1.7.1"
+version = "1.7.2"
 edition = "2021"
 authors = ["Mihai Galos <mihaigalos@gmail.com>"]
 description = "🎯 A command line download/upload tool with resume."
@@ -27,7 +27,7 @@ async-ssh2-lite = { version = "0.3", features = ["tokio"] }
 async-std = "1.12.0"
 async-stream = "0.3.3"
 async_ftp = "6.0.0"
-autoclap = "0.2.2"
+autoclap = "0.2.5"
 clap = { version = "4.0.4", features = ["cargo"] }
 custom_error = "1.9.2"
 dotenv = "0.15.0"
