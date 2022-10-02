@@ -1,6 +1,6 @@
 use autoclap::autoclap;
-use clap::{Arg, ArgAction};
 use clap::Command;
+use clap::{Arg, ArgAction};
 use std::{env, io};
 
 use aim::driver::Options;
@@ -44,6 +44,14 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
                 .help("Expected sha256 for verification. Will return a non-zero if mismatch.")
                 .required(false),
         )
+       .arg(
+           Arg::new("version")
+               .long("version")
+               .short('v')
+               .action(ArgAction::SetTrue)
+               .help("Prints current version.")
+               .required(false),
+       )
         .arg(
             Arg::new("silent")
                 .long("silent")
@@ -56,7 +64,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             Arg::new("interactive")
                 .long("interactive")
                 .short('i')
-                .action(ArgAction::SetTrue)
+                .action(ArgAction::Set)
                 .help("Navigate folder structure in remote, interactively.\n\
             Use Tab, / to enter a folder, .. to exit, Enter to accept selection.")
                 .required(false),
@@ -71,7 +79,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
         );
     let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
-    if args.contains_id("update") {
+    if args.get_flag("update") {
         tokio::task::spawn_blocking(move || match update() {
             Err(e) => {
                 println!("ERROR: {}", e);
@@ -93,8 +101,8 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
         .map(|s| s.as_str())
         .unwrap_or("stdout");
 
-    let silent = args.contains_id("silent");
-    let interactive = args.contains_id("interactive");
+    let silent = args.get_flag("silent");
+    let interactive = args.get_flag("interactive");
     let expected_sha256 = args
         .get_one::<String>("SHA256")
         .map(|s| s.as_str())
