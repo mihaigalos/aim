@@ -17,7 +17,7 @@ async fn main() {
 
 #[cfg(not(tarpaulin_include))]
 async fn parse_args() -> io::Result<(String, String, Options)> {
-    let mut app: clap::Command = autoclap!()
+    let app: clap::Command = autoclap!()
         .arg(
             Arg::new("INPUT")
                 .help(
@@ -91,10 +91,12 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
         .unwrap();
     }
 
-    let input = args.get_one::<String>("INPUT").unwrap_or_else(|| {
-        app.print_help().unwrap();
-        ::std::process::exit(0)
-    });
+    if args.get_flag("version") {
+        println!("{}", app.get_about().unwrap());
+    }
+    let input = args
+        .get_one::<String>("INPUT")
+        .unwrap_or_else(|| ::std::process::exit(0));
 
     let output = args
         .get_one::<String>("OUTPUT")
