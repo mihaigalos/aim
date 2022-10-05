@@ -64,7 +64,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             Arg::new("interactive")
                 .long("interactive")
                 .short('i')
-                .action(ArgAction::Set)
+                .action(ArgAction::SetTrue)
                 .help("Navigate folder structure in remote, interactively.\n\
             Use Tab, / to enter a folder, .. to exit, Enter to accept selection.")
                 .required(false),
