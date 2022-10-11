@@ -30,7 +30,7 @@ async_ftp = "6.0.0"
 autoclap = "0.3.5"
 clap = { version = "4.0.13", features = ["cargo", "string"] }
 custom_error = "1.9.2"
-dotenv = "0.15.0"
+dotenvy = "0.15.5"
 futures = "0.3"
 futures-util = "0.3.24"
 http = "0.2.8"
