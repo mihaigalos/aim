@@ -652,7 +652,7 @@ async fn test_hashed_handlers_https_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
 
@@ -662,7 +662,7 @@ async fn test_hashed_handlers_http_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
 
@@ -673,7 +673,7 @@ async fn test_hashed_handlers_ftp_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
 
@@ -684,7 +684,7 @@ async fn test_hashed_handlers_sftp_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
 
@@ -695,7 +695,7 @@ async fn test_hashed_handlers_ssh_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
 
@@ -706,6 +706,6 @@ async fn test_hashed_handlers_s3_list_works_when_typical() {
     let scheme = Driver::extract_scheme_or_panic(input);
     let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
 
-    let result = (schema_handlers[scheme].list_handler)(input.to_string()).await;
+    let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
 }
