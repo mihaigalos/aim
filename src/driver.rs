@@ -16,7 +16,7 @@ pub struct Options {
     pub expected_sha256: String,
 }
 
-use url_parse::core::Parser;
+use url_parse::core::{scheme_separator::SchemeSeparator, Parser};
 use url_parse::utils::Utils;
 
 use futures_util::FutureExt;
@@ -133,7 +133,7 @@ impl Driver {
 
         let scheme = Driver::extract_scheme_or_panic(input);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        (schema_handlers[scheme].get_handler)(input, output, bar, expected_sha256).await?;
+        (schema_handlers[scheme.0].get_handler)(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
             decompress(std::path::Path::new(output)).unwrap();
@@ -145,7 +145,7 @@ impl Driver {
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let scheme = Driver::extract_scheme_or_panic(output);
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
-        (schema_handlers[scheme].put_handler)(input, output, bar).await?;
+        (schema_handlers[scheme.0].put_handler)(input, output, bar).await?;
         Ok(())
     }
 
@@ -176,11 +176,13 @@ impl Driver {
         }
     }
 
-    fn extract_scheme(address: &str) -> &str {
-        Parser::new(None).scheme(address).unwrap_or("")
+    fn extract_scheme(address: &str) -> (&str, SchemeSeparator) {
+        Parser::new(None)
+            .scheme(address)
+            .unwrap_or(("", SchemeSeparator::ColonSlashSlash))
     }
 
-    fn extract_scheme_or_panic(address: &str) -> &str {
+    fn extract_scheme_or_panic(address: &str) -> (&str, SchemeSeparator) {
         let scheme = Parser::new(None).scheme(address);
         if scheme.is_none() {
             panic!("Cannot extract handler from arg: {} Exiting.", address,);
@@ -194,7 +196,7 @@ impl Driver {
         let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
         let path = match options.interactive {
             false => "".to_string(),
-            true => Navi::run(input, &schema_handlers[scheme].list_handler)
+            true => Navi::run(input, &schema_handlers[scheme.0].list_handler)
                 .await
                 .unwrap_or("".to_string() + "/"),
         };
@@ -210,15 +212,17 @@ impl Driver {
 #[test]
 fn test_extract_scheme_works_when_typical() {
     let expected = "";
-    let result = Driver::extract_scheme(".");
+    let (result, _) = Driver::extract_scheme(".");
     assert_eq!(result, expected);
 }
 
 #[test]
 fn test_extract_scheme_or_panic_works_when_typical() {
-    let expected = "https";
+    let expected_scheme = "https";
+    let expected_separator = SchemeSeparator::ColonSlashSlash;
     let result = Driver::extract_scheme_or_panic("https://foo.bar");
-    assert_eq!(result, expected);
+    assert_eq!(result.0, expected_scheme);
+    assert_eq!(result.1, expected_separator);
 }
 
 #[test]
