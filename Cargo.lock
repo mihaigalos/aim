@@ -50,7 +50,7 @@ dependencies = [
  "native-tls",
  "netrc",
  "openssl",
- "openssl-src 300.0.9+3.0.5",
+ "openssl-src 300.0.10+3.0.6",
  "question",
  "regex",
  "reqwest",
@@ -1811,9 +1811,9 @@ dependencies = [
 
 [[package]]
 name = "openssl-src"
-version = "300.0.9+3.0.5"
+version = "300.0.10+3.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df52116687e2d276515a1cbf0b84d2fb646f519aebe65d2fa82f28c5d078f174"
+checksum = "c206b35bde27af03c259c6ca70328f421c254b3f9ab2fc7179da7c701c13ed96"
 dependencies = [
  "cc",
 ]
