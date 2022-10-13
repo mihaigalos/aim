@@ -37,7 +37,7 @@ dependencies = [
  "async-stream",
  "async_ftp",
  "autoclap",
- "clap 4.0.13",
+ "clap 4.0.14",
  "custom_error",
  "dotenvy",
  "futures",
@@ -50,7 +50,7 @@ dependencies = [
  "native-tls",
  "netrc",
  "openssl",
- "openssl-src 300.0.10+3.0.6",
+ "openssl-src 300.0.9+3.0.5",
  "question",
  "regex",
  "reqwest",
@@ -298,11 +298,11 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "autoclap"
-version = "0.3.5"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4267a8a57d83e34031120a699dae792e7170f641347abb6ee1a253240cf1c7c2"
+checksum = "b1e9c7465a123e9c68adedd42ead805138bad26bf2f88139772c865bfde33293"
 dependencies = [
- "clap 4.0.13",
+ "clap 4.0.14",
 ]
 
 [[package]]
@@ -500,9 +500,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.0.13"
+version = "4.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69d64e88428747154bd8bc378d178377ef4dace7a5735ca1f3855be72f2c2cb5"
+checksum = "6ea54a38e4bce14ff6931c72e5b3c43da7051df056913d4e7e1fcdb1c03df69d"
 dependencies = [
  "atty",
  "bitflags",
@@ -1811,9 +1811,9 @@ dependencies = [
 
 [[package]]
 name = "openssl-src"
-version = "300.0.10+3.0.6"
+version = "300.0.9+3.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c206b35bde27af03c259c6ca70328f421c254b3f9ab2fc7179da7c701c13ed96"
+checksum = "df52116687e2d276515a1cbf0b84d2fb646f519aebe65d2fa82f28c5d078f174"
 dependencies = [
  "cc",
 ]
