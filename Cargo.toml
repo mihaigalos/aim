@@ -27,7 +27,7 @@ async-ssh2-lite = { version = "0.3", features = ["tokio"] }
 async-std = "1.12.0"
 async-stream = "0.3.3"
 async_ftp = "6.0.0"
-autoclap = "0.3.7"
+autoclap = "0.3.8"
 clap = { version = "4.0.17", features = ["cargo", "string"] }
 custom_error = "1.9.2"
 dotenvy = "0.15.6"
