@@ -168,7 +168,7 @@ impl Driver {
         } else {
             match output {
                 "stdout" => {
-                    crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await;
+                    crate::http_serve_folder::WarpyWrapper::run(input.to_string()).await?;
                     Ok(())
                 }
                 _ => Ok(Driver::put(input, output, bar).await?),
