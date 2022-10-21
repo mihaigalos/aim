@@ -37,7 +37,7 @@ dependencies = [
  "async-stream",
  "async_ftp",
  "autoclap",
- "clap 4.0.17",
+ "clap 4.0.18",
  "custom_error",
  "dotenvy",
  "futures",
@@ -301,7 +301,7 @@ version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "19eb5f6180ca94b226c0be495318350885a7af3fb69e611d62ab1137b953c8ad"
 dependencies = [
- "clap 4.0.17",
+ "clap 4.0.18",
 ]
 
 [[package]]
@@ -499,9 +499,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.0.17"
+version = "4.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06badb543e734a2d6568e19a40af66ed5364360b9226184926f89d229b4b4267"
+checksum = "335867764ed2de42325fafe6d18b8af74ba97ee0c590fa016f157535b42ab04b"
 dependencies = [
  "atty",
  "bitflags",
