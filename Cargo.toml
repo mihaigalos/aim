@@ -10,17 +10,16 @@ categories = [
     "network-programming",
     "web-programming::http-client"
 ]
+
 keywords = [ 
     "cli",
     "download",
     "resume",
     "upload"
 ]
+
 repository = "https://github.com/mihaigalos/aim"
 license = "MIT"
-
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 async-ssh2-lite = { version = "0.3", features = ["tokio"] }
