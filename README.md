@@ -91,7 +91,11 @@ aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-u
 
 ### Resume
 
-If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
+Please consult the [Feature matrix](#feature-matrix) to find out if transfers via your desired protocol are resumable.
+
+Resumable transfers pick up from a specific byte offset and continue. Extensive testing ensures that transfers are byte-exact (hash comparison between expected and actual transfer artefacts).
+
+> Node: If you're hosting a http(s) server yourself, upload needs `PUT` ranges (or a [patched](https://github.com/arut/nginx-patches) version of `nginx`).
 
 ### Interactive mode
 
