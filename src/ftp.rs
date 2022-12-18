@@ -171,7 +171,7 @@ impl FTPHandler {
         transfered: u64,
         parsed_address: &ParsedAddress,
     ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
-        let mut ftp_stream = FtpStream::connect((*parsed_address).server.clone())
+        let mut ftp_stream = FtpStream::connect((parsed_address).server.clone())
             .await
             .expect("Cannot connect to FTP server");
         ftp_stream

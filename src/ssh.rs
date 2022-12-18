@@ -44,7 +44,7 @@ impl SSHHandler {
 
     pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SSHHandler::setup_session(output, bar.silent);
-        let input_file = File::open(&input).expect("Cannot open input file for SSH read");
+        let input_file = File::open(input).expect("Cannot open input file for SSH read");
         let total_size = input_file
             .metadata()
             .expect("Cannot determine input file size for HTTPS read")
