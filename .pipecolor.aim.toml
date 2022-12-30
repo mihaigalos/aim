@@ -1,6 +1,0 @@
-[[lines]]
-    pat  = "^(.*?) - - .*? \\[(.*?)\\] (.*?) (.*?) (.*)"
-    colors = ["White", "LightGreen", "LightBlue", "LightYellow", "White", "LightGreen"]
-    [[lines.tokens]]
-        pat   = "Foo"
-        colors = ["LightCyan"]

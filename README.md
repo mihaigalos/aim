@@ -139,11 +139,11 @@ aim http://ip_of_Machine_A:8080/file . # download
 Moreover, since hosting is done over http, the client can even be a browser:
 ![hosting example](screenshots/self_hosting.png)
 
-The server prints logs to the standard output. To colorize them, you can use [pipecolor](https://github.com/dalance/pipecolor) with the provided `.pipecolor.aim.toml` in this repo:
+The server prints logs to the standard output. To colorize them, you can use [pipeview](https://github.com/mihaigalos/pipeview):
 
 
 ```bash
-aim /tmp | pipecolor -c ~/.pipecolor.aim.toml
+aim . | pipeview --aim
 ```
 ![hosting example logs](screenshots/self_hosting_logs.png)
 
