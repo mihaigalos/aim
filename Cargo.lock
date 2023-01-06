@@ -38,7 +38,7 @@ dependencies = [
  "async_ftp",
  "autoclap",
  "clap 4.0.32",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
  "custom_error",
  "dotenvy",
  "futures",
@@ -191,7 +191,7 @@ dependencies = [
  "async-global-executor",
  "async-io",
  "async-lock",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
  "futures-channel",
  "futures-core",
  "futures-io",
@@ -628,7 +628,7 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-epoch",
  "crossbeam-queue",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
 ]
 
 [[package]]
@@ -648,7 +648,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2dd04ddaf88237dc3b8d8f9a3c1004b506b54b3313403944054d23c0870c521"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
 ]
 
 [[package]]
@@ -659,7 +659,7 @@ checksum = "715e8152b692bba2d374b53d4875445368fdf21a94751410af607a5ac677d1fc"
 dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-epoch",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
 ]
 
 [[package]]
@@ -670,7 +670,7 @@ checksum = "f916dfc5d356b0ed9dae65f1db9fc9770aa2851d2662b988ccf4fe3516e86348"
 dependencies = [
  "autocfg",
  "cfg-if 1.0.0",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
  "memoffset",
  "scopeguard",
 ]
@@ -682,7 +682,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1cd42583b04998a5363558e5f9291ee5a5ff6b49944332103f251e7479a82aa7"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
 ]
 
 [[package]]
@@ -698,9 +698,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.12"
+version = "0.8.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edbafec5fa1f196ca66527c1b12c2ec4745ca14b50f1ad8f9f6f720b55d11fac"
+checksum = "4fb766fa798726286dbbb842f174001dab8abc7b627a1dd86e0b7222a95d929f"
 dependencies = [
  "cfg-if 1.0.0",
 ]
@@ -2167,7 +2167,7 @@ checksum = "258bcdb5ac6dad48491bb2992db6b7cf74878b0384908af124823d118c99683f"
 dependencies = [
  "crossbeam-channel 0.5.6",
  "crossbeam-deque",
- "crossbeam-utils 0.8.12",
+ "crossbeam-utils 0.8.14",
  "num_cpus",
 ]
 
