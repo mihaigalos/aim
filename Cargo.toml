@@ -28,7 +28,7 @@ async-stream = "0.3.3"
 async_ftp = "6.0.0"
 autoclap = "0.3.11"
 clap = { version = "4.0.32", features = ["cargo", "string"] }
-crossbeam-utils = "0.8.7"
+crossbeam-utils = "0.8.14"
 custom_error = "1.9.2"
 dotenvy = "0.15.6"
 futures = "0.3"
