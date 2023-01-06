@@ -38,6 +38,7 @@ dependencies = [
  "async_ftp",
  "autoclap",
  "clap 4.0.32",
+ "crossbeam-utils 0.8.12",
  "custom_error",
  "dotenvy",
  "futures",
