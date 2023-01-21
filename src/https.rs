@@ -83,10 +83,16 @@ impl HTTPSHandler {
             if caps.is_some() {
                 result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
             }
+            let re = Regex::new(r#".*src="https://(.+?)".*"#).unwrap();
+            let caps = re.captures(line);
+            if caps.is_some() {
+                result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
+            }
         }
         result.push("..".to_string());
 
         result.sort();
+        result.dedup();
 
         Ok(result)
     }

@@ -200,6 +200,7 @@ impl Driver {
                 .await
                 .unwrap_or("".to_string() + "/"),
         };
+        println!("{:?}", path);
 
         if !path.is_empty() {
             let parser = Parser::new(None);
