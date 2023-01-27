@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_check_api_fails_when_checksum_mismatch() {
-        let expected = "AAAAbea8f23421c6306df712af6f416a3f570ecf5652b45fd6d409019fe6d4fe";
+        let expected = "AAAA847124bfb9d9a9d44af6f00d8003006c44b9ef9ba458b5d4d3fc5f81bde5";
 
         let _ = assert_err!(
             HashChecker::check("LICENSE.md", expected),
@@ -61,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_sha256sum_api() {
-        let expected = "fa701768a0ddfd65fe175ecf9865b6046f151bb05d0d4ad2cef5acb1d4c60c6b";
+        let expected = "21d7847124bfb9d9a9d44af6f00d8003006c44b9ef9ba458b5d4d3fc5f81bde5";
 
         let actual = HashChecker::sha256sum("LICENSE.md");
 
@@ -70,7 +70,7 @@ mod tests {
 
     #[test]
     fn test_check_api_works_when_typical() {
-        let expected = "fa701768a0ddfd65fe175ecf9865b6046f151bb05d0d4ad2cef5acb1d4c60c6b";
+        let expected = "21d7847124bfb9d9a9d44af6f00d8003006c44b9ef9ba458b5d4d3fc5f81bde5";
 
         let is_match = HashChecker::check("LICENSE.md", expected).is_ok();
 
