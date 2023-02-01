@@ -2642,9 +2642,9 @@ dependencies = [
 
 [[package]]
 name = "strfmt"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26cdabcdab6da7e8c2ac1160e917ec83e78bbe3e10325e17d532718c67a4828f"
+checksum = "b73de159e5e71c4c7579ea3041d3e765f46790555790c24489195554210f1fb4"
 
 [[package]]
 name = "strsim"
