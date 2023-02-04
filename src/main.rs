@@ -82,7 +82,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
     if args.get_flag("update") {
         tokio::task::spawn_blocking(move || match update() {
             Err(e) => {
-                println!("ERROR: {}", e);
+                println!("ERROR: {e}");
                 ::std::process::exit(1);
             }
             Ok(()) => ::std::process::exit(0),

@@ -25,7 +25,7 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             }
             file = Some(
                 File::create(path)
-                    .map_err(|_| format!("Failed to create file '{}'", path))
+                    .map_err(|_| format!("Failed to create file '{path}'"))
                     .unwrap(),
             );
         }

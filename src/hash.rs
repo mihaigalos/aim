@@ -16,9 +16,7 @@ impl HashChecker {
             match result {
                 Ok(()) => println!("✅ Checksum OK."),
                 Err(ValidateError::Sha256Mismatch) => println!(
-                    "❌ Checksum verification failed for {}:\n  expected: {}\n  got:      {}",
-                    filename, expected_hash, actual_hash
-                ),
+                    "❌ Checksum verification failed for {filename}:\n  expected: {expected_hash}\n  got:      {actual_hash}"),
             }
         }
         result
@@ -32,7 +30,7 @@ impl HashChecker {
         let computed_hash = hasher.finalize();
         drop(file);
 
-        format!("{:x}", computed_hash)
+        format!("{computed_hash:x}")
     }
 }
 
