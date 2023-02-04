@@ -18,7 +18,7 @@ pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
         let candidate = untildify(candidate);
         if Path::new(&candidate).exists() {
             if !silent {
-                println!("🔑 Parsed ssh key from: {}", candidate);
+                println!("🔑 Parsed ssh key from: {candidate}");
             }
             result.push(candidate.to_string());
         }

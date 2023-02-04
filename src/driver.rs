@@ -185,7 +185,7 @@ impl Driver {
     fn extract_scheme_or_panic(address: &str) -> (&str, SchemeSeparator) {
         let scheme = Parser::new(None).scheme(address);
         if scheme.is_none() {
-            panic!("Cannot extract handler from arg: {} Exiting.", address,);
+            panic!("Cannot extract handler from arg: {address} Exiting.");
         }
         scheme.unwrap()
     }

@@ -28,10 +28,10 @@ impl SSHHandler {
 
         let (channel, stat) = session
             .scp_recv(Path::new(&remote_file))
-            .unwrap_or_else(|_| panic!("Remote file does not exist: {}", input));
+            .unwrap_or_else(|_| panic!("Remote file does not exist: {input}"));
 
-        let mut target = File::create(output)
-            .unwrap_or_else(|_| panic!("Cannot create output file: {}", output));
+        let mut target =
+            File::create(output).unwrap_or_else(|_| panic!("Cannot create output file: {output}"));
         bar.set_length(stat.size());
 
         std::io::copy(

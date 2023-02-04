@@ -17,7 +17,7 @@ fn get_possible_netrc_path(silent: bool) -> String {
         let candidate = untildify(candidate);
         if Path::new(&candidate).exists() {
             if !silent {
-                println!("🔑 Parsed .netrc from: {}", candidate);
+                println!("🔑 Parsed .netrc from: {candidate}");
             }
             return candidate;
         }
