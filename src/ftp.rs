@@ -126,7 +126,7 @@ impl FTPHandler {
                     let new = min(uploaded + (chunk.len() as u64), total_size);
                     uploaded = new;
                     bar.set_position(new);
-                    if(uploaded >= total_size){
+                    if uploaded >= total_size {
                         bar.finish_upload(input, output);
                     }
                 }
