@@ -33,7 +33,7 @@ jobs:
           echo "::set-output name=project-name::$(grep ^name Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')"
 
   cd:
-    uses: mihaigalos/config/.github/workflows/rust-cd.yaml@main
+    uses: mihaigalos/workflows/.github/workflows/rust-cd.yaml@main
     needs:
       - generate-cd-inputs
     with:

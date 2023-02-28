@@ -19,7 +19,7 @@ on:
   workflow_dispatch: # Run with Run Workflow button in GitHub Action Job, set debug_enabled=true for interactive ssh session.
     inputs:
       debug_enabled:
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'     
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
         required: false
         default: false
 env:
@@ -27,5 +27,5 @@ env:
 
 jobs:
   ci:
-    uses: mihaigalos/config/.github/workflows/rust-ci.yaml@main
+    uses: mihaigalos/workflows/.github/workflows/rust-ci.yaml@main
     if: ${{ github.event_name == 'push' || !github.event.pull_request.draft }}
