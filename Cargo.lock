@@ -2571,9 +2571,9 @@ dependencies = [
 
 [[package]]
 name = "skim"
-version = "0.10.3"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "12dbba8c0b84aa379b30ba8684a647164d3760ca7d2e4694998d7821d8a63074"
+checksum = "e5d28de0a6cb2cdd83a076f1de9d965b973ae08b244df1aa70b432946dda0f32"
 dependencies = [
  "atty",
  "beef",
@@ -2600,9 +2600,9 @@ dependencies = [
 
 [[package]]
 name = "skim-navi"
-version = "0.1.7"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44cbfee8d18545d3b1857694dbe3e43324e979c10effc697486e3534b388e644"
+checksum = "d83e339a586c8d76763fe6e8fc3dc3961e758854ed462b04cdb52bc0ee445555"
 dependencies = [
  "log",
  "skim",
