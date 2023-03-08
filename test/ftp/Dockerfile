@@ -1,6 +1,8 @@
 FROM alpine:latest
 
-RUN apk --no-cache add vsftpd
+RUN apk --no-cache add \
+        netcat-openbsd \
+        vsftpd
 
 ENV FTP_USER=user
 ENV FTP_PASS=pass
@@ -17,5 +19,8 @@ COPY vsftpd.sh /usr/sbin/
 RUN chmod +x /usr/sbin/vsftpd.sh
 
 EXPOSE 20 21
+
+HEALTHCHECK --interval=3s --retries=20 --timeout=1s \
+  CMD nc -z localhost 21
 
 ENTRYPOINT ["/usr/sbin/vsftpd.sh"]

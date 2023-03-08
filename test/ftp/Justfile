@@ -12,8 +12,8 @@ docker_image_version := "latest"
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
 server_port := "21"
 
-build:
-    docker build -t {{ docker_image }} .
+build +args="":
+    docker build {{ args }} --network=host -t {{ docker_image }} .
 
 _start dirname="." +args="-d":
     #!/bin/bash

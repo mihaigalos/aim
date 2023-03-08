@@ -10,7 +10,7 @@ user := "user"
 pass := "pass"
 
 build:
-    docker build --no-cache -t {{ docker_image }} .
+    docker build --no-cache --network=host -t {{ docker_image }} .
 
 _setup:
     @chmod 400 keys/*

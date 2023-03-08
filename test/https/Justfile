@@ -13,7 +13,7 @@ docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool 
 server_port := "8081"
 
 build:
-    docker build -t {{ docker_image }} .
+    docker build --network=host -t {{ docker_image }} .
 
 push:
     docker push {{ docker_image }}
