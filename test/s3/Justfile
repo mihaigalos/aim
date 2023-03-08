@@ -3,8 +3,14 @@ set positional-arguments := true
 default:
     @just --list
 
-build:
-    true
+tool := "minio"
+docker_container_registry := "docker.pkg.github.com"
+docker_user_repo := "mihaigalos/docker"
+docker_image_version := "latest"
+docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
+
+build +args="":
+    docker build {{ args }} -t {{ docker_image }} .
 
 test: _start && _stop
     #!/bin/bash
@@ -20,7 +26,7 @@ test: _start && _stop
 _start dirname="." +args="-d": _stop
     #!/bin/bash
     source ../common.sh
-    docker run -p 9000:9000 --name minio -e MINIO_CI_CD=1 -d minio/minio server /export && wait_docker "minio"
+    docker run -p 9000:9000 --name minio -e MINIO_CI_CD=1 -d {{ docker_image }} server /export && wait_docker "minio"
     docker run --rm --net=host -v $(realpath .mc):/root/.mc --entrypoint=mc minio/mc mb myminio/test-bucket
     docker run --rm --net=host -v $(realpath .mc):/root/.mc -v $(realpath .):/src --entrypoint=mc minio/mc cp /src/binary_file.tar.gz.part1 myminio/test-bucket/binary_file.tar.gz.part1
 
