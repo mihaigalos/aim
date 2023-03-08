@@ -13,7 +13,7 @@ docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool 
 server_port := "21"
 
 build +args="":
-    docker build {{ args }} -t {{ docker_image }} .
+    docker build {{ args }} --network=host -t {{ docker_image }} .
 
 _start dirname="." +args="-d":
     #!/bin/bash

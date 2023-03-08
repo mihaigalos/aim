@@ -10,7 +10,7 @@ docker_image_version := "latest"
 docker_image := docker_container_registry + "/" + docker_user_repo + "/" + tool + ":" + docker_image_version
 
 build +args="":
-    docker build {{ args }} -t {{ docker_image }} .
+    docker build {{ args }} --network=host -t {{ docker_image }} .
 
 test: _start && _stop
     #!/bin/bash

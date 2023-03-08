@@ -1,6 +1,6 @@
 FROM minio/minio
 
-RUN yum install nc
+RUN microdnf install nc
 
 HEALTHCHECK --interval=3s --retries=20 --timeout=1s \
   CMD nc -z localhost 9000

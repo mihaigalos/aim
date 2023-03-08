@@ -12,7 +12,7 @@ RUN mkdir -p /srv \
 
 EXPOSE 80
 HEALTHCHECK --interval=3s --retries=20 --timeout=1s \
-  CMD nc -z localhost 21
+  CMD nc -z localhost 80
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 

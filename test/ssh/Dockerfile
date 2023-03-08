@@ -4,7 +4,6 @@ RUN apk update &&\
     apk add \
         netcat-openbsd \
         python3 &&\
-    ln -s /usr/bin/python3 /usr/bin/python &&\
     which python &&\
     python --version
 
