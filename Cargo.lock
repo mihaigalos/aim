@@ -37,7 +37,7 @@ dependencies = [
  "async-stream",
  "async_ftp",
  "autoclap",
- "clap 4.1.9",
+ "clap 4.1.10",
  "crossbeam-utils",
  "custom_error",
  "dotenvy",
@@ -305,7 +305,7 @@ version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c5ef6366b4905691d83749db7d2d14d554b1a15863064ba138ca63a4e3f6130d"
 dependencies = [
- "clap 4.1.9",
+ "clap 4.1.10",
 ]
 
 [[package]]
@@ -491,9 +491,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.1.9"
+version = "4.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a9d6ada83c1edcce028902ea27dd929069c70df4c7600b131b4d9a1ad2879cc"
+checksum = "ce38afc168d8665cfc75c7b1dd9672e50716a137f433f070991619744a67342a"
 dependencies = [
  "bitflags",
  "clap_lex 0.3.1",
