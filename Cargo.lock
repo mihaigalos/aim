@@ -408,9 +408,9 @@ dependencies = [
 
 [[package]]
 name = "build_html"
-version = "2.3.0"
+version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3b34162fa805d68ae4d8e6d7015fa3d215eac0857caf23cc55f5b6d2b457a4a"
+checksum = "3108fe6fe7ac796fb7625bdde8fa2b67b5a7731496251ca57c7b8cadd78a16a1"
 
 [[package]]
 name = "bumpalo"
@@ -3244,9 +3244,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.8"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9eb0ba369d380847e1feb53881481273722139e3301c1d05112d76e466951772"
+checksum = "0f33c04e02f8f4eb6d3c32b58670fca56e4a9837b38d95ecf5b0aafd04db2267"
 dependencies = [
  "build_html",
  "chrono",
