@@ -43,7 +43,7 @@ netrc = "0.4.1"
 openssl = { version = "0.10.48", features = ["vendored"] }
 question = "0.2.2"
 regex = "1.7.3"
-reqwest = { version = "0.11.15", features = ["stream"] }
+reqwest = { version = "0.11.16", features = ["stream"] }
 rust-s3 = { version = "0.31.0", features = ["blocking"] }
 self_update = { version = "0.36.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.6"
