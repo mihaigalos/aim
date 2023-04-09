@@ -56,15 +56,17 @@ impl S3 {
     }
 
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
-        let (input, bucket) = S3::setup(input, bar.silent).await;
+        let (path, bucket) = S3::setup(input, bar.silent).await;
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open output file");
         
-        let response_data_stream = bucket.get_object_stream(input);
+        let mut response_data_stream = bucket.get_object_stream(path).await.unwrap();
+
         while let Some(chunk) = response_data_stream.bytes().next().await {
-            async_output_file.write_all(&chunk).await?;
+            async_output_file.write_all(&chunk).await.unwrap();
         }
+        
 
         Ok(())
     }
