@@ -9,6 +9,9 @@ use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
 
+use tokio::io::AsyncWriteExt;
+use tokio_stream::StreamExt;
+
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
@@ -57,10 +60,12 @@ impl S3 {
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open output file");
-        let _ = bucket
-            .get_object_stream(input, &mut async_output_file)
-            .await
-            .unwrap();
+        
+        let response_data_stream = bucket.get_object_stream(input);
+        while let Some(chunk) = response_data_stream.bytes().next().await {
+            async_output_file.write_all(&chunk).await?;
+        }
+
         Ok(())
     }
 
@@ -69,7 +74,7 @@ impl S3 {
         let io = S3::get_path_in_bucket(&parsed_address);
         let bucket = S3::get_bucket(&parsed_address);
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-        let fqdn = transport.to_string() + &parsed_address.server;
+        let fqdn = transport.to_string() + &parsed_address.server[..];
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let (username, password) = S3::get_credentials(&parsed_address, silent);
         let backend = S3::new_storage(&bucket_kind, &username, &password, bucket, &fqdn);
@@ -188,8 +193,8 @@ impl S3 {
         destination_file: &str,
         string: &str,
     ) -> Result<(), S3Error> {
-        let (_, _) = bucket.delete_object(destination_file).await?;
-        let (_, _) = bucket
+        let _ = bucket.delete_object(destination_file).await?;
+        let _ = bucket
             .put_object(destination_file, string.as_bytes())
             .await?;
 
@@ -197,8 +202,8 @@ impl S3 {
     }
 
     async fn _get_string(bucket: &Bucket, source_file: &str) -> Result<String, S3Error> {
-        let (data, _) = bucket.get_object(source_file).await?;
-        let string = str::from_utf8(&data)?;
+        let data = bucket.get_object(source_file).await?;
+        let string = str::from_utf8(data.as_slice())?;
         Ok(string.to_string())
     }
 
@@ -221,6 +226,7 @@ impl S3 {
                     secret_key: Some(secret_key.to_owned()),
                     security_token: None,
                     session_token: None,
+                    expiration: None,
                 },
                 _bucket: bucket.to_string(),
                 _location_supported: false,
@@ -233,6 +239,7 @@ impl S3 {
                     secret_key: Some(secret_key.to_owned()),
                     security_token: None,
                     session_token: None,
+                    expiration: None,
                 },
                 _bucket: bucket.to_string(),
                 _location_supported: true,
@@ -245,6 +252,7 @@ impl S3 {
                     secret_key: Some(secret_key.to_owned()),
                     security_token: None,
                     session_token: None,
+                    expiration: None,
                 },
                 _bucket: bucket.to_string(),
                 _location_supported: false,

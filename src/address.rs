@@ -89,7 +89,7 @@ impl ParsedAddress {
 
                 let mut name = netrc_name.to_string();
                 if let Some(port) = machine.port {
-                    name = name + ":" + &port.to_string();
+                    name = name + ":" + &port.to_string()[..];
                 }
                 if server == name {
                     user = machine.login.clone();
