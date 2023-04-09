@@ -168,9 +168,9 @@ impl SFTPHandler {
         }
 
         let remote_file = String::from("/")
-            + &parsed_address.path_segments.join("/")
+            + &parsed_address.path_segments.join("/")[..]
             + "/"
-            + &parsed_address.file;
+            + &parsed_address.file[..];
         (session, remote_file)
     }
 

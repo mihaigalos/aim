@@ -58,7 +58,7 @@ impl HTTPSHandler {
         let response = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
-            .header("Range", "bytes=".to_owned() + &uploaded.to_string() + "-")
+            .header("Range", "bytes=".to_owned() + &uploaded.to_string()[..] + "-")
             .header(
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
@@ -119,7 +119,7 @@ impl HTTPSHandler {
 
         let res = Client::new()
             .get(input)
-            .header("Range", "bytes=".to_owned() + &downloaded.to_string() + "-")
+            .header("Range", "bytes=".to_owned() + &downloaded.to_string()[..] + "-")
             .header(
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
