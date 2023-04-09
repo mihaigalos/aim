@@ -9,9 +9,6 @@ use s3::creds::Credentials;
 use s3::error::S3Error;
 use s3::region::Region;
 
-use tokio::io::AsyncWriteExt;
-use tokio_stream::StreamExt;
-
 use crate::address::ParsedAddress;
 use crate::bar::WrappedBar;
 use crate::consts::*;
@@ -55,18 +52,13 @@ impl S3 {
         Ok(())
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), HTTPHeaderError> {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), S3Error> {
         let (path, bucket) = S3::setup(input, bar.silent).await;
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open output file");
         
-        let mut response_data_stream = bucket.get_object_stream(path).await.unwrap();
-
-        while let Some(chunk) = response_data_stream.bytes().next().await {
-            async_output_file.write_all(&chunk).await.unwrap();
-        }
-        
+        bucket.get_object_to_writer(&path, &mut async_output_file).await?;
 
         Ok(())
     }

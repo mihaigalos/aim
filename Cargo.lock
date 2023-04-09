@@ -62,7 +62,6 @@ dependencies = [
  "ssh2",
  "strfmt",
  "tokio",
- "tokio-stream",
  "tokio-util",
  "untildify",
  "url-parse",
