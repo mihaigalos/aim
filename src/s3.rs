@@ -311,7 +311,7 @@ mod tests {
         let bucket = S3::get_bucket(&parsed_address);
 
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-        let fqdn = transport.to_string() + &parsed_address.server;
+        let fqdn = transport.to_string() + &parsed_address.server[..];
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let backend = S3::new_storage(
             &bucket_kind,
@@ -345,7 +345,7 @@ mod tests {
         let bucket = S3::get_bucket(&parsed_address);
 
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-        let fqdn = transport.to_string() + &parsed_address.server;
+        let fqdn = transport.to_string() + &parsed_address.server[..];
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let backend = S3::new_storage(
             &bucket_kind,
@@ -385,7 +385,7 @@ mod tests {
         let bucket = S3::get_bucket(&parsed_address);
 
         let transport = S3::_get_transport::<TLS, QuestionWrapped>(&parsed_address.server);
-        let fqdn = transport.to_string() + &parsed_address.server;
+        let fqdn = transport.to_string() + &parsed_address.server[..];
         let bucket_kind = S3::_get_header(&fqdn, HTTP_HEADER_SERVER).await.unwrap();
         let backend = S3::new_storage(
             &bucket_kind,
