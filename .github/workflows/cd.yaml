@@ -27,10 +27,10 @@ jobs:
         id: set-outputs
         run: |
           set -eu pipefail
-          echo "::set-output name=description::$(grep ^description Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')"
-          echo "::set-output name=homepage::$(grep ^repository Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')"
-          echo "::set-output name=maintainer::$(grep ^authors Cargo.toml | cut -d'=' -f2 | sed -e 's/[][]//g' -e 's/\s*//' -e 's/\"//g')"
-          echo "::set-output name=project-name::$(grep ^name Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')"
+          echo "description=$(grep ^description Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "homepage=$(grep ^repository Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "maintainer=$(grep ^authors Cargo.toml | cut -d'=' -f2 | sed -e 's/[][]//g' -e 's/\s*//' -e 's/\"//g')" >> $GITHUB_OUTPUT
+          echo "project-name=$(grep ^name Cargo.toml | cut -d'=' -f2 | sed -e 's/\s*//' -e 's/\"//g')" >> $GITHUB_OUTPUT
 
   cd:
     uses: mihaigalos/workflows/.github/workflows/rust-cd.yaml@main
