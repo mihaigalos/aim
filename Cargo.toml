@@ -50,7 +50,7 @@ sha2 = "0.10.6"
 skim-navi = "0.1.10"
 ssh2 = "0.9.3"
 strfmt = "0.2.4"
-tokio = { version = "1.27.0", features = ["full"] }
+tokio = { version = "1.28.0", features = ["full"] }
 tokio-util = {version="0.7.8", features = ["full"]}
 untildify = "0.1.1"
 url-parse = "1.0.5"
