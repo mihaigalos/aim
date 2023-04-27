@@ -3298,9 +3298,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.11"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff3571fa12c9b7383dab3e3afcc5d29501477f6bc455860a14342fded962767e"
+checksum = "b3847a8062ff492940f9417ce73440520434c9febbcd3572e0293b6c2793b50f"
 dependencies = [
  "build_html",
  "chrono",
