@@ -6,7 +6,6 @@ use crate::slicer::Slicer;
 
 use futures::future::BoxFuture;
 use melt::decompress;
-use std::future::Future;
 use std::io;
 use std::io::Error;
 
@@ -50,9 +49,7 @@ impl<'a> Handlers<'a> {
     }
 }
 
-fn schema_handlers<'a, Fut>() -> HashMap<&'a str, Handlers<'a>>
-where
-    Fut: Future<Output = GetPutResult> + 'a + ?Sized,
+fn schema_handlers<'a>() -> HashMap<&'a str, Handlers<'a>>
 {
     let mut m = HashMap::<&str, Handlers>::new();
 
@@ -132,7 +129,7 @@ impl Driver {
         };
 
         let scheme = Driver::extract_scheme_or_panic(input);
-        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+        let schema_handlers = schema_handlers();
         (schema_handlers[scheme.0].get_handler)(input, output, bar, expected_sha256).await?;
 
         if is_decompress_requested {
@@ -144,7 +141,7 @@ impl Driver {
 
     async fn put(input: &str, output: &str, bar: WrappedBar) -> io::Result<()> {
         let scheme = Driver::extract_scheme_or_panic(output);
-        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+        let schema_handlers = schema_handlers();
         (schema_handlers[scheme.0].put_handler)(input, output, bar).await?;
         Ok(())
     }
@@ -193,7 +190,7 @@ impl Driver {
     #[cfg(not(tarpaulin_include))]
     async fn navigate(input: &str, options: &Options) -> String {
         let scheme = Driver::extract_scheme(input);
-        let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+        let schema_handlers = schema_handlers();
         let path = match options.interactive {
             false => "".to_string(),
             true => Navi::run(input, &schema_handlers[scheme.0].list_handler)
@@ -639,7 +636,7 @@ async fn test_http_serve_folder_works_when_typical() {
 
 #[tokio::test]
 async fn test_hashed_handlers_created_correctly_when_typical() {
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     for item in ["http", "https", "ftp", "sftp", "ssh", "s3"] {
         assert!(schema_handlers.contains_key(item));
@@ -650,7 +647,7 @@ async fn test_hashed_handlers_created_correctly_when_typical() {
 async fn test_hashed_handlers_https_list_works_when_typical() {
     let input = "https://github.com/XAMPPRocky/tokei/releases/";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
@@ -660,7 +657,7 @@ async fn test_hashed_handlers_https_list_works_when_typical() {
 async fn test_hashed_handlers_http_list_works_when_typical() {
     let input = "http://github.com/XAMPPRocky/tokei/releases/";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
@@ -671,7 +668,7 @@ async fn test_hashed_handlers_http_list_works_when_typical() {
 async fn test_hashed_handlers_ftp_list_works_when_typical() {
     let input = "ftp://unimplemented";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
@@ -682,7 +679,7 @@ async fn test_hashed_handlers_ftp_list_works_when_typical() {
 async fn test_hashed_handlers_sftp_list_works_when_typical() {
     let input = "sftp://unimplemented";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
@@ -693,7 +690,7 @@ async fn test_hashed_handlers_sftp_list_works_when_typical() {
 async fn test_hashed_handlers_ssh_list_works_when_typical() {
     let input = "ssh://unimplemented";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
@@ -704,7 +701,7 @@ async fn test_hashed_handlers_ssh_list_works_when_typical() {
 async fn test_hashed_handlers_s3_list_works_when_typical() {
     let input = "s3://unimplemented";
     let scheme = Driver::extract_scheme_or_panic(input);
-    let schema_handlers = schema_handlers::<dyn Future<Output = GetPutResult>>();
+    let schema_handlers = schema_handlers();
 
     let result = (schema_handlers[scheme.0].list_handler)(input.to_string()).await;
     assert!(result.is_ok());
