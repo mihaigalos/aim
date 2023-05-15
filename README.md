@@ -125,6 +125,8 @@ Several output formats can be specified:
 ### Sharing a folder
 `aim` can serve a folder over `http` on one device so that you can download it on another. By default, the serving port is `8080` or the next free port.
 
+You can optionally set the `AIM_HOSTING_PORT` environment variable in your shell or `.env` file for a specific port.
+
 `Machine A`
 ```bash
 aim . # to serve current folder
@@ -158,6 +160,7 @@ AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transfering {url}"
 AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
 AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
 AIM_PROGRESSBAR_UPLOADED_MESSAGE="🎯 Uploaded {input} to {output}"
+AIM_HOSTING_PORT=8080
 ```
 
 By default, no progressbar is displayed if content length <1MB (easy display contents of remote).
