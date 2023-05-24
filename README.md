@@ -4,8 +4,7 @@
 [![Security Audit](https://github.com/mihaigalos/aim/actions/workflows/audit.yaml/badge.svg)](https://github.com/mihaigalos/aim/actions/workflows/audit.yaml)
 [![codecov](https://codecov.io/gh/mihaigalos/aim/branch/main/graph/badge.svg?token=CYCF96JIOH)](https://codecov.io/gh/mihaigalos/aim)
 [![crates.io](https://img.shields.io/crates/d/aim.svg)](https://crates.io/crates/aim)
-[![docker pulls](https://img.shields.io/docker/pulls/mihaigalos/aim)](https://hub.docker.com/r/mihaigalos/aim)
-[![LoC](https://tokei.rs/b1/github/mihaigalos/aim)](https://github.com/mihaigalos/aim)
+![](https://img.shields.io/docker/image-size/mihaigalos/aim/latest?logo=Docker)
 
 A command line download/upload tool with resume.
 
