@@ -32,6 +32,9 @@ test: build
         popd > /dev/null
     done
 
+setup_precommit:
+    [ -x "$(which pre-commit)" ] && pip3 install pre-commit && pre-commit install --hook-type=pre-push || true
+
 setup_dockerize:
     #!/bin/bash
     sudo apt update
