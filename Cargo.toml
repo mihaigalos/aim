@@ -2,7 +2,7 @@
 name = "aim"
 version = "1.8.3"
 edition = "2021"
-authors = ["Mihai Galos <mihaigalos@gmail.com>"]
+authors = ["Mihai Galos <mihai@galos.one>"]
 description = "🎯 A command line download/upload tool with resume."
 categories = [
     "HTTP client",
