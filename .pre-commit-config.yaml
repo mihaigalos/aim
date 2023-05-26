@@ -5,11 +5,11 @@ repos:
       hooks:
           - id: check-yaml
           - id: trailing-whitespace
-    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    - repo: https://github.com/mihaigalos/pre-commit-hook-yamlfmt
       rev: 0.2.3
       hooks:
           - id: yamlfmt
-    - repo: https://github.com/doublify/pre-commit-rust
+    - repo: https://github.com/mihaigalos/pre-commit-rust
       rev: v1.0
       hooks:
           - id: cargo-check
