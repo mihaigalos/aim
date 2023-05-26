@@ -57,8 +57,10 @@ impl S3 {
         let mut async_output_file = tokio::fs::File::create(output) //TODO: when s3 provider crate has stream support implementing futures_core::stream::Stream used in resume, use io.rs::get_output() instead.
             .await
             .expect("Unable to open output file");
-        
-        bucket.get_object_to_writer(&path, &mut async_output_file).await?;
+
+        bucket
+            .get_object_to_writer(&path, &mut async_output_file)
+            .await?;
 
         Ok(())
     }

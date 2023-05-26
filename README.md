@@ -83,7 +83,7 @@ cargo install aim
 * support for `http(s)`, `(s)ftp`, `ssh`, `s3` (no resume at the moment).
 
 ### Optional check of sha256
-To validate that a download matches a desired checksum, just list it at the end when invoking `aim`. 
+To validate that a download matches a desired checksum, just list it at the end when invoking `aim`.
 ```rust
 aim https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz . 0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b
 ```
@@ -234,7 +234,7 @@ docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.g
 cd $(mktemp -d)
 echo hello > myfile
 docker run --rm -it -v $(pwd):/src --user $UID:$UID -p 8080:8080 mihaigalos/aim /src
-``` 
+```
 ### Downloading on machine B
 
 Adapt IP to match that of machine `A`.

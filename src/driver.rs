@@ -49,8 +49,7 @@ impl<'a> Handlers<'a> {
     }
 }
 
-fn schema_handlers<'a>() -> HashMap<&'a str, Handlers<'a>>
-{
+fn schema_handlers<'a>() -> HashMap<&'a str, Handlers<'a>> {
     let mut m = HashMap::<&str, Handlers>::new();
 
     m.insert(

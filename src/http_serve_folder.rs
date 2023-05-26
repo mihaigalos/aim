@@ -14,7 +14,7 @@ impl WarpyWrapper {
         let ip = [0, 0, 0, 0];
         let port: Option<u16> = match &env::var("AIM_HOSTING_PORT") {
             Ok(e) => Some(e.parse::<u16>().unwrap()),
-            Err(_) => DEFAULT_AIM_HOSTING_PORT
+            Err(_) => DEFAULT_AIM_HOSTING_PORT,
         };
         let footer = format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         warpy::server::run(folder, ip, footer, port, false).await?;

@@ -58,7 +58,10 @@ impl HTTPSHandler {
         let response = reqwest::Client::new()
             .put(output)
             .header("content-type", "application/octet-stream")
-            .header("Range", "bytes=".to_owned() + &uploaded.to_string()[..] + "-")
+            .header(
+                "Range",
+                "bytes=".to_owned() + &uploaded.to_string()[..] + "-",
+            )
             .header(
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
@@ -119,7 +122,10 @@ impl HTTPSHandler {
 
         let res = Client::new()
             .get(input)
-            .header("Range", "bytes=".to_owned() + &downloaded.to_string()[..] + "-")
+            .header(
+                "Range",
+                "bytes=".to_owned() + &downloaded.to_string()[..] + "-",
+            )
             .header(
                 reqwest::header::USER_AGENT,
                 reqwest::header::HeaderValue::from_static(CLIENT_ID),
@@ -209,7 +215,7 @@ async fn list_works_when_typical() {
         margin: 0;
         padding: 0;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-        
+
     }
     div {
         width: 600px;
@@ -229,7 +235,7 @@ async fn list_works_when_typical() {
             width: auto;
         }
     }
-    </style>    
+    </style>
 </head>
 
 <body>
