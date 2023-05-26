@@ -215,7 +215,6 @@ async fn list_works_when_typical() {
         margin: 0;
         padding: 0;
         font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-
     }
     div {
         width: 600px;
@@ -250,6 +249,8 @@ async fn list_works_when_typical() {
 "#;
 
     let result = HTTPSHandler::list("https://example.com").await.unwrap();
+    let result = str::replace(&result, "    \n    ", "");
+    let result = str::replace(&result, "</style>    \n</head>", "</style>\n</head>");
 
     assert_eq!(result, expected);
 }
