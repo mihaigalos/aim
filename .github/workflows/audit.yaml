@@ -1,20 +1,19 @@
----
 name: Security Audit
 
 on:
-    schedule:
-        - cron: 0 */72 * * *
-    push:
-        paths:
-            - '**/Cargo.lock'
-            - '**/Cargo.toml'
-            - '**/audit.toml'
-            - .github/workflows/audit.yaml
+  schedule:
+  - cron: 0 */72 * * *
+  push:
+    paths:
+    - '**/Cargo.lock'
+    - '**/Cargo.toml'
+    - '**/audit.toml'
+    - .github/workflows/audit.yaml
 
-    workflow_dispatch: # Run with Run Workflow button in GitHub Action Job, set debug_enabled=true for interactive ssh session.
+  workflow_dispatch:   # Run with Run Workflow button in GitHub Action Job, set debug_enabled=true for interactive ssh session.
 
 jobs:
-    audit:
-        uses: mihaigalos/workflows/.github/workflows/rust-audit.yaml@main
+  audit:
+    uses: mihaigalos/workflows/.github/workflows/rust-audit.yaml@main
 
 
