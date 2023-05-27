@@ -5,7 +5,7 @@ use std::env;
 use strfmt::strfmt;
 
 const DEFAULT_AIM_PROGRESSBAR_DOWNLOADED_MESSAGE: &str = "🎯 Downloaded {input} to {output}";
-const DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT: &str = "🎯 Transfering {url}";
+const DEFAULT_AIM_PROGRESSBAR_MESSAGE_FORMAT: &str = "🎯 Transferring {url}";
 const DEFAULT_AIM_PROGRESSBAR_PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
 const DEFAULT_AIM_PROGRESSBAR_TEMPLATE: &str = "{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}.";
 const DEFAULT_AIM_PROGRESSBAR_UPLOADED_MESSAGE: &str = "🎯 Uploaded {input} to {output}";

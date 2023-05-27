@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Write;
 
 fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
-    let mut transfered: u64 = 0;
+    let mut transferred: u64 = 0;
     let mut file = None;
     if path != "stdout" {
         if std::path::Path::new(path).exists() {
@@ -18,7 +18,7 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             );
 
             let file_size = std::fs::metadata(path).unwrap().len();
-            transfered = file_size;
+            transferred = file_size;
         } else {
             if !silent {
                 println!("Writing to new file.");
@@ -30,17 +30,17 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             );
         }
     }
-    (file, transfered)
+    (file, transferred)
 }
 
 pub fn get_output(path: &str, silent: bool) -> (Box<dyn Write + Send>, u64) {
-    let (file, transfered) = get_output_file(path, silent);
+    let (file, transferred) = get_output_file(path, silent);
     let output: Box<dyn Write + Send> = Box::new(std::io::BufWriter::new(match path {
         "stdout" => Box::new(std::io::stdout()) as Box<dyn Write + Send>,
         _ => Box::new(file.unwrap()) as Box<dyn Write + Send>,
     }));
 
-    (output, transfered)
+    (output, transferred)
 }
 
 #[test]
