@@ -20,5 +20,6 @@ repos:
   hooks:
   - id: codespell
     args:
+    - --check-filenames
     - --ignore-words-list=crate
     - --write-changes
