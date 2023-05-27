@@ -155,7 +155,7 @@ By default, a progressbar is displayed when up/downloading. The indicators can b
 You can change the display template and progress chars by either setting correct environment variables or creating a `.env` file in the folder you are calling from:
 ```bash
 AIM_PROGRESSBAR_DOWNLOADED_MESSAGE="🎯 Downloaded {input} to {output}"
-AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transfering {url}"
+AIM_PROGRESSBAR_MESSAGE_FORMAT="🎯 Transferring {url}"
 AIM_PROGRESSBAR_PROGRESS_CHARS="=>-"
 AIM_PROGRESSBAR_TEMPLATE="{msg}\n{spinner:.cyan}  {elapsed_precise} ▕{bar:.white}▏ {bytes}/{total_bytes}  {bytes_per_sec}  ETA {eta}."
 AIM_PROGRESSBAR_UPLOADED_MESSAGE="🎯 Uploaded {input} to {output}"

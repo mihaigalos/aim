@@ -34,7 +34,7 @@ impl SFTPHandler {
     }
     async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
         let (session, remote_file) = SFTPHandler::setup_session(input, bar.silent).await;
-        let (mut out, mut transfered) = get_output(output, bar.silent);
+        let (mut out, mut transferred) = get_output(output, bar.silent);
         let sftp = session.sftp().await.unwrap();
         let stat = sftp
             .stat(Path::new(&remote_file))
@@ -48,7 +48,7 @@ impl SFTPHandler {
         bar.set_length(total_size);
 
         remote_file
-            .seek(SeekFrom::Current(transfered as i64))
+            .seek(SeekFrom::Current(transferred as i64))
             .await
             .expect("Cannot seek in SFTP file");
         loop {
@@ -62,8 +62,8 @@ impl SFTPHandler {
                 out.write_all(&buffer)
                     .map_err(|_| "Error while writing to output")
                     .unwrap();
-                let new = min(transfered + (byte_count as u64), total_size);
-                transfered = new;
+                let new = min(transferred + (byte_count as u64), total_size);
+                transferred = new;
                 bar.set_position(new);
             } else {
                 break;
@@ -85,7 +85,7 @@ impl SFTPHandler {
         let (session, remote_file) = SFTPHandler::setup_session(output, bar.silent).await;
         let sftp = session.sftp().await.unwrap();
         let stat = sftp.stat(Path::new(&remote_file)).await;
-        let (mut remote_file, mut transfered) = match stat {
+        let (mut remote_file, mut transferred) = match stat {
             Ok(v) => (
                 sftp.open(Path::new(&remote_file))
                     .await
@@ -94,13 +94,13 @@ impl SFTPHandler {
             ),
             Err(_) => (sftp.create(Path::new(&remote_file)).await.unwrap(), 0),
         };
-        bar.set_length(transfered);
+        bar.set_length(transferred);
 
         remote_file
-            .seek(SeekFrom::Current(transfered as i64))
+            .seek(SeekFrom::Current(transferred as i64))
             .await
             .expect("Cannot seek in remote SFTP file");
-        file.seek(SeekFrom::Current(transfered as i64))
+        file.seek(SeekFrom::Current(transferred as i64))
             .await
             .expect("Cannot seek in local file");
         loop {
@@ -115,8 +115,8 @@ impl SFTPHandler {
                     .write_all(&buffer)
                     .await
                     .expect("Cannot write local file stream");
-                let new = min(transfered + (byte_count as u64), total_size);
-                transfered = new;
+                let new = min(transferred + (byte_count as u64), total_size);
+                transferred = new;
                 bar.set_position(new);
             } else {
                 break;
@@ -163,7 +163,7 @@ impl SFTPHandler {
             }
 
             if !is_ok {
-                println!("SFTP Authentication failed. Please specifiy a user: sftp://user@address");
+                println!("SFTP Authentication failed. Please specify a user: sftp://user@address");
             }
         }
 

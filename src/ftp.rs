@@ -14,12 +14,12 @@ use crate::io::get_output;
 
 pub struct FTPHandler {
     pub output: Box<dyn Write>,
-    pub transfered: u64,
+    pub transferred: u64,
 }
 
 struct FTPGetProperties {
     out: Box<dyn Write + Send>,
-    transfered: u64,
+    transferred: u64,
     total_size: u64,
     reader: tokio::io::BufReader<async_ftp::DataStream>,
 }
@@ -40,10 +40,10 @@ impl FTPHandler {
         output: &str,
         bar: &mut WrappedBar,
     ) -> Result<FTPGetProperties, Box<dyn std::error::Error>> {
-        let (out, transfered) = get_output(output, bar.silent);
+        let (out, transferred) = get_output(output, bar.silent);
 
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
-        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
+        let mut ftp_stream = FTPHandler::get_stream(transferred, &parsed_address)
             .await
             .expect("Cannot get FTP stream");
         let total_size = ftp_stream
@@ -59,7 +59,7 @@ impl FTPHandler {
             .expect("Cannot download file via FTP");
         Ok(FTPGetProperties {
             out,
-            transfered,
+            transferred,
             total_size,
             reader,
         })
@@ -83,10 +83,10 @@ impl FTPHandler {
                     .map_err(|_| "Error while writing to output.")
                     .unwrap();
                 let new = min(
-                    properties.transfered + (byte_count as u64),
+                    properties.transferred + (byte_count as u64),
                     properties.total_size,
                 );
-                properties.transfered = new;
+                properties.transferred = new;
                 bar.set_position(new);
             } else {
                 break;
@@ -108,17 +108,17 @@ impl FTPHandler {
             .len();
 
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
-        let transfered = FTPHandler::get_already_uploaded(output, bar.silent).await;
-        file.seek(SeekFrom::Current(transfered as i64))
+        let transferred = FTPHandler::get_already_uploaded(output, bar.silent).await;
+        file.seek(SeekFrom::Current(transferred as i64))
             .await
             .expect("Cannot seek in SFTP file");
-        let mut ftp_stream = FTPHandler::get_stream(transfered, &parsed_address)
+        let mut ftp_stream = FTPHandler::get_stream(transferred, &parsed_address)
             .await
             .expect("Cannot get stream");
         let mut reader_stream = ReaderStream::new(file);
 
         bar.set_length(total_size);
-        let mut uploaded = transfered;
+        let mut uploaded = transferred;
 
         let async_stream = async_stream::stream! {
             while let Some(chunk) = reader_stream.next().await {
@@ -168,7 +168,7 @@ impl FTPHandler {
     }
 
     async fn get_stream(
-        transfered: u64,
+        transferred: u64,
         parsed_address: &ParsedAddress,
     ) -> Result<async_ftp::FtpStream, async_ftp::FtpError> {
         let mut ftp_stream = FtpStream::connect((parsed_address).server.clone())
@@ -191,9 +191,9 @@ impl FTPHandler {
             .await
             .expect("Cannot set transfer type to binary");
         ftp_stream
-            .restart_from(transfered)
+            .restart_from(transferred)
             .await
-            .expect("Cannot restart transfer from already transfered byte count");
+            .expect("Cannot restart transfer from already transferred byte count");
         Ok(ftp_stream)
     }
 

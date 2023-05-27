@@ -15,3 +15,8 @@ repos:
   - id: cargo-check
   - id: clippy
   - id: fmt
+- repo: https://github.com/mihaigalos/codespell
+  rev: v2.2.4
+  hooks:
+  - id: codespell
+    args: [--ignore-words-list=crate]

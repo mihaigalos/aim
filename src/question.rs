@@ -11,7 +11,7 @@ pub struct QuestionWrapped;
 #[cfg(not(debug_assertions))]
 impl QuestionTrait for QuestionWrapped {
     fn yes_no() -> bool {
-        Question::new("Unsecure HTTP host. Continue? [Y/n]")
+        Question::new("Insecure HTTP host. Continue? [Y/n]")
             .default(Answer::YES)
             .confirm()
             == Answer::YES
