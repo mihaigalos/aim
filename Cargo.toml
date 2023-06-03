@@ -45,7 +45,7 @@ question = "0.2.2"
 regex = "1.8.3"
 reqwest = { version = "0.11.18", features = ["stream"] }
 rust-s3 = { version = "0.33.0", features = ["blocking", "with-tokio"] }
-self_update = { version = "0.36.0", features = ["archive-tar", "compression-flate2"] }
+self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.6"
 skim-navi = "0.1.10"
 ssh2 = "0.9.3"
