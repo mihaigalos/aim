@@ -42,7 +42,7 @@ native-tls = "0.2"
 netrc = "0.4.1"
 openssl = { version = "0.10.54", features = ["vendored"] }
 question = "0.2.2"
-regex = "1.8.3"
+regex = "1.8.4"
 reqwest = { version = "0.11.18", features = ["stream"] }
 rust-s3 = { version = "0.33.0", features = ["blocking", "with-tokio"] }
 self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
