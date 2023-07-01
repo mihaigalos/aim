@@ -27,8 +27,8 @@ async-std = "1.12.0"
 async-stream = "0.3.5"
 async_ftp = "6.0.0"
 autoclap = "0.3.15"
-clap = { version = "4.3.3", features = ["cargo", "string"] }
-crossbeam-utils = "0.8.15"
+clap = { version = "4.3.10", features = ["cargo", "string"] }
+crossbeam-utils = "0.8.16"
 custom_error = "1.9.2"
 dotenvy = "0.15.7"
 futures = "0.3"
@@ -36,26 +36,26 @@ futures-util = "0.3.28"
 http = "0.2.9"
 indicatif = "0.17.5"
 lazy_static = "1.4.0"
-log = "0.4.18"
+log = "0.4.19"
 melt = "0.1.6"
 native-tls = "0.2"
 netrc = "0.4.1"
-openssl = { version = "0.10.54", features = ["vendored"] }
+openssl = { version = "0.10.55", features = ["vendored"] }
 question = "0.2.2"
 regex = "1.8.4"
 reqwest = { version = "0.11.18", features = ["stream"] }
 rust-s3 = { version = "0.33.0", features = ["blocking", "with-tokio"] }
 self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
-sha2 = "0.10.6"
+sha2 = "0.10.7"
 skim-navi = "0.1.10"
 ssh2 = "0.9.3"
 strfmt = "0.2.4"
-tokio = { version = "1.28.2", features = ["full"] }
+tokio = { version = "1.29.1", features = ["full"] }
 tokio-util = {version="0.7.8", features = ["full"]}
 untildify = "0.1.1"
 url-parse = "1.0.6"
-uuid = { version = "1.3", features = ["v4"] }
-warpy = "0.3.17"
+uuid = { version = "1.4", features = ["v4"] }
+warpy = "0.3.21"
 
 [dev-dependencies]
 serial_test = "2.0.0"
