@@ -5,17 +5,20 @@ repos:
   - id: check-yaml
     args: [--allow-multiple-documents]
   - id: trailing-whitespace
+
 - repo: https://github.com/mihaigalos/language-formatters-pre-commit-hooks
   rev: v2.9.0
   hooks:
   - id: pretty-format-yaml
     args: [--autofix, --indent, '2']
+
 - repo: https://github.com/mihaigalos/pre-commit-rust
   rev: v1.0
   hooks:
   - id: cargo-check
   - id: clippy
   - id: fmt
+
 - repo: https://github.com/mihaigalos/codespell
   rev: v2.2.4
   hooks:
