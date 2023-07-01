@@ -48,7 +48,7 @@ rust-s3 = { version = "0.33.0", features = ["blocking", "with-tokio"] }
 self_update = { version = "0.37.0", features = ["archive-tar", "compression-flate2"] }
 sha2 = "0.10.7"
 skim-navi = "0.1.10"
-ssh2 = "0.9.3"
+ssh2 = "0.9.4"
 strfmt = "0.2.4"
 tokio = { version = "1.29.1", features = ["full"] }
 tokio-util = {version="0.7.8", features = ["full"]}
