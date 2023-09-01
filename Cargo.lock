@@ -520,9 +520,9 @@ checksum = "17cc5e6b5ab06331c33589842070416baa137e8b0eb912b008cfd4a78ada7919"
 
 [[package]]
 name = "chrono"
-version = "0.4.26"
+version = "0.4.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ec837a71355b28f6556dbd569b37b3f363091c0bd4b2e735674521b4c5fd9bc5"
+checksum = "95ed24df0632f708f5f6d8082675bef2596f7084dee3dd55f632290bf35bfe0f"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -530,7 +530,7 @@ dependencies = [
  "num-traits",
  "time 0.1.45",
  "wasm-bindgen",
- "winapi",
+ "windows-targets 0.48.5",
 ]
 
 [[package]]
@@ -3324,9 +3324,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.25"
+version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfeb11b8f225d06d018bec03d4b99eb3b133e9e6c5f209e53aade8aee8244b2c"
+checksum = "b2cc1edd3591446e0b9baaef21aabd8613bb999f924c52932da24108ad513ffe"
 dependencies = [
  "build_html",
  "chrono",
