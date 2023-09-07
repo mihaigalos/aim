@@ -10,7 +10,7 @@ RUN apk update \
 
 COPY . /src
 
-RUN rustup update 1.64 && rustup default 1.64
+RUN rustup update 1.70 && rustup default 1.70
 
 RUN cd /src \
     && sed -i -e "s/openssl.*=.*//" Cargo.toml \
