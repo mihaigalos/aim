@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "aim"
-version = "1.8.3"
+version = "1.8.4"
 dependencies = [
  "async-ssh2-lite",
  "async-std",
@@ -381,7 +381,7 @@ dependencies = [
  "rust-ini",
  "serde",
  "thiserror",
- "time 0.3.26",
+ "time",
  "url",
 ]
 
@@ -520,15 +520,14 @@ checksum = "17cc5e6b5ab06331c33589842070416baa137e8b0eb912b008cfd4a78ada7919"
 
 [[package]]
 name = "chrono"
-version = "0.4.28"
+version = "0.4.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95ed24df0632f708f5f6d8082675bef2596f7084dee3dd55f632290bf35bfe0f"
+checksum = "defd4e7873dbddba6c7c91e199c7fcb946abc4a6a4ac3195400bcfb01b5de877"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
  "js-sys",
  "num-traits",
- "time 0.1.45",
  "wasm-bindgen",
  "windows-targets 0.48.5",
 ]
@@ -1218,7 +1217,7 @@ checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
 dependencies = [
  "cfg-if",
  "libc",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
 ]
 
 [[package]]
@@ -1712,7 +1711,7 @@ checksum = "927a765cd3fc26206e66b296465fa9d3e5ab003e651c1b3c060e7956d96b19d2"
 dependencies = [
  "libc",
  "log",
- "wasi 0.11.0+wasi-snapshot-preview1",
+ "wasi",
  "windows-sys 0.48.0",
 ]
 
@@ -2175,7 +2174,7 @@ checksum = "4954fbc00dcd4d8282c987710e50ba513d351400dbdd00e803a05172a90d8976"
 dependencies = [
  "pem",
  "ring",
- "time 0.3.26",
+ "time",
  "yasna",
 ]
 
@@ -2329,7 +2328,7 @@ dependencies = [
  "serde_derive",
  "sha2",
  "thiserror",
- "time 0.3.26",
+ "time",
  "tokio",
  "tokio-stream",
  "url",
@@ -2659,7 +2658,7 @@ dependencies = [
  "rayon",
  "regex",
  "shlex",
- "time 0.3.26",
+ "time",
  "timer",
  "tuikit",
  "unicode-width",
@@ -2909,17 +2908,6 @@ checksum = "3fdd6f064ccff2d6567adcb3873ca630700f00b5ad3f060c25b5dcfd9a4ce152"
 dependencies = [
  "cfg-if",
  "once_cell",
-]
-
-[[package]]
-name = "time"
-version = "0.1.45"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b797afad3f312d1c66a56d11d0316f916356d11bd158fbc6ca6389ff6bf805a"
-dependencies = [
- "libc",
- "wasi 0.10.0+wasi-snapshot-preview1",
- "winapi",
 ]
 
 [[package]]
@@ -3336,9 +3324,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.27"
+version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2cc1edd3591446e0b9baaef21aabd8613bb999f924c52932da24108ad513ffe"
+checksum = "c6663aa9d1321eb815fee2e43df0f8f162510194dc126ce937644425cc01fefe"
 dependencies = [
  "build_html",
  "chrono",
@@ -3351,12 +3339,6 @@ dependencies = [
  "tokio",
  "warp",
 ]
-
-[[package]]
-name = "wasi"
-version = "0.10.0+wasi-snapshot-preview1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1a143597ca7c7793eff794def352d41792a93c481eb1042423ff7ff72ba2c31f"
 
 [[package]]
 name = "wasi"
@@ -3660,5 +3642,5 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e17bb3549cc1321ae1296b9cdc2698e2b6cb1992adfa19a8c72e5b7a738f44cd"
 dependencies = [
- "time 0.3.26",
+ "time",
 ]
