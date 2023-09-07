@@ -18,7 +18,10 @@ RUN cd /src \
 
 FROM alpine:3.18 as tool
 
-RUN apk update && apk add libgcc
+RUN apk update && \
+    apk add \
+      libgcc \
+      openssl1.1-compat
 
 COPY --from=base /src/target/release/aim /usr/local/bin
 
