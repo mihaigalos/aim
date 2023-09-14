@@ -18,7 +18,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 <table>
     <tr><td width=33% valign=top>
 
-* [❓ Why](#-why)
+* [❓ Motivation](#-motivation)
 * [💿︎ Installation](#%EF%B8%8E-installation)
 * [💡 Features](#-features)
   * [Feature matrix](#feature-matrix)
@@ -51,7 +51,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
 </tr>
 </table>
 
-## ❓ Why
+## ❓ Motivation
 Simplicity: download or upload files depending on parameter order with default settings.
 
 ## 💿︎ Installation
