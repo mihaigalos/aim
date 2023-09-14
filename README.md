@@ -226,7 +226,7 @@ aim --update
 For convenience, alpine-based docker images for `aarch64` and `x64` are available, so arguments can be passed directly to them.
 
 ```bash
-docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENSE.md
+docker run --rm -it -v $(pwd):/src --net=host --user $UID:$UID mihaigalos/aim https://raw.githubusercontent.com/mihaigalos/aim/main/LICENCE.md
 ```
 
 ### Hosting on machine A
