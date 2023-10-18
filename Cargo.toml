@@ -54,7 +54,7 @@ tokio = { version = "1.33.0", features = ["full"] }
 tokio-util = {version="0.7.9", features = ["full"]}
 untildify = "0.1.1"
 url-parse = "1.0.7"
-uuid = { version = "1.4", features = ["v4"] }
+uuid = { version = "1.5", features = ["v4"] }
 warpy = "0.3.33"
 
 [dev-dependencies]
