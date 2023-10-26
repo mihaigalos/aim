@@ -18,5 +18,5 @@ impl TLSTrait for TLS {
 }
 #[test]
 fn test_has_tls_when_typical() {
-    assert_eq!(TLS::has_tls("google.com", "443"), true);
+    assert!(TLS::has_tls("google.com", "443"));
 }

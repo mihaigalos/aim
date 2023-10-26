@@ -319,7 +319,7 @@ mod tests {
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
-            &bucket,
+            bucket,
             &fqdn,
         );
 
@@ -353,7 +353,7 @@ mod tests {
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
-            &bucket,
+            bucket,
             &fqdn,
         );
 
@@ -393,7 +393,7 @@ mod tests {
             &bucket_kind,
             &parsed_address.username,
             &parsed_address.password,
-            &bucket,
+            bucket,
             &fqdn,
         );
 
@@ -511,19 +511,19 @@ async fn test_get_transport_bucket_panics_when_no_port() {
 #[test]
 fn test_storage_new_minio() {
     let storage = S3::new_storage("minio", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
+    assert!(!storage._location_supported);
 }
 
 #[test]
 fn test_storage_new_aws() {
     let storage = S3::new_storage("aws", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, true);
+    assert!(storage._location_supported);
 }
 
 #[test]
 fn test_storage_new_default() {
     let storage = S3::new_storage("unknown", "user", "pass", "bucket", "fqdn");
-    assert_eq!(storage._location_supported, false);
+    assert!(!storage._location_supported);
 }
 
 #[test]

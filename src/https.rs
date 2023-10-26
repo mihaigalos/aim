@@ -83,8 +83,8 @@ impl HTTPSHandler {
         for line in lines {
             let re = Regex::new(r#".*href="/(.+?)".*"#).unwrap();
             let caps = re.captures(line);
-            if caps.is_some() {
-                result.push(caps.unwrap().get(1).unwrap().as_str().to_string())
+            if let Some(e) = caps {
+                result.push(e.get(1).unwrap().as_str().to_string())
             }
         }
         result.push("..".to_string());
