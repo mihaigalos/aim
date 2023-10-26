@@ -30,5 +30,5 @@ pub fn get_possible_ssh_keys_path(silent: bool) -> Vec<String> {
 fn test_get_possible_ssh_keys_path_when_typical() {
     let actual = get_possible_ssh_keys_path(false);
 
-    assert!(actual.len() > 0);
+    assert!(!actual.is_empty());
 }

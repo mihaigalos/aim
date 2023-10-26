@@ -51,7 +51,7 @@ mod tests {
     fn test_check_api_fails_when_checksum_mismatch() {
         let expected = "AAAA847124bfb9d9a9d44af6f00d8003006c44b9ef9ba458b5d4d3fc5f81bde5";
 
-        let _ = assert_err!(
+        assert_err!(
             HashChecker::check("LICENCE.md", expected),
             Err(ValidateError::Sha256Mismatch)
         );
