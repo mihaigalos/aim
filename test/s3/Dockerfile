@@ -1,4 +1,4 @@
-FROM minio/minio
+FROM minio/minio:RELEASE.2023-10-14T05-17-22Z.fips
 
 RUN microdnf install nc
 
