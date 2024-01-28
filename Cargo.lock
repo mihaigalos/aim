@@ -2293,9 +2293,9 @@ dependencies = [
 
 [[package]]
 name = "rcgen"
-version = "0.12.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d918c80c5a4c7560db726763020bd16db179e4d5b828078842274a443addb5d"
+checksum = "48406db8ac1f3cbc7dcdb56ec355343817958a356ff430259bb07baf7607e1e1"
 dependencies = [
  "pem",
  "ring",
@@ -3511,9 +3511,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.42"
+version = "0.3.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "defd94be2bae42f98e394965f3f54f4b10672d695aa5eb4fe64e53c8e6ab3d91"
+checksum = "31f91e15671e215c89202e90af7f2ed1ca587d39d666bbb70ccdec6a76e6eeb7"
 dependencies = [
  "build_html",
  "chrono",
