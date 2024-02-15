@@ -11,7 +11,6 @@ fn get_output_file(path: &str, silent: bool) -> (Option<std::fs::File>, u64) {
             }
             file = Some(
                 std::fs::OpenOptions::new()
-                    .write(true)
                     .append(true)
                     .open(path)
                     .unwrap(),
