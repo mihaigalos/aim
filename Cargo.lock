@@ -1088,9 +1088,9 @@ dependencies = [
 
 [[package]]
 name = "env_logger"
-version = "0.11.2"
+version = "0.11.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c012a26a7f605efc424dd53697843a72be7dc86ad2d01f7814337794a12231d"
+checksum = "38b35839ba51819680ba087cd351788c9a3c476841207e0b8cee0b04722343b9"
 dependencies = [
  "anstream",
  "anstyle",
@@ -3525,13 +3525,13 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.48"
+version = "0.3.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5b699077a1df7cba859ba2ddad029c7c1119244a9684f7b754a712a5f2d06145"
+checksum = "30d0b63127c0e912cd7fb67701cb62b58918d942739afb5f38c2aec41382d5ee"
 dependencies = [
  "build_html",
  "chrono",
- "env_logger 0.11.2",
+ "env_logger 0.11.3",
  "local_ipaddress",
  "log",
  "qr2term",

@@ -55,7 +55,7 @@ tokio-util = {version="0.7.10", features = ["full"]}
 untildify = "0.1.1"
 url-parse = "1.0.7"
 uuid = { version = "1.7", features = ["v4"] }
-warpy = "0.3.48"
+warpy = "0.3.49"
 
 [dev-dependencies]
 serial_test = "2.0.0"
