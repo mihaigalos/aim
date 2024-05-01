@@ -38,7 +38,7 @@ indicatif = "0.17.8"
 lazy_static = "1.4.0"
 log = "0.4.21"
 melt = "0.1.6"
-native-tls = "0.2"
+native-tls = "0.2.11"
 netrc = "0.4.1"
 openssl = { version = "0.10.64", features = ["vendored"] }
 question = "0.2.2"
