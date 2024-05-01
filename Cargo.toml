@@ -31,7 +31,7 @@ clap = { version = "4.5.4", features = ["cargo", "string"] }
 crossbeam-utils = "0.8.19"
 custom_error = "1.9.2"
 dotenvy = "0.15.7"
-futures = "0.3"
+futures = "0.3.30"
 futures-util = "0.3.30"
 http = "0.2.12"
 indicatif = "0.17.8"
