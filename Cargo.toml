@@ -58,4 +58,4 @@ uuid = { version = "1.8", features = ["v4"] }
 warpy = "0.3.54"
 
 [dev-dependencies]
-serial_test = "2.0.0"
+serial_test = "3.0.0"
