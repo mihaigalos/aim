@@ -8,4 +8,4 @@ RUN apk update &&\
     python --version
 
 HEALTHCHECK --interval=3s --retries=20 --timeout=1s \
-  CMD nc -z localhost 22
+  CMD nc -z localhost 2222
