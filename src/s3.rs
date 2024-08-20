@@ -575,7 +575,7 @@ mod test_mixins {
 
         let mut file = OpenOptions::new()
             .create(true)
-            .write(true)
+            
             .append(true)
             .open(untildify("~/.aws/credentials"))
             .unwrap();
@@ -611,7 +611,7 @@ mod test_mixins {
 
         let mut file = OpenOptions::new()
             .create(true)
-            .write(true)
+            
             .append(true)
             .open(untildify("~/.aws/credentials"))
             .unwrap();
