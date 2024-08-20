@@ -20,7 +20,7 @@ _start_with_user_pass _="": _setup
     #!/bin/bash
     echo "Starting ssh docker with user/pass."
     echo foobar > /tmp/binfile
-    docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_user_pass }} up -d >/tmp/_start_with_user_pass 2>&1
+    docker compose --file {{ justfile_directory() }}/{{ docker_compose_file_user_pass }} up -d >/tmp/_start_with_user_pass 2>&1
     max_seconds=30
     for i in $(seq 1 $max_seconds); do
         echo "Waiting in _start_with_user_pass, iteration ${i}"
@@ -34,7 +34,7 @@ _start_with_keys _="": _setup
     #!/bin/bash
     echo "Starting ssh docker with ssh keys."
     echo foobar_keys > /tmp/foobar_keys
-    docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_keys }} up -d >/tmp/_start_with_keys 2>&1
+    docker compose --file {{ justfile_directory() }}/{{ docker_compose_file_keys }} up -d >/tmp/_start_with_keys 2>&1
     max_seconds=30
     for i in $(seq 1 $max_seconds); do
         echo "Waiting in _start_with_keys, iteration ${i}"
@@ -45,8 +45,8 @@ _start_with_keys _="": _setup
     cat /tmp/_start_with_keys
 
 _stop:
-    @docker-compose --file {{ docker_compose_file_user_pass }} down --remove-orphans
-    @docker-compose --file {{ docker_compose_file_keys }} down --remove-orphans
+    @docker compose --file {{ docker_compose_file_user_pass }} down --remove-orphans
+    @docker compose --file {{ docker_compose_file_keys }} down --remove-orphans
 
 test: _start_with_user_pass _start_with_keys && _stop
     #!/bin/bash
