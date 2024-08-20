@@ -22,7 +22,7 @@ _start_with_user_pass _="": _setup
     echo foobar > /tmp/binfile
     docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_user_pass }} up -d >/dev/null 2>&1
     max_seconds=30
-    for i in {1..$max_seconds}; do
+    for i in $(seq 1 $max_seconds); do
         echo "Waiting in _start_with_user_pass, iteration ${i}"
         sshpass -p {{ pass }} ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2222 'exit'
         [ $? -eq 0 ] && break || sleep 1
@@ -34,7 +34,7 @@ _start_with_keys _="": _setup
     echo foobar_keys > /tmp/foobar_keys
     docker-compose --file {{ justfile_directory() }}/{{ docker_compose_file_keys }} up -d >/dev/null 2>&1
     max_seconds=30
-    for i in {1..$max_seconds}; do
+    for i in $(seq 1 $max_seconds); do
         echo "Waiting in _start_with_keys, iteration ${i}"
         ssh -q -i keys/id_ed25519 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" {{ user }}@127.0.0.1 -p 2223 'exit'
         [ $? -eq 0 ] && break || sleep 1
