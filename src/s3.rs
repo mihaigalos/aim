@@ -77,7 +77,7 @@ impl S3 {
         let bucket = Bucket::new(bucket, backend.region, backend.credentials)
             .unwrap()
             .with_path_style();
-        (io, bucket)
+        (io, *bucket)
     }
 
     fn get_credentials(parsed_address: &ParsedAddress, silent: bool) -> (String, String) {
@@ -575,7 +575,7 @@ mod test_mixins {
 
         let mut file = OpenOptions::new()
             .create(true)
-            
+
             .append(true)
             .open(untildify("~/.aws/credentials"))
             .unwrap();
@@ -611,7 +611,7 @@ mod test_mixins {
 
         let mut file = OpenOptions::new()
             .create(true)
-            
+
             .append(true)
             .open(untildify("~/.aws/credentials"))
             .unwrap();
