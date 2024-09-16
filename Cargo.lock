@@ -1616,7 +1616,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -3813,9 +3813,9 @@ dependencies = [
 
 [[package]]
 name = "warpy"
-version = "0.3.63"
+version = "0.3.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a695a03885324a3ed2a3ba59c3be27a229b1cd696f3263244793664c5c4ac05c"
+checksum = "71d5e8e582f5a8c8717e1b707917856eaaa4ff44148a3fde8dbade8fe87a6989"
 dependencies = [
  "build_html",
  "chrono",
