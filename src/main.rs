@@ -134,3 +134,4 @@ fn update() -> Result<(), Box<dyn ::std::error::Error>> {
     println!("✅ Done.");
     Ok(())
 }
+
