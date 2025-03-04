@@ -246,3 +246,4 @@ docker run --rm -it -v $(pwd):/src --user $UID:$UID mihaigalos/aim http://192.16
 
 ## 🛠️ Similar work
 [`duma`](https://github.com/mattgathu/duma), [`grapple`](https://github.com/daveallie/grapple), [`rget`](https://github.com/Arcterus/rget).
+
