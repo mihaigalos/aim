@@ -21,7 +21,7 @@ FROM alpine:3.21 as tool
 RUN apk update && \
     apk add \
       libgcc \
-      openssl1.1-compat
+      openssl
 
 COPY --from=base /src/target/release/aim /usr/local/bin
 
