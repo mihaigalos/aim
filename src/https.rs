@@ -80,8 +80,8 @@ impl HTTPSHandler {
         let res = HTTPSHandler::list(&input).await.unwrap();
         let lines: Vec<&str> = res.split('\n').collect();
 
+        let re = Regex::new(r#".*href="/(.+?)".*"#).unwrap();
         for line in lines {
-            let re = Regex::new(r#".*href="/(.+?)".*"#).unwrap();
             let caps = re.captures(line);
             if let Some(e) = caps {
                 result.push(e.get(1).unwrap().as_str().to_string())
