@@ -10,7 +10,7 @@ RUN apk update \
 
 COPY . /src
 
-RUN rustup update 1.70 && rustup default 1.70
+RUN rustup update 1.85.0 && rustup default 1.85.0
 
 RUN cd /src \
     && sed -i -e "s/openssl.*=.*//" Cargo.toml \
@@ -21,7 +21,7 @@ FROM alpine:3.21 as tool
 RUN apk update && \
     apk add \
       libgcc \
-      openssl1.1-compat
+      openssl
 
 COPY --from=base /src/target/release/aim /usr/local/bin
 
