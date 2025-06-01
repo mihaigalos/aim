@@ -16,7 +16,7 @@ RUN cd /src \
     && sed -i -e "s/openssl.*=.*//" Cargo.toml \
     && RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
 
-FROM alpine:3.21 as tool
+FROM alpine:3.22 as tool
 
 RUN apk update && \
     apk add \
