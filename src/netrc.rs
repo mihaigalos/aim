@@ -11,6 +11,7 @@ fn get_possible_netrc_path(silent: bool) -> String {
         ".netrc.test_https",
         ".netrc.test_ftp",
         ".netrc.test_unit",
+        ".netrc.test_unit2",
         "~/.netrc",
     ];
     for candidate in candidates {
@@ -52,12 +53,12 @@ fn test_netrc_with_file_works_when_typical() {
 #[test]
 fn test_netrc_with_file_works_when_typical_and_not_silent() {
     use std::io::Write;
-    let mut file = std::fs::File::create(".netrc.test_unit").unwrap();
+    let mut file = std::fs::File::create(".netrc.test_unit2").unwrap();
     file.write_all(b"machine mydomain.com login myuser password mypass port 1234")
         .unwrap();
 
     let netrc = netrc(false);
 
     assert!(netrc.is_some());
-    std::fs::remove_file(".netrc.test_unit").unwrap();
+    std::fs::remove_file(".netrc.test_unit2").unwrap();
 }
