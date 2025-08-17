@@ -494,7 +494,7 @@ mod tests {
         )
         .await;
 
-        println!("out file: {}", out_file);
+        println!("out file: {out_file}");
         assert!(result.is_ok());
         std::fs::remove_file(out_file).unwrap();
         just_stop("test/ftp/Justfile");
