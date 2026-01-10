@@ -76,6 +76,13 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
                 .action(ArgAction::SetTrue)
                 .help("Update the executable in-place.")
                 .required(false),
+        )
+        .arg(
+            Arg::new("no-follow-redirects")
+                .long("no-follow-redirects")
+                .action(ArgAction::SetTrue)
+                .help("Disable automatic following of HTTP redirects.")
+                .required(false),
         );
     let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
@@ -105,6 +112,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
 
     let silent = args.get_flag("silent");
     let interactive = args.get_flag("interactive");
+    let no_follow_redirects = args.get_flag("no-follow-redirects");
     let expected_sha256 = args
         .get_one::<String>("SHA256")
         .map(|s| s.as_str())
@@ -117,6 +125,7 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             silent,
             interactive,
             expected_sha256: expected_sha256.to_string(),
+            no_follow_redirects,
         },
     ))
 }
