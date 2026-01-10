@@ -19,12 +19,13 @@ impl HTTPSHandler {
         output: &str,
         bar: &mut WrappedBar,
         expected_sha256: &str,
+        no_follow_redirects: bool,
     ) -> Result<(), ValidateError> {
-        HTTPSHandler::_get(input, output, bar).await?;
+        HTTPSHandler::_get(input, output, bar, no_follow_redirects).await?;
         HashChecker::check(output, expected_sha256)
     }
 
-    pub async fn put(input: &str, output: &str, mut bar: WrappedBar) -> Result<(), ValidateError> {
+    pub async fn put(input: &str, output: &str, mut bar: WrappedBar, no_follow_redirects: bool) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(output, bar.silent);
         let file = tokio::fs::File::open(&input)
             .await
@@ -38,7 +39,7 @@ impl HTTPSHandler {
         let output_ = output.to_string();
         let mut reader_stream = ReaderStream::new(file);
 
-        let mut uploaded = HTTPSHandler::get_already_uploaded(output, bar.silent).await;
+        let mut uploaded = HTTPSHandler::get_already_uploaded(output, bar.silent, no_follow_redirects).await;
         bar.set_length(total_size);
 
         let async_stream = async_stream::stream! {
@@ -55,7 +56,16 @@ impl HTTPSHandler {
             }
         };
 
-        let response = reqwest::Client::new()
+        let client = Client::builder()
+            .redirect(if no_follow_redirects {
+                reqwest::redirect::Policy::none()
+            } else {
+                reqwest::redirect::Policy::default()
+            })
+            .build()
+            .unwrap();
+
+        let response = client
             .put(output)
             .header("content-type", "application/octet-stream")
             .header(
@@ -98,7 +108,10 @@ impl HTTPSHandler {
         let is_silent = true;
         let parsed_address = ParsedAddress::parse_address(input, is_silent);
 
-        let res = Client::new()
+        let res = Client::builder()
+            .redirect(reqwest::redirect::Policy::default())
+            .build()
+            .unwrap()
             .get(input)
             .header(
                 reqwest::header::USER_AGENT,
@@ -116,11 +129,20 @@ impl HTTPSHandler {
         Ok(res)
     }
 
-    async fn _get(input: &str, output: &str, bar: &mut WrappedBar) -> Result<(), ValidateError> {
+    async fn _get(input: &str, output: &str, bar: &mut WrappedBar, no_follow_redirects: bool) -> Result<(), ValidateError> {
         let parsed_address = ParsedAddress::parse_address(input, bar.silent);
         let (mut out, mut downloaded) = io::get_output(output, bar.silent);
 
-        let res = Client::new()
+        let client = Client::builder()
+            .redirect(if no_follow_redirects {
+                reqwest::redirect::Policy::none()
+            } else {
+                reqwest::redirect::Policy::default()
+            })
+            .build()
+            .unwrap();
+
+        let res = client
             .get(input)
             .header(
                 "Range",
@@ -154,9 +176,18 @@ impl HTTPSHandler {
         Ok(())
     }
 
-    async fn get_already_uploaded(output: &str, silent: bool) -> u64 {
+    async fn get_already_uploaded(output: &str, silent: bool, no_follow_redirects: bool) -> u64 {
         let parsed_address = ParsedAddress::parse_address(output, silent);
-        let res = Client::new()
+        let client = Client::builder()
+            .redirect(if no_follow_redirects {
+                reqwest::redirect::Policy::none()
+            } else {
+                reqwest::redirect::Policy::default()
+            })
+            .build()
+            .unwrap();
+
+        let res = client
             .get(output)
             .header(
                 reqwest::header::USER_AGENT,
@@ -176,7 +207,7 @@ async fn get_https_works() {
     let expected_hash = "0e0f0d7139c8c7e3ff20cb243e94bc5993517d88e8be8d59129730607d5c631b";
     let out_file = "tokei-x86_64-unknown-linux-gnu.tar.gz";
 
-    let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash).await;
+    let result = HTTPSHandler::get("https://github.com/XAMPPRocky/tokei/releases/download/v12.0.4/tokei-x86_64-unknown-linux-gnu.tar.gz", out_file, &mut WrappedBar::new_empty(), expected_hash, false).await;
 
     assert!(result.is_ok());
     std::fs::remove_file(out_file).unwrap();
@@ -192,7 +223,7 @@ async fn get_resume_works() {
     )
     .unwrap();
 
-    let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "").await;
+    let _ = HTTPSHandler::get("https://github.com/Byron/dua-cli/releases/download/v2.10.2/dua-v2.10.2-x86_64-unknown-linux-musl.tar.gz", out_file, &mut WrappedBar::new_empty_verbose(), "", false).await;
 
     let actual_size = std::fs::metadata(out_file).unwrap().len();
     assert_eq!(actual_size, expected_size);
@@ -220,4 +251,70 @@ async fn get_links_works_when_typical() {
         .unwrap();
 
     assert_eq!(result[0], expected);
+}
+#[tokio::test]
+async fn test_redirect_following_enabled_by_default() {
+    let out_file = "test_redirect_following.txt";
+    
+    let result = HTTPSHandler::get(
+        "http://httpbin.org/redirect/1",
+        out_file,
+        &mut WrappedBar::new_empty(),
+        "",
+        false,
+    )
+    .await;
+
+    assert!(result.is_ok(), "Should successfully follow redirect");
+    
+    let content = std::fs::read_to_string(out_file).unwrap();
+    assert!(content.contains("\"url\": \"http://httpbin.org/get\""), 
+            "Should have followed redirect to /get endpoint");
+    
+    std::fs::remove_file(out_file).unwrap();
+}
+
+#[tokio::test]
+async fn test_redirect_following_can_be_disabled() {
+    let out_file = "test_no_redirect.txt";
+    
+    let result = HTTPSHandler::get(
+        "http://httpbin.org/redirect/1",
+        out_file,
+        &mut WrappedBar::new_empty(),
+        "",
+        true,
+    )
+    .await;
+
+    assert!(result.is_ok(), "Should complete request without following redirect");
+    
+    let metadata = std::fs::metadata(out_file);
+    if metadata.is_ok() {
+        let size = metadata.unwrap().len();
+        assert!(size < 1000, "File should be small without following redirect, got {} bytes", size);
+        std::fs::remove_file(out_file).unwrap();
+    }
+}
+
+#[tokio::test]
+async fn test_http_to_https_redirect() {
+    let out_file = "test_http_to_https_redirect.html";
+    
+    let result = HTTPSHandler::get(
+        "http://github.com",
+        out_file,
+        &mut WrappedBar::new_empty(),
+        "",
+        false,
+    )
+    .await;
+
+    assert!(result.is_ok(), "Should successfully follow http->https redirect");
+    
+    let content = std::fs::read_to_string(out_file).unwrap();
+    assert!(content.len() > 5000, "Should have downloaded the GitHub homepage");
+    assert!(content.contains("GitHub"), "Content should be from GitHub");
+    
+    std::fs::remove_file(out_file).unwrap();
 }
