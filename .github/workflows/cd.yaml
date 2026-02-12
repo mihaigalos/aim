@@ -22,7 +22,7 @@ jobs:
       project-name: ${{ steps.set-outputs.outputs.project-name }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
     - name: Set outputs
       id: set-outputs
       run: |
