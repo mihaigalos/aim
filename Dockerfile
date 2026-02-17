@@ -1,4 +1,4 @@
-FROM rust:alpine3.16 as base
+FROM rust:alpine3.23 as base
 RUN apk update \
     && apk add \
         git \
