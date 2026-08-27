@@ -38,6 +38,7 @@ docker run -v $PWD:/app -w /app --rm -it pbzweihander/markdown-toc README.md --b
   * [Netrc](#netrc)
   * [SSH keys](#ssh-keys)
   * [.aws folder](#aws-folder)
+* [📦 Installing a binary](#-installing-a-binary)
 * [🆕 Updating](#-updating)
 
 </td><td width=33% valign=top>
@@ -211,6 +212,18 @@ Keys that match the following patterns are automatically tried:
 Credentials for AWS interaction (i.e.: S3) are automatically read from `~/.aws/credentials`.
 
 Alternatively, the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables are read.
+
+----------------------------------------
+
+## 📦 Installing a binary
+
+`aim` can download an archive or binary and install it directly to `~/.local/bin`:
+
+```bash
+aim --install https://releases.hashicorp.com/terraform/1.5.7/terraform_1.5.7_linux_amd64.zip
+```
+
+If the URL points to an archive (`.tar.gz`, `.tar.xz`, `.tar.bz2`, `.zip`, `.tar`), it is extracted first and the binary inside is located automatically. The installed file is made executable (`0o755`). `~/.local/bin` is created if it does not exist.
 
 ----------------------------------------
 
