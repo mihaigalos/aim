@@ -120,7 +120,7 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .map_err(|_| format!("Failed to GET from {}", &input))
+            .map_err(|_| format!("Failed to GET from {}", input))
             .unwrap()
             .text()
             .await
@@ -155,7 +155,7 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .map_err(|_| format!("Failed to GET from {} to {}", &input, &output))
+            .map_err(|_| format!("Failed to GET from {} to {}", input, output))
             .unwrap();
         let total_size = downloaded + res.content_length().unwrap_or(0);
 
@@ -196,7 +196,7 @@ impl HTTPSHandler {
             .basic_auth(parsed_address.username, Some(parsed_address.password))
             .send()
             .await
-            .map_err(|_| format!("Failed to GET already uploaded size from {}", &output))
+            .map_err(|_| format!("Failed to GET already uploaded size from {}", output))
             .unwrap();
         res.content_length().unwrap_or(0)
     }
@@ -232,11 +232,11 @@ async fn get_resume_works() {
 
 #[tokio::test]
 async fn list_works_when_typical() {
-    let expected = r#"<!doctype html><html lang="en"><head><title>Example Domain</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href="https://iana.org/domains/example">Learn more</a></p></div></body></html>
+    let expected = r#"<!doctype html><html lang="en"><head><title>Example Domain</title><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#eee;width:60vw;margin:15vh auto;font-family:system-ui,sans-serif}h1{font-size:1.5em}div{opacity:0.8}a:link,a:visited{color:#348}</style></head><body><div><h1>Example Domain</h1><p>This domain is for use in documentation examples without needing permission. Avoid use in operations.</p><p><a href="https://iana.org/domains/example">Learn more</a></p></div></body></html>
 "#;
 
     let result = HTTPSHandler::list("https://example.com").await.unwrap();
-    let result = str::replace(&result, "    \n    ", "");
+    let result = str::replace(&result, "   n    ", "");
     let result = str::replace(&result, "</style>    \n</head>", "</style>\n</head>");
 
     assert_eq!(result, expected);

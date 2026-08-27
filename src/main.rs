@@ -1,6 +1,7 @@
 use autoclap::autoclap;
 use clap::Command;
 use clap::{Arg, ArgAction};
+use std::os::unix::fs::PermissionsExt;
 use std::{env, io};
 
 use aim::driver::Options;
@@ -83,6 +84,13 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
                 .action(ArgAction::SetTrue)
                 .help("Disable automatic following of HTTP redirects.")
                 .required(false),
+        )
+        .arg(
+            Arg::new("install")
+                .long("install")
+                .action(ArgAction::SetTrue)
+                .help("Download, extract if needed, and install the binary to ~/.local/bin.")
+                .required(false),
         );
     let args = app.clone().try_get_matches().unwrap_or_else(|e| e.exit());
 
@@ -104,6 +112,17 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
     let input = args
         .get_one::<String>("INPUT")
         .unwrap_or_else(|| ::std::process::exit(0));
+
+    if args.get_flag("install") {
+        let input_clone = input.clone();
+        match install(&input_clone).await {
+            Err(e) => {
+                println!("ERROR: {e}");
+                ::std::process::exit(1);
+            }
+            Ok(()) => ::std::process::exit(0),
+        }
+    }
 
     let output = args
         .get_one::<String>("OUTPUT")
@@ -128,6 +147,76 @@ async fn parse_args() -> io::Result<(String, String, Options)> {
             no_follow_redirects,
         },
     ))
+}
+
+#[cfg(not(tarpaulin_include))]
+async fn install(input: &str) -> Result<(), Box<dyn ::std::error::Error>> {
+    let temp_dir = std::env::temp_dir().join(uuid::Uuid::new_v4().to_string());
+    std::fs::create_dir_all(&temp_dir)?;
+
+    let filename = aim::slicer::Slicer::target_with_extension(input);
+    let temp_file = temp_dir.join(filename);
+
+    let options = aim::driver::Options {
+        silent: false,
+        interactive: false,
+        expected_sha256: String::new(),
+        no_follow_redirects: false,
+    };
+    aim::driver::Driver::dispatch(input, temp_file.to_str().unwrap(), &options).await?;
+
+    let is_archive = filename.ends_with(".tar.gz")
+        || filename.ends_with(".tar.xz")
+        || filename.ends_with(".tar.bz2")
+        || filename.ends_with(".zip")
+        || filename.ends_with(".tar");
+
+    let install_source = if is_archive {
+        let original_dir = std::env::current_dir()?;
+        std::env::set_current_dir(&temp_dir)?;
+        melt::decompress(std::path::Path::new(temp_file.to_str().unwrap())).ok();
+        std::env::set_current_dir(&original_dir)?;
+        std::fs::remove_file(&temp_file).ok();
+        find_binary_in_dir(&temp_dir)?
+    } else {
+        temp_file
+    };
+
+    let install_dir = std::path::PathBuf::from(untildify::untildify("~/.local/bin"));
+    std::fs::create_dir_all(&install_dir)?;
+
+    let binary_name = install_source.file_name().unwrap();
+    let dest = install_dir.join(binary_name);
+    std::fs::copy(&install_source, &dest)?;
+    std::fs::set_permissions(&dest, std::fs::Permissions::from_mode(0o755))?;
+
+    println!("\u{2705} Installed to {}", dest.display());
+    std::fs::remove_dir_all(&temp_dir).ok();
+    Ok(())
+}
+
+#[cfg(not(tarpaulin_include))]
+fn find_binary_in_dir(dir: &std::path::Path) -> Result<std::path::PathBuf, Box<dyn ::std::error::Error>> {
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let meta = entry.metadata()?;
+        if meta.is_dir() {
+            if let Ok(found) = find_binary_in_dir(&path) {
+                return Ok(found);
+            }
+        } else if meta.is_file() && meta.permissions().mode() & 0o111 != 0 {
+            return Ok(path);
+        }
+    }
+    // Fallback: return first regular file
+    for entry in std::fs::read_dir(dir)? {
+        let entry = entry?;
+        if entry.metadata()?.is_file() {
+            return Ok(entry.path());
+        }
+    }
+    Err("No binary found in archive".into())
 }
 
 #[cfg(not(tarpaulin_include))]
